@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<!-- 예시 유저 맵퍼 -->
+<mapper namespace="generationgap.co.kr.mapper.UserMapper">
+    <resultMap id="userMap" type="generationgap.co.kr.domain.User">
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="nickname"/>
+    </resultMap>
+
+    <select id="getAllUsers" resultMap="userMap">
+        SELECT * FROM users
+    </select>
+
+    <insert id="insertUser" parameterType="generationgap.co.kr.domain.User">
+        INSERT INTO users (user_id, nickname)
+        VALUES (#{userId}, #{userName})
+    </insert>
+</mapper>
