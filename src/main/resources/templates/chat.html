@@ -8,6 +8,12 @@
 <h2>모임 채팅방</h2>
 
 <div>
+  <label>userId: <input type="text" id="userId" /></label>
+  <label>groupId: <input type="text" id="groupId" /></label>
+  <button onclick="connectWebSocket()">연결</button>
+</div>
+
+<div>
   <label>메시지: <input type="text" id="message" /></label>
   <button onclick="sendMessage()">보내기</button>
 </div>
@@ -16,25 +22,48 @@
 </div>
 
 <script>
-  const userId = prompt("userId 입력");
-  const groupId = prompt("groupId 입력");
-  const ws = new WebSocket("ws://localhost:8080/ws/chat?userId=" + userId + "&groupId=" + groupId);
+  let ws = null;
 
-  ws.onopen = () => console.log("✅ 연결됨");
+  function connectWebSocket() {
+    const userId = document.getElementById("userId").value;
+    const groupId = document.getElementById("groupId").value;
 
-  ws.onmessage = (event) => {
+    if (!userId || !groupId) {
+      alert("userId와 groupId를 입력하세요.");
+      return;
+    }
+
+    // 기존 WebSocket 닫기
+    if (ws && ws.readyState !== WebSocket.CLOSED) {
+      console.log("🔁 기존 연결 종료");
+      ws.close();
+    }
+
+    const url = "ws://localhost:8080/ws/chat?userId=" + encodeURIComponent(userId) + "&groupId=" + encodeURIComponent(groupId);
+    ws = new WebSocket(url);
+
+    ws.onopen = () => console.log("✅ 연결됨");
+
+    ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       const chatBox = document.getElementById("chat-box");
       const div = document.createElement("div");
       div.innerHTML = `<b>${data.from}:</b> ${data.msg}`;
       chatBox.appendChild(div);
-  };
+    };
+
+    ws.onclose = () => console.log("❌ 연결 종료");
+  }
 
   function sendMessage() {
-      const msg = document.getElementById("message").value;
-      const json = { msg: msg };
-      ws.send(JSON.stringify(json));
-      document.getElementById("message").value = "";
+    const msg = document.getElementById("message").value;
+    if (!msg || !ws || ws.readyState !== WebSocket.OPEN) {
+      alert("WebSocket이 연결되지 않았거나 메시지가 비어있습니다.");
+      return;
+    }
+    const json = { msg: msg };
+    ws.send(JSON.stringify(json));
+    document.getElementById("message").value = "";
   }
 </script>
 </body>
