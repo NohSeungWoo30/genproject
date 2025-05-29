@@ -10,5 +10,6 @@ import java.util.List;
 public interface UserMapper {
     List<User> getAllUsers();
     void insertUser(User user);
-
 }
+
+// 테스트용 주석
