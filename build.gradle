@@ -38,6 +38,9 @@ dependencies {
 	implementation 'org.webjars:sockjs-client:1.5.1'
 	implementation 'org.webjars:stomp-websocket:2.3.4'
 
+	//json
+	implementation 'org.json:json:20240303'
+
 }
 
 tasks.named('test') {

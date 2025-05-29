@@ -1,0 +1,10 @@
+package generationgap.co.kr.mapper.chat;
+
+import generationgap.co.kr.domain.chat.ChatMessage;
+
+import java.util.List;
+
+public interface ChatMapper {
+    void insertMessage(ChatMessage message);
+    List<ChatMessage> getMessagesByGroup(String groupChatIdx);
+}
