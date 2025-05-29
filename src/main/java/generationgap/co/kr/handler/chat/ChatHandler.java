@@ -46,7 +46,11 @@ public class ChatHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws IOException {
         String groupId = getParam(session, "groupId");
-
+        if (groupId == null || groupId.isBlank()) {
+            System.err.println("❗ groupId가 누락됨. 연결 종료");
+            session.close();
+            return;
+        }
         // 1. 세션 등록
         groupSessions.computeIfAbsent(groupId, k-> new HashSet<>()).add(session);
         System.out.println("✅ WebSocket 연결됨: groupId = " + groupId);
@@ -75,6 +79,12 @@ public class ChatHandler extends TextWebSocketHandler {
         // 1. 데이터 파싱
         String groupId = getParam(session, "groupId");
         String userId = getParam(session, "userId");
+        if (groupId == null || groupId.isBlank()) {
+            System.err.println("❗ groupId가 누락됨. 연결 종료");
+            session.close();
+            return;
+        }
+
 
         // 2. 닉네임 조회
         String nickname = userMapper.getNicknameByUserId(userId);
@@ -82,7 +92,7 @@ public class ChatHandler extends TextWebSocketHandler {
         int userIdx = userMapper.getUserIdxByUserId(userId);
 
         ChatMessage chatMessage = new ChatMessage();
-        chatMessage.setGroupChatIdx(groupId);
+        chatMessage.setGroupChatIdx(Long.parseLong(groupId));
         chatMessage.setSenderIdx(userIdx);
         chatMessage.setNickname(nickname);
         chatMessage.setContent(msg);
@@ -123,7 +133,7 @@ public class ChatHandler extends TextWebSocketHandler {
 
     private void sendSystemMessage(String groupId, String content){
         ChatMessage systemMsg = new ChatMessage();
-        systemMsg.setGroupChatIdx(groupId);
+        systemMsg.setGroupChatIdx(Long.parseLong(groupId));
         systemMsg.setSenderIdx(1); // 시스템 user_idx
         systemMsg.setNickname("시스템");
         systemMsg.setContent(content);
