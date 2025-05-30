@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+
+<mapper namespace="generationgap.co.kr.mapper.group.GroupsMapper">
+    <resultMap id="Groups" type="generationgap.co.kr.domain.group.Groups">
+        <id property="groupIdx" column="group_idx"/>
+        <result property="ownerIdx" column="owner_idx"/>
+        <result property="groupCategoryMainIdx" column="category_main_idx"/>
+        <result property="groupCategorySubIdx" column="category_sub_idx"/>
+        <result property="title" column="title"/>
+        <result property="genderLimit" column="gender_limit"/>
+        <result property="ageMin" column="age_min"/>
+        <result property="ageMax" column="age_max"/>
+        <result property="groupDate" column="group_date"/>
+        <result property="membersMax" column="members_max"/>
+        <result property="partyMember" column="party_member"/>
+        <result property="content" column="content"/>
+        <result property="placeName" column="place_name"/>
+        <result property="placeCategory" column="place_category"/>
+        <result property="placeAddress" column="place_address"/>
+        <result property="naverPlaceId" column="naver_place_id"/>
+        <result property="naverPlaceUrl" column="naver_place_url"/>
+        <result property="latitude" column="latitude"/>
+        <result property="longitude" column="longitude"/>
+        <result property="groupImgUrl" column="group_img_url"/>
+        <result property="groupsStatus" column="groups_status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="deletedAt" column="deleted_at"/>
+
+        <association property="owner" javaType="generationgap.co.kr.domain.user.Users">
+            <result property="userIdx" column="user_idx"/>
+            <result property="userId" column="user_id"/>
+            <result property="nickname" column="user_nickname"/>
+        </association>
+
+        <association property="categoryMain" javaType="generationgap.co.kr.domain.group.CategoryMain">
+            <result property="cmCategoryMainIdx" column="cm_category_main_idx"/>
+            <result property="categoryMainName" column="category_main_name"/>
+        </association>
+
+        <association property="categorySub" javaType="generationgap.co.kr.domain.group.CategorySub">
+            <result property="categorySubIdx" column="category_sub_idx"/>
+            <result property="csCategoryMainIdx" column="category_main_idx"/>
+            <result property="categorySubName" column="category_sub_name"/>
+        </association>
+    </resultMap>
+
+    <select id="getAllGroups" resultMap="Groups">
+        SELECT
+        g.group_idx,
+        g.owner_idx,
+        u.nickname as user_nickname,
+        cm.category_main_idx AS cm_category_main_idx,
+        cm.category_main_name,
+        cs.category_sub_idx,
+        cs.category_sub_name,
+        g.title,
+        g.gender_limit,
+        g.age_min,
+        g.age_max,
+        g.group_date,
+        g.members_max,
+        g.party_member,
+        g.content,
+        g.place_name,
+        g.place_category,
+        g.place_address,
+        g.naver_place_id,
+        g.naver_place_url,
+        g.latitude,
+        g.longitude,
+        g.group_img_url,
+        g.groups_status,
+        g.created_at,
+        g.deleted_at
+
+        FROM groups g
+        JOIN users u ON g.owner_idx = u.user_idx
+        JOIN group_category_main cm ON g.category_main_idx = cm.category_main_idx
+        JOIN group_category_sub cs ON g.category_sub_idx = cs.category_sub_idx
+    </select>
+
+    <!-- 단순 select문 같은 하나의 객체에 필드명/컬럼명이 동일하면 쓰기 좋음-->
+    <!--<select id="getAllGroups" resultType="generationgap.co.kr.domain.group.Groups">
+        SELECT * FROM Groups
+    </select>-->
+
+    <!--<insert id="insertGroup" parameterType="generationgap.co.kr.domain.Group.Groups">
+        INSERT INTO users (user_id, nickname)
+        VALUES (#{userId}, #{userName})
+    </insert>-->
+</mapper>

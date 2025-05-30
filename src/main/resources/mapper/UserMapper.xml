@@ -6,7 +6,7 @@
 
 <!-- 예시 유저 맵퍼 -->
 <mapper namespace="generationgap.co.kr.mapper.UserMapper">
-    <resultMap id="userMap" type="generationgap.co.kr.domain.User">
+    <resultMap id="userMap" type="generationgap.co.kr.domain.user.Users">
         <result property="userId" column="user_id"/>
         <result property="userName" column="nickname"/>
     </resultMap>
@@ -15,7 +15,7 @@
         SELECT * FROM users
     </select>
 
-    <insert id="insertUser" parameterType="generationgap.co.kr.domain.User">
+    <insert id="insertUser" parameterType="generationgap.co.kr.domain.user.Users">
         INSERT INTO users (user_id, nickname)
         VALUES (#{userId}, #{userName})
     </insert>
