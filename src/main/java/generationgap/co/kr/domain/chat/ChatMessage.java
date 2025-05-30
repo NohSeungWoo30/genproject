@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Setter
 public class ChatMessage {
     private Long messagesIdx;
-    private String groupChatIdx;
+    private Long groupChatIdx;
     private Integer senderIdx;
     private String nickname;
     private String content;
