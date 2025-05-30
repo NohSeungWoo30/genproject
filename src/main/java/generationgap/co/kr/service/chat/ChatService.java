@@ -1,26 +1,19 @@
 package generationgap.co.kr.service.chat;
 
 import generationgap.co.kr.domain.chat.ChatMessage;
-import generationgap.co.kr.mapper.chat.ChatMapper;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
-public class ChatService {
 
-    private final ChatMapper chatMapper;
+public interface ChatService {
 
-    public ChatService(ChatMapper chatMapper){
-        this.chatMapper = chatMapper;
-    }
+    void saveMessage(ChatMessage message);
 
-    public void saveMessage(ChatMessage message){
-        chatMapper.insertMessage(message);
-    }
+    List<ChatMessage> getMessagesByGroup(String groupChatIdx);
 
-    public List<ChatMessage> getMessagesByGroup(String groupChatIdx){
-        return chatMapper.getMessagesByGroup(groupChatIdx);
-    }
+    void editMessageWithHistory(int messageId, String newContent, int requestUserIdx, String editedBy);
 
+    void deleteMessage(int messageId, int requesterIdx, String requesterId);
+
+    List<ChatMessage> searchMessagesByKeyword(String groupId, String keyword);
 }
