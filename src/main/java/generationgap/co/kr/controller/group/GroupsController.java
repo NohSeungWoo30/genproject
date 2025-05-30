@@ -1,12 +1,13 @@
 package generationgap.co.kr.controller.group;
 
+import generationgap.co.kr.domain.group.CategoryMain;
+import generationgap.co.kr.domain.group.CategorySub;
 import generationgap.co.kr.domain.group.Groups;
-import generationgap.co.kr.service.groups.GroupService;
+import generationgap.co.kr.service.group.GroupService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -36,7 +37,10 @@ public class GroupsController {
 
     // 새 그룹 생성 폼 페이지를 보여주는 메서드
     @GetMapping("/group_create") // /groups/new 경로 처리
-    public String showCreateGroupForm() {
+    public String showCreateGroupForm(Model model) {
+        List<CategoryMain> categoryMainList = groupService.getAllMainCategory();
+        model.addAttribute("categoryMainList",categoryMainList);
+
         return "group/group_create";
     }
 
@@ -47,5 +51,13 @@ public class GroupsController {
         // 예: groupService.saveGroup(groupData);
         // 저장 후 그룹 목록 페이지로 리다이렉트
         return "redirect:/group";
+    }
+
+    @GetMapping("/api/sub-categories")
+    @ResponseBody // 이 메서드가 HTTP 응답 본문에 직접 데이터를 직렬화하여 반환함을 의미 (JSON, XML 등)
+    public ResponseEntity<List<CategorySub>> getSubCategoriesByMainIdx(
+            @RequestParam("mainCategoryIdx") int mainCategoryIdx) {
+        List<CategorySub> subCategories = groupService.getAllSubCategory(mainCategoryIdx);
+        return ResponseEntity.ok(subCategories); // HTTP 200 OK와 함께 JSON 데이터 반환
     }
 }

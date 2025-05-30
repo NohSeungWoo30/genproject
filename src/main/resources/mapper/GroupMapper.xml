@@ -49,6 +49,42 @@
         </association>
     </resultMap>
 
+    <!-- 카테고리 대 -->
+    <resultMap id="categoryMain" type="generationgap.co.kr.domain.group.CategoryMain">
+        <id property="cmCategoryMainIdx" column="category_main_idx"/>
+        <result property="categoryMainName" column="category_main_name"/>
+    </resultMap>
+    <!-- 카테고리 세부사항 -->
+    <resultMap id="categorySub" type="generationgap.co.kr.domain.group.CategorySub">
+        <id property="categorySubIdx" column="category_sub_idx"/>
+        <result property="csCategoryMainIdx" column="category_main_idx"/>
+        <result property="categorySubName" column="category_sub_name"/>
+
+        <association property="categoryMain" javaType="generationgap.co.kr.domain.group.CategoryMain">
+            <result property="cmCategoryMainIdx" column="cm_category_main_idx"/>
+            <result property="categoryMainName" column="category_main_name"/>
+        </association>
+
+    </resultMap>
+
+    <!-- 그룹 생성 페이지 카테고리 선택용 -->
+    <select id="getAllMainCategory" resultMap="categoryMain">
+        select * from group_category_main
+    </select>
+    <!-- 메인 카테고리 선택 후 파라메터 값 받아서 나오게 만들기위한 서브 세부사항 -->
+    <select id="getAllSubCategory" parameterType="int" resultMap="categorySub">
+        SELECT
+        csub.category_main_idx,
+        csub.category_sub_idx,
+        csub.category_sub_name,
+        cmain.category_main_name
+        FROM group_category_sub csub
+        JOIN group_category_main cmain
+        ON csub.category_main_idx = cmain.category_main_idx
+        where cmain.category_main_idx=#{mainCategoryIdx} and csub.is_active='N'
+    </select>
+
+    <!-- 그룹 전체 리스트(닉네임, 선택한 카테고리 이름 추가) -->
     <select id="getAllGroups" resultMap="Groups">
         SELECT
         g.group_idx,

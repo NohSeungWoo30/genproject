@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -46,13 +46,21 @@
 </div>
 
     <div>
-        <label for="categoryMainIdx">카테고리 메인 인덱스 (category_main_idx):</label>
-        <input type="number" id="categoryMainIdx" name="groupCategoryMainIdx">
+        <label for="groupCategoryMainIdx">카테고리 (대분류):</label>
+        <select id="groupCategoryMainIdx" name="groupCategoryMainIdx">
+            <option value="">-- 대분류 선택 --</option>
+            <option th:each="maincategory : ${categoryMainList}"
+                    th:value="${maincategory.cmCategoryMainIdx}"
+                    th:text="${maincategory.cmCategoryMainIdx}+', '+${maincategory.categoryMainName}">
+            </option>
+        </select>
     </div>
 
     <div>
-        <label for="categorySubIdx">카테고리 서브 인덱스 (category_sub_idx):</label>
-        <input type="number" id="categorySubIdx" name="groupCategorySubIdx">
+        <label for="groupCategorySubIdx">카테고리 (소분류):</label>
+        <select id="groupCategorySubIdx" name="groupCategorySubIdx">
+            <option value="">-- 소분류 선택 --</option>
+        </select>
     </div>
 
     <div>
@@ -144,5 +152,49 @@
     </div>
 
 </form>
+
+<script th:inline="javascript">
+    const mainCategorySelect = document.getElementById('groupCategoryMainIdx');
+    const subCategorySelect = document.getElementById('groupCategorySubIdx');
+
+    mainCategorySelect.addEventListener('change', function() {
+        const selectedMainCategoryIdx = this.value; // 선택된 메인 카테고리 ID
+
+    console.log('선택된 메인 카테고리 ID:', selectedMainCategoryIdx); // 추가
+    console.log('fetch URL:', `/group/api/sub-categories?mainCategoryIdx=${selectedMainCategoryIdx}`); // 추가
+
+        // 서브 카테고리 드롭다운 초기화
+        subCategorySelect.innerHTML = '<option value="">-- 소분류 선택 --</option>';
+        subCategorySelect.disabled = true; // 서브 카테고리 선택 비활성화 (로딩 중)
+
+        if (selectedMainCategoryIdx) { // 메인 카테고리가 선택된 경우에만 AJAX 호출
+            // **여기 URL 경로를 변경했습니다.**
+            fetch(`/group/api/sub-categories?mainCategoryIdx=${selectedMainCategoryIdx}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(subCategories => {
+                    subCategories.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.categorySubIdx;
+                        option.textContent = category.categorySubName;
+                        subCategorySelect.appendChild(option);
+                    });
+                    subCategorySelect.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Error fetching sub categories:', error);
+                    alert('서브 카테고리를 불러오는 데 실패했습니다.');
+                    subCategorySelect.disabled = true;
+                });
+        } else {
+            subCategorySelect.disabled = true;
+        }
+    });
+</script>
+
 </body>
 </html>
