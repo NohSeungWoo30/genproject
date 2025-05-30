@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 
-<!-- 예시 유저 맵퍼 -->
+
 <mapper namespace="generationgap.co.kr.mapper.UserMapper">
     <resultMap id="userMap" type="generationgap.co.kr.domain.User">
         <result property="userId" column="user_id"/>
@@ -19,4 +19,6 @@
         INSERT INTO users (user_id, nickname)
         VALUES (#{userId}, #{userName})
     </insert>
+
+
 </mapper>
