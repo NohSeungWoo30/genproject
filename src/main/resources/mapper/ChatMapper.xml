@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="generationgap.co.kr.mapper.chat.ChatMapper">
+    <resultMap id="chatMessageMap" type="generationgap.co.kr.domain.chat.ChatMessage">
+    <id property="messagesIdx" column="messages_idx" />
+    <result property="groupChatIdx" column="group_chat_idx" />
+    <result property="senderIdx" column="sender_idx" />
+    <result property="nickname" column="nickname" />
+    <result property="content" column="content" />
+    <result property="sentAt" column="sent_at" />
+    <result property="isDeleted" column="is_deleted" />
+    <result property="deletedAt" column="deleted_at" />
+    </resultMap>
+
+    <insert id="insertMessage" parameterType="generationgap.co.kr.domain.chat.ChatMessage">
+        <!-- 시퀀스로 messagesIdx 값을 먼저 받아옴 -->
+        <selectKey keyProperty="messagesIdx" resultType="Long" order="BEFORE">
+            SELECT chat_messages_seq.NEXTVAL FROM dual
+        </selectKey>
+
+        INSERT INTO chat_messages (
+            messages_idx, group_chat_idx, sender_idx, nickname, content, sent_at, is_deleted
+        )
+        VALUES (
+        #{messagesIdx} ,#{groupChatIdx}, #{senderIdx}, #{nickname}, #{content}, SYSDATE, 'N'
+        )
+    </insert>
+
+    <select id="getMessagesByGroup" resultMap="chatMessageMap">
+        SELECT * FROM chat_messages
+        WHERE group_chat_idx = #{groupChatIdx} AND is_deleted = 'N'
+        ORDER BY sent_at ASC
+    </select>
+
+
+    <!-- 메세지 수정 기능 추가-->
+
+    <!-- 작성자 확인-->
+    <select id="getSenderIdxByMessageId" resultType="int">
+        SELECT sender_idx FROM chat_messages WHERE messages_idx = #{messageId}
+    </select>
+
+    <!-- 기존 메세지 조회-->
+    <select id="getMessageContentById" resultType="String">
+        SELECT content FROM chat_messages WHERE messages_idx = #{messageId}
+    </select>
+
+    <!-- 수정 이력 저장-->
+    <insert id="insertEditHistory">
+        INSERT INTO chat_message_edits (message_id, old_content, edited_by)
+        VALUES (#{messageId}, #{oldContent}, #{editedBy})
+    </insert>
+
+    <!-- 메세지 수정 -->
+    <update id="updateMessageContent">
+        UPDATE chat_messages SET content = #{newContent},
+                                is_edited = 'Y',
+                                edited_at = SYSTIMESTAMP
+                            WHERE messages_idx = #{messageId}
+    </update>
+
+    <update id="deleteMessage">
+        UPDATE chat_messages SET is_deleted ='Y',
+                                deleted_at = SYSTIMESTAMP
+                            WHERE messages_idx = #{messageId}
+    </update>
+
+    <select id="searchMessages" resultMap="chatMessageMap">
+        SELECT * FROM chat_messages
+        WHERE group_chat_idx = #{groupId}
+        AND content LIKE #{keyword}
+        AND is_deleted = 'N'
+        ORDER BY sent_at ASC
+    </select>
+
+</mapper>

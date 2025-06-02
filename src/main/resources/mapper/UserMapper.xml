@@ -5,18 +5,62 @@
 
 
 <!-- 예시 유저 맵퍼 -->
-<mapper namespace="generationgap.co.kr.mapper.UserMapper">
+<mapper namespace="generationgap.co.kr.mapper.user.UserMapper">
     <resultMap id="userMap" type="generationgap.co.kr.domain.User">
         <result property="userId" column="user_id"/>
         <result property="userName" column="nickname"/>
+    </resultMap>
+
+    <resultMap id="userResultMap" type="generationgap.co.kr.domain.user.UserDTO">
+        <id property="userIdx" column="user_idx"/>
+        <result property="userId" column="user_id"/>
+        <result property="provider" column="provider"/>
+        <result property="userName" column="user_name"/>
+        <result property="nickname" column="nickname"/>
+        <result property="birthDate" column="birth_date"/>
+        <result property="gender" column="gender"/>
+        <result property="userCi" column="user_ci"/>
+        <result property="passwordHash" column="password_hash"/> <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
+        <result property="profileName" column="profile_name"/>
+        <result property="introduction" column="introduction"/>
+        <result property="signupDate" column="signup_date"/>
+        <result property="userStatus" column="user_status"/>
+        <result property="lastLoginAt" column="last_login_at"/>
+        <result property="updateAt" column="update_at"/>
+        <result property="ghost" column="ghost"/>
     </resultMap>
 
     <select id="getAllUsers" resultMap="userMap">
         SELECT * FROM users
     </select>
 
-    <insert id="insertUser" parameterType="generationgap.co.kr.domain.User">
-        INSERT INTO users (user_id, nickname)
-        VALUES (#{userId}, #{userName})
+    <insert id="insertUser" parameterType="generationgap.co.kr.domain.user.UserDTO">
+        INSERT INTO users (
+        user_id, provider, user_name, nickname, birth_date, gender,
+        user_ci, password_hash, email, phone, profile_name, introduction
+        ) VALUES (
+        #{userId}, #{provider}, #{userName}, #{nickname}, #{birthDate}, #{gender},
+        #{userCi}, #{passwordHash}, #{email}, #{phone}, #{profileName, jdbcType=VARCHAR}, #{introduction}
+        )
     </insert>
+
+<!--
+    <select id="findByUserId" parameterType="string" resultType="generationgap.co.kr.domain.user.UserDTO">
+-->
+    <select id="findByUserId" parameterType="string" resultMap="userResultMap">
+        SELECT
+        user_idx, user_id, provider, user_name, nickname, birth_date, gender,
+        user_ci, password_hash, email, phone, profile_name, introduction,
+        signup_date, user_status, last_login_at, update_at, ghost
+        FROM users
+        WHERE user_id = #{userId}
+    </select>
+
+    <update id="updateUserPassword" parameterType="generationgap.co.kr.domain.user.UserDTO">
+        UPDATE users
+        SET password_hash = #{passwordHash},
+        update_at = SYSDATE <!--비밀번호 변경 시 업데이트 시간 기록 (Oracle)-->
+        WHERE user_idx = #{userIdx}
+    </update>
 </mapper>
