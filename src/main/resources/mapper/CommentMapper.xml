@@ -25,7 +25,7 @@
             pc.created_at ASC
     </select>
 
-    <insert id="insertComment" parameterType="Comment">
+    <insert id="insertComment" parameterType="generationgap.co.kr.domain.board.Comment">
         INSERT INTO post_comments (
         post_idx,
         commenter_idx,
@@ -35,7 +35,7 @@
         ) VALUES (
         #{postIdx},
         #{commenterIdx},
-        #{parentCommentId, jdbcType=NUMERIC}, <!-- 여기 추가 -->
+        #{parentCommentId, jdbcType=NUMERIC},
         #{content},
         'N'
         )

@@ -19,9 +19,7 @@
         <result property="deletedAt" column="deleted_at"/>
         <result property="commentCount" column="comment_count"/>
         <result property="isDeleted" column="is_deleted"/>
-        <result property="deletedBy" column="deleted_by"/>
-        <result property="deletedAt" column="deleted_at"/>
-        <result property="updateAt" column="update_at"/>
+
 
     </resultMap>
 
@@ -47,7 +45,7 @@
         SELECT COUNT(*) FROM board_posts WHERE is_deleted = 'N'
     </select>
 
-    <insert id="insertPost" parameterType="Post">
+    <insert id="insertPost" parameterType="generationgap.co.kr.domain.board.Post">
         INSERT INTO board_posts(
             author_idx, category, title, content, view_count, like_count, is_deleted, created_at)
         VALUES(

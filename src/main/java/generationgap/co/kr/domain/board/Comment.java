@@ -2,10 +2,12 @@ package generationgap.co.kr.domain.board;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.ibatis.type.Alias;
 
 import java.time.LocalDateTime;
 import java.util.Date;
 
+@Alias("Comment")
 @Getter
 @Setter
 public class Comment {
