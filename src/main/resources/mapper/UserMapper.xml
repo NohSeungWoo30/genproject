@@ -15,8 +15,22 @@
         SELECT * FROM users
     </select>
 
-    <insert id="insertUser" parameterType="generationgap.co.kr.domain.User">
-        INSERT INTO users (user_id, nickname)
-        VALUES (#{userId}, #{userName})
+    <insert id="insertUser" parameterType="generationgap.co.kr.domain.user.UserDTO">
+        INSERT INTO users (
+        user_id, provider, user_name, nickname, birth_date, gender,
+        user_ci, password_hash, email, phone, profile_name, introduction
+        ) VALUES (
+        #{userId}, #{provider}, #{userName}, #{nickname}, #{birthDate}, #{gender},
+        #{userCi}, #{passwordHash}, #{email}, #{phone}, #{profileName, jdbcType=VARCHAR}, #{introduction}
+        )
     </insert>
+
+    <select id="findByUserId" parameterType="string" resultType="generationgap.co.kr.domain.user.UserDTO">
+        SELECT
+        user_idx, user_id, provider, user_name, nickname, birth_date, gender,
+        user_ci, password_hash, email, phone, profile_name, introduction,
+        signup_date, user_status, last_login_at, update_at, ghost
+        FROM users
+        WHERE user_id = #{userId}
+    </select>
 </mapper>
