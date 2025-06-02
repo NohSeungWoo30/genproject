@@ -1,4 +1,4 @@
-package generationgap.co.kr.mapper;
+package generationgap.co.kr.mapper.user;
 
 import generationgap.co.kr.domain.User;
 import generationgap.co.kr.domain.user.UserDTO;
@@ -15,6 +15,8 @@ public interface UserMapper {
     void insertUser(UserDTO user);
 
     UserDTO findByUserId(@Param("userId") String userId); // 사용자 ID로 UserDTO 조회
+
+    void updateUserPassword(UserDTO user);
 
     @Select("SELECT nickname FROM users WHERE user_id = #{userId}")
     String getNicknameByUserId(String userId);

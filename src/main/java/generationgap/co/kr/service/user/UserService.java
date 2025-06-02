@@ -1,7 +1,7 @@
 package generationgap.co.kr.service.user;
 
 import generationgap.co.kr.domain.user.UserDTO;
-import generationgap.co.kr.mapper.UserMapper;
+import generationgap.co.kr.mapper.user.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
