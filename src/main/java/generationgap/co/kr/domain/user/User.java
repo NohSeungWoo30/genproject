@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class Users {
-    private int userIdx; // PRIMARY KEY
+public class User {
+    private Long userIdx; // PRIMARY KEY
     private String userId; // NOT NULL
     private String provider; // NOT NULL
     private String userName; // NOT NULL

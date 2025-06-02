@@ -31,7 +31,7 @@
         <result property="createdAt" column="created_at"/>
         <result property="deletedAt" column="deleted_at"/>
 
-        <association property="owner" javaType="generationgap.co.kr.domain.user.Users">
+        <association property="owner" javaType="generationgap.co.kr.domain.user.User">
             <result property="userIdx" column="user_idx"/>
             <result property="userId" column="user_id"/>
             <result property="nickname" column="user_nickname"/>

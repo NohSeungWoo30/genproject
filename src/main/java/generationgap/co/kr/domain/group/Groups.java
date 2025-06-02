@@ -1,6 +1,6 @@
 package generationgap.co.kr.domain.group;
 
-import generationgap.co.kr.domain.user.Users;
+import generationgap.co.kr.domain.user.User;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -32,7 +32,7 @@ public class Groups {
     private String deletedAt;
 
     // 조인용 객체 선언
-    private Users owner;                     // 호스트
+    private User owner;                     // 호스트
     private CategoryMain categoryMain;     // 대분류
     private CategorySub categorySub;       // 소분류
 
