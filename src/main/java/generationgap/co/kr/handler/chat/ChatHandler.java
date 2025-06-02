@@ -2,7 +2,7 @@ package generationgap.co.kr.handler.chat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import generationgap.co.kr.domain.chat.ChatMessage;
-import generationgap.co.kr.mapper.UserMapper;
+import generationgap.co.kr.mapper.user.UserMapper;
 import generationgap.co.kr.service.chat.ChatService;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
