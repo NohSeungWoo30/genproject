@@ -9,5 +9,6 @@ public class MainController {
     @GetMapping("/main")
     public String mainPage() {
         return "main"; // main.html 템플릿 반환
+           
     }
 }
