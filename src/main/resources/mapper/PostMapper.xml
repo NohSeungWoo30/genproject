@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="generationgap.co.kr.mapper.board.PostMapper">
+
+    <resultMap id="postMap" type="generationgap.co.kr.domain.board.Post">
+        <id property="postIdx" column="post_idx"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="authorName" column="nickname"/> <!-- 사용자 닉네임 JOIN -->
+        <result property="viewCount" column="view_count"/>
+        <result property="likeCount" column="like_count"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updateAt" column="update_at"/>
+        <result property="deletedBy" column="deleted_by"/>
+        <result property="deletedAt" column="deleted_at"/>
+    </resultMap>
+
+    <select id="getAllPosts" resultMap="postMap">
+        SELECT p.*, u.nickname
+        FROM board_posts p
+        JOIN users u ON p.author_idx = u.user_idx
+        WHERE is_deleted = 'N'
+        ORDER BY created_at DESC
+    </select>
+
+</mapper>

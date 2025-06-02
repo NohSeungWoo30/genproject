@@ -1,70 +1,230 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>모임 채팅방</title>
+    <meta charset="UTF-8">
+    <title>모임 채팅방</title>
+    <style>
+        #context-menu {
+          display: none;
+          position: absolute;
+          z-index: 1000;
+          background: white;
+          border: 1px solid #ccc;
+          padding: 5px;
+        }
+        #context-menu button {
+          background: none;
+          border: none;
+          padding: 5px;
+          cursor: pointer;
+          display: block;
+          width: 100%;
+          text-align: left;
+        }
+    </style>
 </head>
 <body>
 <h2>모임 채팅방</h2>
 
 <div>
-  <label>userId: <input type="text" id="userId" /></label>
-  <label>groupId: <input type="text" id="groupId" /></label>
-  <button onclick="connectWebSocket()">연결</button>
+    <label>userId: <input type="text" id="userId" /></label>
+    <label>groupId: <input type="text" id="groupId" /></label>
+    <button onclick="connectWebSocket()">연결</button>
 </div>
 
 <div>
-  <label>메시지: <input type="text" id="message" /></label>
-  <button onclick="sendMessage()">보내기</button>
+    <label>메시지: <input type="text" id="message" /></label>
+    <button onclick="sendMessage()">보내기</button>
+</div>
+
+<div style="margin-top:10px;">
+    <input type="text" id="searchKeyword" placeholder="메시지 검색" />
+    <button onclick="searchMessages()">검색</button>
 </div>
 
 <div id="chat-box" style="border:1px solid #ccc; margin-top:20px; padding:10px; height:300px; overflow-y:scroll;">
 </div>
 
+<div id="context-menu">
+    <button onclick="promptEdit()">✏ 메시지 수정</button>
+    <button onclick="promptDelete()">🗑 메시지 삭제</button>
+</div>
+
 <script>
-  let ws = null;
+    let ws = null;
+    let currentUserId = '';
+    let editingMessageId = null;
 
-  function connectWebSocket() {
-    const userId = document.getElementById("userId").value;
-    const groupId = document.getElementById("groupId").value;
+    function connectWebSocket() {
+      const userId = document.getElementById("userId").value;
+      const groupId = document.getElementById("groupId").value;
+      currentUserId = userId;
 
-    if (!userId || !groupId) {
-      alert("userId와 groupId를 입력하세요.");
-      return;
+      if (!userId || !groupId) {
+        alert("userId와 groupId를 입력하세요.");
+        return;
+      }
+
+      if (ws && ws.readyState !== WebSocket.CLOSED) {
+        ws.close();
+      }
+
+      const url = "ws://localhost:8080/ws/chat?userId=" + encodeURIComponent(userId) + "&groupId=" + encodeURIComponent(groupId);
+      ws = new WebSocket(url);
+
+      ws.onopen = () => console.log("✅ 연결됨");
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log("📨 받은 데이터:", data);
+
+        const chatBox = document.getElementById("chat-box");
+
+        if (data.type === "ERROR") {
+          alert(`⚠ 오류: ${data.message}`);
+          return;
+        }
+
+        if (data.type === "DELETE") {
+          const target = [...chatBox.children].find(d => d.dataset.messageId === String(data.messageId));
+          if (target) {
+            target.innerHTML = `<i style="color:gray;">삭제된 메시지입니다.</i>`;
+          }
+          return;
+        }
+
+        if (data.type === "EDIT") {
+          const target = [...chatBox.children].find(d => d.dataset.messageId === String(data.messageId));
+          if (target) {
+            target.innerHTML = `<b>${data.from}:</b> ${data.newContent}`;
+          }
+          return;
+        }
+
+        const div = document.createElement("div");
+
+        let timestamp = "";
+        if (data.sentAt) {
+          timestamp = `<span style="color:gray; font-size:0.8em;"> [${formatTime(data.sentAt)}]</span>`;
+        }
+
+        if (data.from && data.msg) {
+          div.innerHTML = `<b>${data.from}:</b> ${data.msg} ${timestamp}`;
+        } else if (data.system) {
+          div.innerHTML = `<i>시스템: ${data.system}</i>`;
+        } else {
+          div.innerHTML = `<i style="color:red;">⚠ 처리할 수 없는 메시지</i>`;
+          console.warn("⚠ 알 수 없는 메시지 구조:", data);
+        }
+
+        if (data.userId) div.dataset.userId = data.userId;
+        if (data.messageId) div.dataset.messageId = data.messageId;
+
+        div.addEventListener("contextmenu", (e) => {
+          e.preventDefault();
+          if (div.dataset.userId === currentUserId && div.dataset.messageId) {
+            editingMessageId = div.dataset.messageId;
+            showContextMenu(e.pageX, e.pageY);
+          }
+        });
+
+        chatBox.appendChild(div);
+      };
+
+      ws.onclose = () => console.log("❌ 연결 종료");
     }
 
-    // 기존 WebSocket 닫기
-    if (ws && ws.readyState !== WebSocket.CLOSED) {
-      console.log("🔁 기존 연결 종료");
-      ws.close();
+    function sendMessage() {
+      const msg = document.getElementById("message").value;
+      if (!msg || !ws || ws.readyState !== WebSocket.OPEN) {
+        alert("WebSocket이 연결되지 않았거나 메시지가 비어있습니다.");
+        return;
+      }
+      const json = { msg: msg };
+      ws.send(JSON.stringify(json));
+      document.getElementById("message").value = "";
     }
 
-    const url = "ws://localhost:8080/ws/chat?userId=" + encodeURIComponent(userId) + "&groupId=" + encodeURIComponent(groupId);
-    ws = new WebSocket(url);
-
-    ws.onopen = () => console.log("✅ 연결됨");
-
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      const chatBox = document.getElementById("chat-box");
-      const div = document.createElement("div");
-      div.innerHTML = `<b>${data.from}:</b> ${data.msg}`;
-      chatBox.appendChild(div);
-    };
-
-    ws.onclose = () => console.log("❌ 연결 종료");
-  }
-
-  function sendMessage() {
-    const msg = document.getElementById("message").value;
-    if (!msg || !ws || ws.readyState !== WebSocket.OPEN) {
-      alert("WebSocket이 연결되지 않았거나 메시지가 비어있습니다.");
-      return;
+    function formatTime(isoTimeString) {
+      const date = new Date(isoTimeString);
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      return `${hours}:${minutes}`;
     }
-    const json = { msg: msg };
-    ws.send(JSON.stringify(json));
-    document.getElementById("message").value = "";
-  }
+
+    function showContextMenu(x, y) {
+      const menu = document.getElementById("context-menu");
+      menu.style.left = x + "px";
+      menu.style.top = y + "px";
+      menu.style.display = "block";
+    }
+
+    function hideContextMenu() {
+      document.getElementById("context-menu").style.display = "none";
+    }
+
+    function promptEdit() {
+      const newContent = prompt("수정할 메시지를 입력하세요:");
+      if (newContent && editingMessageId) {
+        ws.send(JSON.stringify({
+          type: "EDIT",
+          messageId: editingMessageId,
+          newContent: newContent,
+          userId: currentUserId
+        }));
+      }
+      hideContextMenu();
+    }
+
+    function promptDelete() {
+      if (editingMessageId) {
+        ws.send(JSON.stringify({
+          type: "DELETE",
+          messageId: editingMessageId,
+          userId: currentUserId
+        }));
+      }
+      hideContextMenu();
+    }
+
+    function searchMessages() {
+      const keyword = document.getElementById("searchKeyword").value.trim();
+      const groupId = document.getElementById("groupId").value;
+
+      if (!groupId) {
+        alert("groupId를 입력하세요.");
+        return;
+      }
+
+      const url = keyword
+        ? `/chat/search?groupId=${groupId}&keyword=${encodeURIComponent(keyword)}`
+        : `/chat/history?groupId=${groupId}`;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          const chatBox = document.getElementById("chat-box");
+          chatBox.innerHTML = keyword
+            ? "<b>🔍 검색 결과:</b><br>"
+            : "<b>💬 전체 메시지 목록:</b><br>";
+
+          if (data.length === 0) {
+            chatBox.innerHTML += "<i>표시할 메시지가 없습니다.</i>";
+            return;
+          }
+
+          data.forEach(msg => {
+            const time = msg.sentAt ? `[${formatTime(msg.sentAt)}]` : '';
+            chatBox.innerHTML += `<div><b>${msg.nickname}:</b> ${msg.content} <span style="color:gray; font-size:0.8em;">${time}</span></div>`;
+          });
+        });
+    }
+
+    window.addEventListener("click", () => hideContextMenu());
+
+    document.getElementById("message").addEventListener("keyup", function(event) {
+      if (event.key === "Enter") sendMessage();
+    });
 </script>
 </body>
 </html>
