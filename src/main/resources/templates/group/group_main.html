@@ -4,7 +4,8 @@
     <title>그룹 목록(전체리스트)</title>
 </head>
 <body>
-<a href="/group/group_create" class="nav-button">새 그룹 생성</a>
+<!-- 임의로 호스트에 대한 값을 고정으로 넘김 user_idx=1&nickname=행복한현수 -->
+<a href="/group/group_create?user_idx=23&nickname=길도_로컬" class="nav-button">새 그룹 생성</a>
 <h1>그룹 목록</h1>
 <p th:text="${#lists.isEmpty(groupsList)}"></p>빈 리스트 여부
 <p th:text="${groupsList.size()}"></p>리스트 크기
