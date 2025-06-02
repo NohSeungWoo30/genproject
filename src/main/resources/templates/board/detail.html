@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${post.title}">제목</title>
+  <style>
+    .comment {
+      margin-bottom: 10px;
+      padding-left: 10px;
+      border-left: 2px solid #ccc;
+    }
+    .reply {
+      margin-left: 20px;
+      border-color: #aaa;
+    }
+    .author {
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+<h2 th:text="${post.title}">제목</h2>
+
+<p><b>카테고리:</b> <span th:text="${post.category}"></span></p>
+<p><b>작성자:</b> <span th:text="${post.authorName}"></span></p>
+<p><b>작성일:</b> <span th:text="${#dates.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></span></p>
+
+<hr/>
+<div th:text="${post.content}">내용</div>
+
+<br/>
+
+<button th:onclick="|likePost(${post.postIdx})|">👍 추천</button>
+<span id="like-count" th:text="${post.likeCount}">0</span>
+
+<form th:action="@{'/posts/' + ${post.postIdx} + '/delete'}" method="post"
+      onsubmit="return confirm('정말 삭제하시겠습니까?');">
+  <button type="submit">🗑 삭제</button>
+</form>
+
+<hr/>
+
+<h3>💬 댓글</h3>
+
+
+<!-- ✅ 댓글 목록 -->
+<div th:each="comment : ${comments}">
+  <div class="comment" th:classappend="${comment.parentCommentId != null} ? 'reply'">
+    <span class="author" th:text="${comment.authorNickname}">작성자</span>
+
+    <!-- 🔥 삭제 여부에 따라 출력 다르게 -->
+    <span th:if="${comment.isDeleted != 'Y'}" th:text="${comment.content}">내용</span>
+    <span th:if="${comment.isDeleted == 'Y'}" style="color:gray;"><i>삭제된 댓글입니다</i></span>
+
+    <!-- 🔘 삭제되지 않은 댓글만 버튼 노출 -->
+    <div th:if="${comment.isDeleted != 'Y'}">
+      <div th:if="${comment.parentCommentId == null}">
+        <button th:onclick="|showReplyForm(${comment.commentIdx})|">답글</button>
+        <button th:onclick="|deleteComment(${comment.commentIdx})|">삭제</button>
+      </div>
+      <div th:if="${comment.parentCommentId != null}">
+        <button th:onclick="|deleteComment(${comment.commentIdx})|">삭제</button>
+      </div>
+    </div>
+
+    <!-- 대댓글 입력폼 (원댓글만) -->
+    <div th:if="${comment.parentCommentId == null}"
+         th:id="'reply-form-' + ${comment.commentIdx}"
+         style="display:none;">
+      <input type="text" th:id="'reply-content-' + ${comment.commentIdx}" placeholder="답글 입력" />
+      <button th:onclick="|submitReply(${post.postIdx}, ${comment.commentIdx})|">등록</button>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ 최상위 댓글 입력 폼 -->
+<div class="comment-box">
+  <input type="text" id="new-comment-content" placeholder="댓글을 입력하세요" style="width:300px;" />
+  <button th:onclick="|submitReply(${post.postIdx}, null)|">등록</button>
+</div>
+
+
+
+
+
+<a th:href="@{/posts(page=${currentPage})}">← 목록으로</a>
+
+<script>
+  // 👍 좋아요 시작
+  function likePost(postIdx) {
+    fetch(`/posts/${postIdx}/like`, { method: 'POST' })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("like-count").innerText = data.likeCount;
+        alert(data.liked ? "추천되었습니다!" : "추천이 취소되었습니다.");
+      })
+      .catch(err => {
+        console.error("오류 발생:", err);
+        alert("요청 실패");
+      });
+  } // 👍 좋아요 끝
+
+  // 💬 댓글 시작
+  function showReplyForm(commentId) {
+    const form = document.getElementById("reply-form-" + commentId);
+    form.style.display = (form.style.display === "none") ? "block" : "none";
+  }
+
+  function submitReply(postIdx, parentCommentId) {
+    let content;
+    if (parentCommentId !== null) {
+      content = document.getElementById("reply-content-" + parentCommentId).value;
+    } else {
+      content = document.getElementById("new-comment-content").value;
+    }
+
+    if (!content.trim()) {
+      alert("내용을 입력하세요.");
+      return;
+    }
+
+    fetch(`/posts/${postIdx}/comments`, {
+  method: "POST",
+  headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  body: `content=${encodeURIComponent(content)}&parentCommentId=${parentCommentId ?? ''}`
+})
+.then(res => res.text())  // 여기 추가
+.then(text => {
+  if (text === "ok") {
+    alert("댓글이 등록되었습니다.");
+    location.reload();
+  } else {
+    alert("댓글 등록 실패: " + text);
+  }
+})
+.catch(err => {
+  console.error("에러:", err);
+  alert("요청 중 오류 발생");
+});
+  } // 💬 댓글 끝
+
+  //댓글 삭제
+  function deleteComment(commentIdx) {
+  if (!confirm("댓글을 삭제하시겠습니까?")) return;
+
+  fetch(`/posts/comments/${commentIdx}/delete`, {
+    method: 'POST'
+  })
+  .then(res => {
+    if (res.ok) {
+      location.reload();
+    } else {
+      alert("삭제 실패");
+    }
+  })
+  .catch(err => {
+    console.error("에러 발생:", err);
+    alert("오류 발생");
+  });
+}//댓글 삭제 끝
+</script>
+</body>
+</html>
