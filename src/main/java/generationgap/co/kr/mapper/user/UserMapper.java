@@ -1,6 +1,6 @@
 package generationgap.co.kr.mapper.user;
 
-import generationgap.co.kr.domain.User;
+import generationgap.co.kr.domain.user.User;
 import generationgap.co.kr.domain.user.UserDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;

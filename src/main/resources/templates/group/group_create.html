@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>그룹 생성</title>
+    <style>
+        /* 간략한 스타일은 가독성을 위해 추가했습니다. 디자인 목적은 아닙니다. */
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        form { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        div { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        textarea,
+        select {
+            width: calc(100% - 10px); /* 패딩 고려 */
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
+        }
+        input[type="radio"] { margin-right: 5px; }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* 성별 라디오 버튼 한 줄 정렬 */
+        .gender-options {
+            display: flex;
+            align-items: center;
+            gap: 15px; /* 라디오 버튼 사이 간격 */
+        }
+        .gender-options label {
+            display: inline-block; /* 라디오 버튼 라벨을 인라인으로 */
+            margin-bottom: 0;
+            font-weight: normal; /* 라벨 볼드 해제 */
+        }
+
+        /* 슬라이더 컨테이너 스타일 */
+        .age-slider-container {
+            margin-top: 25px; /* 슬라이더와 위쪽 요소 간격 */
+            margin-bottom: 30px; /* 슬라이더와 아래쪽 요소 간격 */
+            padding: 0 10px; /* 슬라이더가 폼 경계에 붙지 않도록 좌우 패딩 */
+        }
+        #age-slider-values {
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body>
+<a href="/group/group_main" class="nav-button">그룹 목록 보기</a>
+<h1>새 그룹 생성</h1>
+
+<form action="/group/group_success" method="post">
+    <div>
+        <label for="ownerIdx">닉네임(nickname) :</label>
+        <!-- 호스트번호(ownerIdx) 숨김처리로 보유 -->
+        <input type="number" id="ownerIdx" name="ownerIdx" required th:value="${group.ownerIdx}" readonly>
+        <input type="text" id="nickname" name="nickname" required th:value="${nickname}" readonly>
+    </div>
+
+    <div>
+        <label for="groupCategoryMainIdx">카테고리 (대분류):</label>
+        <select id="groupCategoryMainIdx" name="groupCategoryMainIdx">
+            <option value="">-- 대분류 선택 --</option>
+            <option th:each="maincategory : ${categoryMainList}"
+                    th:value="${maincategory.cmCategoryMainIdx}"
+                    th:text="${maincategory.cmCategoryMainIdx}+', '+${maincategory.categoryMainName}">
+            </option>
+        </select>
+    </div>
+
+    <div>
+        <label for="groupCategorySubIdx">카테고리 (소분류):</label>
+        <select id="groupCategorySubIdx" name="groupCategorySubIdx">
+            <option value="">-- 소분류 선택 --</option>
+        </select>
+    </div>
+
+    <div>
+        <label for="title">그룹 제목 (title):</label>
+        <input type="text" id="title" name="title" maxlength="100" required>
+    </div>
+
+    <div>
+        <label>성별 제한 (gender_limit):</label><br>
+        <div class="gender-options">
+            <input type="radio" id="genderM" name="genderLimit" value="M">
+            <label for="genderM">남성</label>
+            <input type="radio" id="genderF" name="genderLimit" value="F">
+            <label for="genderF">여성</label>
+            <input type="radio" id="genderNone" name="genderLimit" value="A" checked> <label for="genderNone">제한
+            없음</label>
+        </div>
+    </div>
+
+
+    <div>
+        <label for="age-slider">나이 제한 (age_min ~ age_max):</label>
+        <div class="age-slider-container">
+            <div id="age-slider"></div>
+            <div id="age-slider-values">
+                <span id="ageMinDisplay">0</span> ~ <span id="ageMaxDisplay">100</span>
+            </div>
+        </div>
+        <input type="hidden" id="ageMin" name="ageMin" value="0">
+        <input type="hidden" id="ageMax" name="ageMax" value="100">
+    </div>
+
+    <div>
+        <label for="groupDate">그룹 날짜 (group_date):</label>
+        <input type="date" id="groupDate" name="groupDate">
+    </div>
+
+    <div>
+        <label for="membersMax">최대 멤버 수 (members_max):</label>
+        <input type="number" id="membersMax" name="membersMax" min="1">
+    </div>
+    <!--
+                        <div>
+                            <label for="partyMember">파티 멤버 (party_member):</label>
+                            <input type="number" id="partyMember" name="partyMember" min="0">
+                        </div>
+
+                        <div>
+                            <label for="content">내용 (content):</label>
+                            <textarea id="content" name="content" rows="5" maxlength="1000"></textarea>
+                        </div>
+
+                        <div>
+                            <label for="placeName">장소명 (place_name):</label>
+                            <input type="text" id="placeName" name="placeName" maxlength="255">
+                        </div>
+
+                        <div>
+                            <label for="placeCategory">장소 카테고리 (place_category):</label>
+                            <input type="text" id="placeCategory" name="placeCategory" maxlength="100">
+                        </div>
+
+                        <div>
+                            <label for="placeAddress">장소 주소 (place_address):</label>
+                            <input type="text" id="placeAddress" name="placeAddress" maxlength="500">
+                        </div>
+
+                        <div>
+                            <label for="naverPlaceId">네이버 플레이스 ID (naver_place_id):</label>
+                            <input type="text" id="naverPlaceId" name="naverPlaceId" maxlength="50">
+                        </div>
+
+                        <div>
+                            <label for="naverPlaceUrl">네이버 플레이스 URL (naver_place_url):</label>
+                            <input type="url" id="naverPlaceUrl" name="naverPlaceUrl" maxlength="1000">
+                        </div>
+
+                        <div>
+                            <label for="latitude">위도 (latitude):</label>
+                            <input type="number" id="latitude" name="latitude" step="any">
+                        </div>
+
+                        <div>
+                            <label for="longitude">경도 (longitude):</label>
+                            <input type="number" id="longitude" name="longitude" step="any">
+                        </div>
+
+                        <div>
+                            <label for="groupImgUrl">그룹 이미지 URL (group_img_url):</label>
+                            <input type="url" id="groupImgUrl" name="groupImgUrl" maxlength="1000">
+                        </div>
+                    -->
+
+    <div>
+        <button type="submit">그룹 생성</button>
+    </div>
+
+</form>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css">
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+    // 카테고리 스크립트 (기존 코드)
+    const mainCategorySelect = document.getElementById('groupCategoryMainIdx');
+    const subCategorySelect = document.getElementById('groupCategorySubIdx');
+
+    mainCategorySelect.addEventListener('change', function() {
+        const selectedMainCategoryIdx = this.value;
+
+        console.log('선택된 메인 카테고리 ID:', selectedMainCategoryIdx);
+        console.log('fetch URL:', `/group/api/sub-categories?mainCategoryIdx=${selectedMainCategoryIdx}`);
+
+        subCategorySelect.innerHTML = '<option value="">-- 소분류 선택 --</option>';
+        subCategorySelect.disabled = true;
+
+        if (selectedMainCategoryIdx) {
+            fetch(`/group/api/sub-categories?mainCategoryIdx=${selectedMainCategoryIdx}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(subCategories => {
+                    subCategories.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.categorySubIdx;
+                        option.textContent = category.categorySubName;
+                        subCategorySelect.appendChild(option);
+                    });
+                    subCategorySelect.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Error fetching sub categories:', error);
+                    alert('서브 카테고리를 불러오는 데 실패했습니다.');
+                    subCategorySelect.disabled = true;
+                });
+        } else {
+            subCategorySelect.disabled = true;
+        }
+    });
+
+    // 성별 제한(limite) 라디오박스(선택형)
+    const genLimiteBtn = document.getElementsByName('genderLimit');
+    let selectedValue = null;
+
+    for (const radio of genLimiteBtn) {
+      if (radio.checked) {
+        selectedValue = radio.value;
+        break;
+      }
+    }
+
+    // 미선택 시 제출 보류
+    if (!selectedValue) {
+      e.preventDefault(); // 폼 제출 막기
+      alert('성별 제한을 선택해주세요.');
+    }
+
+    // 나이 슬라이더 스크립트
+        const ageSlider = document.getElementById('age-slider');
+        const ageMinInput = document.getElementById('ageMin');
+        const ageMaxInput = document.getElementById('ageMax');
+        const ageMinDisplay = document.getElementById('ageMinDisplay');
+        const ageMaxDisplay = document.getElementById('ageMaxDisplay');
+
+
+        // noUiSlider 초기화
+        noUiSlider.create(ageSlider, {
+            start: [parseInt(ageMinInput.value), parseInt(ageMaxInput.value)], // hidden input의 초기값 사용
+            connect: true,
+            range: {
+                'min': 0,
+                'max': 100
+            },
+            step: 1,
+            format: {
+                to: function (value) {
+                    return parseInt(value);
+                },
+                from: function (value) {
+                    return parseInt(value);
+                }
+            }
+        });
+
+        // 슬라이더 값이 변경될 때마다 hidden input 필드와 표시 업데이트
+        ageSlider.noUiSlider.on('update', function (values, handle) {
+            const minAge = values[0];
+            const maxAge = values[1];
+            ageMinInput.value = minAge;
+            ageMaxInput.value = maxAge;
+            ageMinDisplay.textContent = `${minAge}세`;
+            ageMaxDisplay.textContent = `${maxAge}세`;
+        });
+
+        // 폼 로드 시 숨겨진 input 값과 화면 표시 동기화 (초기화)
+        ageMinDisplay.textContent = `${ageMinInput.value}세`;
+        ageMaxDisplay.textContent = `${ageMaxInput.value}세`;
+    });
+</script>
+
+</body>
+</html>
