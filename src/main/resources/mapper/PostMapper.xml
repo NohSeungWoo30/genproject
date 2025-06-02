@@ -9,6 +9,7 @@
         <id property="postIdx" column="post_idx"/>
         <result property="title" column="title"/>
         <result property="content" column="content"/>
+        <result property="category" column="category"/>
         <result property="authorName" column="nickname"/> <!-- 사용자 닉네임 JOIN -->
         <result property="viewCount" column="view_count"/>
         <result property="likeCount" column="like_count"/>
@@ -16,14 +17,92 @@
         <result property="updateAt" column="update_at"/>
         <result property="deletedBy" column="deleted_by"/>
         <result property="deletedAt" column="deleted_at"/>
+        <result property="commentCount" column="comment_count"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="deletedBy" column="deleted_by"/>
+        <result property="deletedAt" column="deleted_at"/>
+        <result property="updateAt" column="update_at"/>
+
     </resultMap>
 
-    <select id="getAllPosts" resultMap="postMap">
-        SELECT p.*, u.nickname
-        FROM board_posts p
-        JOIN users u ON p.author_idx = u.user_idx
-        WHERE is_deleted = 'N'
-        ORDER BY created_at DESC
+    <select id="getPostsPaged" resultMap="postMap">
+        SELECT
+        bp.*,
+        u.nickname AS author_nickname,
+        COUNT(c.comment_idx) AS comment_count
+        FROM board_posts bp
+        JOIN users u ON bp.author_idx = u.user_idx
+        LEFT JOIN post_comments c
+        ON bp.post_idx = c.post_idx AND c.is_deleted = 'N'
+        WHERE bp.is_deleted = 'N'
+        GROUP BY bp.post_idx, bp.author_idx, bp.category, bp.title, bp.content,
+        bp.view_count, bp.like_count, bp.deleted_by, bp.is_deleted,
+        bp.created_at, bp.deleted_at, bp.update_at,
+        u.nickname
+        ORDER BY bp.created_at DESC, bp.post_idx DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
     </select>
+
+    <select id="getPostCount" resultType="int">
+        SELECT COUNT(*) FROM board_posts WHERE is_deleted = 'N'
+    </select>
+
+    <insert id="insertPost" parameterType="Post">
+        INSERT INTO board_posts(
+            author_idx, category, title, content, view_count, like_count, is_deleted, created_at)
+        VALUES(
+            #{authorIdx}, #{category}, #{title}, #{content}, 0,0, 'N', SYSDATE)
+    </insert>
+
+    <select id="getPostById" resultMap="postMap">
+        SELECT
+            bp.*,
+            u.nickname AS nickname
+        FROM board_posts bp
+        JOIN users u ON bp.author_idx = u.user_idx
+        WHERE bp.post_idx = #{postIdx} AND bp.is_deleted = 'N'
+    </select>
+
+    <update id="updateViewCount">
+        UPDATE board_posts
+        SET view_count = view_count+1
+        WHERE post_idx = #{postIdx}
+    </update>
+
+    <insert id ="insertPostLikeCheck">
+        INSERT INTO post_like_ck(user_idx, post_idx)
+        VALUES (#{userIdx}, #{postIdx})
+    </insert>
+
+    <update id="updateLikeCount">
+        UPDATE board_posts
+        SET like_count = like_count+1
+        WHERE post_idx = #{postIdx}
+    </update>
+
+    <select id="hasUserLikedPost" resultType="int">
+        SELECT COUNT(*)
+        FROM post_like_ck
+        WHERE user_idx = #{userIdx} AND post_idx = #{postIdx}
+    </select>
+
+    <delete id = "deletePostLike">
+        DELETE FROM post_like_ck
+        WHERE user_idx= #{userIdx} AND post_idx =#{postIdx}
+    </delete>
+
+    <update id="decrementLikeCount">
+        UPDATE board_posts
+        SET like_count= like_count-1
+        WHERE post_idx = #{postIdx}
+    </update>
+
+    <update id="softDeletePost">
+        UPDATE board_posts
+        SET is_deleted = 'Y',
+        deleted_by = #{userIdx},
+        deleted_at = SYSDATE
+        WHERE post_idx = #{postIdx}
+    </update>
 
 </mapper>

@@ -45,6 +45,7 @@
   <thead>
   <tr>
     <th>번호</th>
+    <th>카테고리</th>
     <th>제목</th>
     <th>작성자</th>
     <th>조회수</th>
@@ -55,20 +56,44 @@
   <tbody>
   <tr th:each="post : ${posts}">
     <td th:text="${post.postIdx}">1</td>
+    <td th:text="${post.category}">카테고리</td>
     <td>
-      <a th:href="@{/posts/{id}(id=${post.postIdx})}"
+      <a th:href="@{'/posts/' + ${post.postIdx} + '?page=' + ${currentPage}}"
          th:text="${post.title}">제목</a>
+      <span th:if="${post.commentCount > 0}" th:text="'(' + ${post.commentCount} + ')'"></span>
+
     </td>
     <td th:text="${post.authorName}">작성자</td>
     <td th:text="${post.viewCount}">0</td>
     <td th:text="${post.likeCount}">0</td> <!-- ✅ 추가 -->
-    <td th:text="${#dates.format(post.createdAt, 'yyyy-MM-dd')}">2025-05-30</td>
+    <td th:text="${#dates.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">2025-05-30</td>
   </tr>
   <tr th:if="${#lists.isEmpty(posts)}">
     <td colspan="6"><i>게시글이 없습니다.</i></td>
   </tr>
   </tbody>
+
+
+
 </table>
+
+<div style="margin-top: 20px; text-align: center;"> <!-- ✅ 중앙 정렬 -->
+  <span th:if="${currentPage > 1}">
+    <a th:href="@{/posts(page=${currentPage - 1})}">◀ 이전</a>
+  </span>
+
+  <span th:each="i : ${#numbers.sequence(1, totalPages)}">
+    <a th:href="@{/posts(page=${i})}"
+       th:text="${i}"
+       th:classappend="${i == currentPage} ? 'current' : ''"
+       style="margin: 0 5px;">1</a>
+  </span>
+
+  <span th:if="${currentPage < totalPages}">
+    <a th:href="@{/posts(page=${currentPage + 1})}">다음 ▶</a>
+  </span>
+</div>
+
 
 </body>
 </html>
