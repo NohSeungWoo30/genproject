@@ -2,6 +2,7 @@ package generationgap.co.kr.controller.board;
 
 import generationgap.co.kr.domain.board.Comment;
 import generationgap.co.kr.domain.board.Post;
+import generationgap.co.kr.dto.post.Attachment;
 import generationgap.co.kr.mapper.board.CommentMapper;
 import generationgap.co.kr.service.board.PostService;
 import jakarta.servlet.http.HttpSession;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -30,9 +32,10 @@ public class PostController {
     }
 
     @PostMapping("/write")
-    public String submitPost(@ModelAttribute Post post){
+    public String submitPost(@ModelAttribute Post post,
+                             @RequestParam("files")List<MultipartFile> files){
         post.setAuthorIdx(1); //임시로 1번 유저로 고정
-        postService.savePost(post);
+        postService.writePostWithAttachments(post, files);
         return "redirect:/posts";
     }
 
@@ -63,6 +66,10 @@ public class PostController {
         }
 
         model.addAttribute("post", post);
+
+        // 첨부파일 목록 조회 추가
+        List<Attachment> attachments = postService.getAttachmentsByPostId((long) postIdx);
+        model.addAttribute("attachments", attachments);
 
         List<Comment> comments = commentMapper.getCommentsByPost(postIdx);// 댓글도 같이 조회되도록 추가
         model.addAttribute("comments", comments);

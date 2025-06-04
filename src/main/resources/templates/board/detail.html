@@ -30,6 +30,23 @@
 <div th:text="${post.content}">내용</div>
 
 <br/>
+<!-- 📎 첨부파일 표시 영역 추가 -->
+<div th:if="${attachments != null and #lists.size(attachments) > 0}">
+  <h4>📎 첨부파일</h4>
+  <ul>
+    <li th:each="file : ${attachments}">
+      <!-- ✅ 이미지 파일인 경우 → 미리보기 표시 -->
+      <div th:if="${#strings.endsWith(file.originalName.toLowerCase(), '.png')
+                or #strings.endsWith(file.originalName.toLowerCase(), '.jpg')
+                or #strings.endsWith(file.originalName.toLowerCase(), '.jpeg')
+                or #strings.endsWith(file.originalName.toLowerCase(), '.gif')}">
+        <img th:src="@{|/uploads/${file.fileName}|}" alt="첨부 이미지" style="max-width:300px;" />
+      </div>
+    </li>
+  </ul>
+</div>
+
+<hr/>
 
 <button th:onclick="|likePost(${post.postIdx})|">👍 추천</button>
 <span id="like-count" th:text="${post.likeCount}">0</span>

@@ -4,7 +4,7 @@
 <body>
 <h2>➕ 게시글 작성</h2>
 
-<form th:action="@{/posts/write}" method="post" th:object="${post}">
+<form th:action="@{/posts/write}" method="post" th:object="${post}" enctype="multipart/form-data">
   <label>카테고리:
     <select th:field="*{category}">
       <option value="공지">공지</option>
@@ -17,6 +17,9 @@
   <label>제목: <input type="text" th:field="*{title}" /></label><br/><br/>
   <label>내용:<br/>
     <textarea th:field="*{content}" rows="10" cols="60"></textarea>
+  </label><br/><br/>
+  <label>첨부파일:
+    <input type="file" name="files" multiple accept="image/png, image/jpeg, image/gif, image/webp" />
   </label><br/><br/>
 
   <button type="submit">등록</button>

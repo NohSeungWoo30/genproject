@@ -26,7 +26,7 @@
     <select id="getPostsPaged" resultMap="postMap">
         SELECT
         bp.*,
-        u.nickname AS author_nickname,
+        u.nickname AS nickname,
         COUNT(c.comment_idx) AS comment_count
         FROM board_posts bp
         JOIN users u ON bp.author_idx = u.user_idx
@@ -46,10 +46,14 @@
     </select>
 
     <insert id="insertPost" parameterType="generationgap.co.kr.domain.board.Post">
+        <selectKey keyProperty="postIdx" resultType="Long" order="BEFORE">
+            SELECT board_posts_seq.NEXTVAL FROM dual
+        </selectKey>
+
         INSERT INTO board_posts(
-            author_idx, category, title, content, view_count, like_count, is_deleted, created_at)
+        post_idx, author_idx, category, title, content, view_count, like_count, is_deleted, created_at)
         VALUES(
-            #{authorIdx}, #{category}, #{title}, #{content}, 0,0, 'N', SYSDATE)
+        #{postIdx}, #{authorIdx}, #{category}, #{title}, #{content}, 0,0, 'N', SYSDATE)
     </insert>
 
     <select id="getPostById" resultMap="postMap">
@@ -103,4 +107,32 @@
         WHERE post_idx = #{postIdx}
     </update>
 
+    <insert id="insertAttachmentWithOriginal">
+        INSERT INTO attachments (
+        post_idx,
+        uploader_idx,
+        file_name,
+        original_name,
+        upload_at
+        )
+        VALUES (
+        #{postIdx},
+        #{uploaderIdx},
+        #{fileName},
+        #{originalName},
+        SYSDATE
+        )
+    </insert>
+
+
+    <select id="getAttachmentsByPostId" parameterType="long" resultType="generationgap.co.kr.dto.post.Attachment">
+        SELECT
+        attachment_idx AS attachmentIdx,
+        post_idx       AS postIdx,
+        uploader_idx   AS uploaderIdx,
+        file_name      AS fileName,
+        original_name  AS originalName,
+        upload_at      AS uploadAt
+        FROM attachments
+        WHERE post_idx = #{postIdx}    </select>
 </mapper>

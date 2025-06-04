@@ -1,17 +1,15 @@
 package generationgap.co.kr.service.user;
 
 import generationgap.co.kr.domain.user.UserDTO;
-import generationgap.co.kr.mapper.user.UserMapper; // UserMapper 임포트
+import generationgap.co.kr.mapper.user.UserMapper;
+import generationgap.co.kr.security.CustomUserDetails;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections; // Collection.emptyList()를 위해 임포트
-import org.slf4j.Logger; // Logger 추가
-import org.slf4j.LoggerFactory; // LoggerFactory 추가
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -47,6 +45,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         // UserDetails는 Spring Security가 사용자 인증 및 권한 부여에 사용하는 핵심 인터페이스입니다.
         // 여기서는 간단하게 UserDTO의 userId와 passwordHash를 사용하여 User 객체를 생성합니다.
         // 권한(Authorities)은 Collections.emptyList()로 비워둡니다. (나중에 권한 관리 시 추가)
-        return new User(userDTO.getUserId(), userDTO.getPasswordHash(), Collections.emptyList());
+        // CustomUserDetails 객체를 반환합니다.
+        return new CustomUserDetails(userDTO);
     }
 }

@@ -1,6 +1,7 @@
 package generationgap.co.kr.mapper.board;
 
 import generationgap.co.kr.domain.board.Post;
+import generationgap.co.kr.dto.post.Attachment;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -28,4 +29,11 @@ public interface PostMapper {
 
     //삭제
     void softDeletePost(@Param("postIdx") int postIdx, @Param("userIdx") int userIdx);
+
+    //첨부파일 추가
+    void insertAttachmentWithOriginal(Attachment attachment);
+
+    List<Attachment> getAttachmentsByPostId(Long postIdx);
+
+
 }

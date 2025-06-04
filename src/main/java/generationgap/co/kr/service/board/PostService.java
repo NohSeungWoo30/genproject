@@ -1,6 +1,8 @@
 package generationgap.co.kr.service.board;
 
 import generationgap.co.kr.domain.board.Post;
+import generationgap.co.kr.dto.post.Attachment;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -9,7 +11,7 @@ public interface PostService {
 
     int getTotalPostCount();
 
-    void savePost(Post post);
+    void writePostWithAttachments(Post post, List<MultipartFile> files);
 
     Post getPostById(int postIdx);
 
@@ -18,5 +20,8 @@ public interface PostService {
     boolean toggleLikePost(int UserIdx, int postIdx);
 
     void softDeletePost(int postIdx, int userIdx);
+
+    List<Attachment> getAttachmentsByPostId(Long postIdx);
+
 }
 
