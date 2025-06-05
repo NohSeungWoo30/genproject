@@ -32,11 +32,28 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok:1.18.30'
 	annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
-	// 웹 소켓 관련 의존성 추가
-	implementation 'org.springframework.boot:spring-boot-starter-websocket'
-	//implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	implementation 'org.webjars:sockjs-client:1.5.1'
-	implementation 'org.webjars:stomp-websocket:2.3.4'
+    // 웹 소켓 관련 의존성 추가
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.webjars:sockjs-client:1.5.1'
+    implementation 'org.webjars:stomp-websocket:2.3.4'
+
+    //json
+    implementation 'org.json:json:20240303'
+
+    // *** 이 부분 추가 *** 비번 해싱 용
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    // validation starter도 함께 추가하는 것을 권장합니다 (이전 오류 해결에 도움됨)
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // Thymeleaf Spring Security Dialect (이것이 가장 중요!)
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6' // Spring Security 6 버전에 맞춰 '6'
+    // 또는 Spring Security 5 버전이라면:
+    // implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    // testImplementation 'org.springframework.security:spring-security-test' // Spring Security 테스트용
+
 
 	//json
 	implementation 'org.json:json:20240303'
@@ -53,6 +70,7 @@ dependencies {
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	// testImplementation 'org.springframework.security:spring-security-test' // Spring Security 테스트용
+
 
 }
 

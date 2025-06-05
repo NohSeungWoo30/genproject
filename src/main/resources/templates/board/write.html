@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>게시글 작성</title></head>
+<body>
+<h2>➕ 게시글 작성</h2>
+
+<form th:action="@{/posts/write}" method="post" th:object="${post}">
+  <label>카테고리:
+    <select th:field="*{category}">
+      <option value="공지">공지</option>
+      <option value="자유">자유</option>
+      <option value="질문">질문</option>
+      <option value="정보">정보</option>
+    </select>
+  </label><br/><br/>
+
+  <label>제목: <input type="text" th:field="*{title}" /></label><br/><br/>
+  <label>내용:<br/>
+    <textarea th:field="*{content}" rows="10" cols="60"></textarea>
+  </label><br/><br/>
+
+  <button type="submit">등록</button>
+</form>
+</body>
+</html>
