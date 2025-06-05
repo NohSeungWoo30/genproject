@@ -7,6 +7,7 @@
 
     <resultMap id="postMap" type="generationgap.co.kr.domain.board.Post">
         <id property="postIdx" column="post_idx"/>
+        <result property="authorIdx"  column="author_idx"/>
         <result property="title" column="title"/>
         <result property="content" column="content"/>
         <result property="category" column="category"/>
@@ -134,5 +135,29 @@
         original_name  AS originalName,
         upload_at      AS uploadAt
         FROM attachments
-        WHERE post_idx = #{postIdx}    </select>
+        WHERE post_idx = #{postIdx}
+    </select>
+
+    <update id="updatePost" parameterType="generationgap.co.kr.domain.board.Post">
+        UPDATE board_posts
+        SET
+        title = #{title},
+        content = #{content},
+        update_at = SYSTIMESTAMP
+        WHERE post_idx = #{postIdx}
+    </update>
+
+    <delete id="deleteAttachmentsByPostId" parameterType="long">
+        DELETE FROM attachments
+        WHERE post_idx = #{postIdx}
+    </delete>
+
+
+    <insert id="insertPostEditHistory">
+        INSERT INTO post_edits (
+        post_idx, title_before, content_before, edited_by
+        ) VALUES (
+        #{postIdx}, #{titleBefore}, #{contentBefore}, #{editedBy}
+        )
+    </insert>
 </mapper>

@@ -27,7 +27,6 @@
 <h2>모임 채팅방</h2>
 
 <div>
-    <label>userId: <input type="text" id="userId" /></label>
     <label>groupId: <input type="text" id="groupId" /></label>
     <button onclick="connectWebSocket()">연결</button>
 </div>
@@ -56,12 +55,10 @@
     let editingMessageId = null;
 
     function connectWebSocket() {
-      const userId = document.getElementById("userId").value;
       const groupId = document.getElementById("groupId").value;
-      currentUserId = userId;
 
-      if (!userId || !groupId) {
-        alert("userId와 groupId를 입력하세요.");
+      if (!groupId) {
+        alert("groupId를 입력하세요.");
         return;
       }
 
@@ -69,7 +66,7 @@
         ws.close();
       }
 
-      const url = "ws://localhost:8080/ws/chat?userId=" + encodeURIComponent(userId) + "&groupId=" + encodeURIComponent(groupId);
+    const url = "ws://localhost:8080/ws/chat?groupId=" + encodeURIComponent(groupId);
       ws = new WebSocket(url);
 
       ws.onopen = () => console.log("✅ 연결됨");
@@ -79,6 +76,12 @@
         console.log("📨 받은 데이터:", data);
 
         const chatBox = document.getElementById("chat-box");
+
+        if (data.type === "IDENTIFY" && data.userId) {
+  currentUserId = data.userId;
+  console.log("✅ 내 userId 확정됨:", currentUserId);
+  return;
+}
 
         if (data.type === "ERROR") {
           alert(`⚠ 오류: ${data.message}`);

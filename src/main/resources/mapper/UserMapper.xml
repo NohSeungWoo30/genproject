@@ -6,12 +6,7 @@
 
 <!-- 예시 유저 맵퍼 -->
 <mapper namespace="generationgap.co.kr.mapper.user.UserMapper">
-    <resultMap id="userMap" type="generationgap.co.kr.domain.User">
-        <result property="userId" column="user_id"/>
-        <result property="userName" column="nickname"/>
-    </resultMap>
-
-    <resultMap id="userResultMap" type="generationgap.co.kr.domain.user.UserDTO">
+     <resultMap id="userResultMap" type="generationgap.co.kr.domain.user.UserDTO">
         <id property="userIdx" column="user_idx"/>
         <result property="userId" column="user_id"/>
         <result property="provider" column="provider"/>
@@ -20,7 +15,8 @@
         <result property="birthDate" column="birth_date"/>
         <result property="gender" column="gender"/>
         <result property="userCi" column="user_ci"/>
-        <result property="passwordHash" column="password_hash"/> <result property="email" column="email"/>
+        <result property="passwordHash" column="password_hash"/>
+        <result property="email" column="email"/>
         <result property="phone" column="phone"/>
         <result property="profileName" column="profile_name"/>
         <result property="introduction" column="introduction"/>
@@ -31,9 +27,7 @@
         <result property="ghost" column="ghost"/>
     </resultMap>
 
-    <select id="getAllUsers" resultMap="userMap">
-        SELECT * FROM users
-    </select>
+
 
     <insert id="insertUser" parameterType="generationgap.co.kr.domain.user.UserDTO">
         INSERT INTO users (

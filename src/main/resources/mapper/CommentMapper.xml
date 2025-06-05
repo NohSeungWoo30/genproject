@@ -25,6 +25,16 @@
             pc.created_at ASC
     </select>
 
+    <!-- 단일 댓글 조회용 메서드 추가 -->
+    <select id="getCommentById" resultMap="commentMap" parameterType="int">
+        SELECT
+        pc.*,
+        u.nickname AS author_nickname
+        FROM post_comments pc
+        JOIN users u ON pc.commenter_idx = u.user_idx
+        WHERE pc.comment_idx = #{commentIdx}
+    </select>
+
     <insert id="insertComment" parameterType="generationgap.co.kr.domain.board.Comment">
         INSERT INTO post_comments (
         post_idx,
@@ -48,5 +58,25 @@
         deleted_at = SYSDATE
         WHERE comment_idx = #{commentIdx}
     </update>
+
+    <update id="updateCommentContent">
+        UPDATE post_comments
+        SET content = #{content},
+        update_at = SYSTIMESTAMP
+        WHERE comment_idx = #{commentIdx}
+    </update>
+
+    <insert id="insertCommentEdit">
+        INSERT INTO comment_edits (
+        comment_idx,
+        content_before,
+        edited_by
+        ) VALUES (
+        #{commentIdx},
+        #{contentBefore},
+        #{editedBy}
+        )
+    </insert>
+
 
 </mapper>

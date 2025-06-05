@@ -35,5 +35,14 @@ public interface PostMapper {
 
     List<Attachment> getAttachmentsByPostId(Long postIdx);
 
+    void updatePost(Post post);
+
+    void deleteAttachmentsByPostId(Long postIdx);
+
+    void insertPostEditHistory(@Param("postIdx") int postIdx,
+                               @Param("titleBefore") String titleBefore,
+                               @Param("contentBefore") String contentBefore,
+                               @Param("editedBy") int editedBy);
+
 
 }

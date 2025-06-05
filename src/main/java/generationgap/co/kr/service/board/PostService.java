@@ -23,5 +23,6 @@ public interface PostService {
 
     List<Attachment> getAttachmentsByPostId(Long postIdx);
 
+    void updatePost(Post post, List<MultipartFile> files);
 }
 
