@@ -73,6 +73,9 @@ public class GroupsController {
         System.out.println("Age Min: " + groupData.getAgeMin());
         System.out.println("Age Max: " + groupData.getAgeMax());
         System.out.println("Group Date: " + groupData.getGroupDate()); //
+        System.out.println("membersMin: " + groupData.getMembersMin());
+        System.out.println("membersMax: " + groupData.getMembersMax());
+        System.out.println("모임방 상세내용: " + groupData.getContent());
 
         try {
             // Service 계층으로 데이터 전달

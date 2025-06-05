@@ -1,6 +1,6 @@
 package generationgap.co.kr.domain.group;
 
-import generationgap.co.kr.domain.user.User;
+import generationgap.co.kr.domain.user.UserDTO;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,6 +16,7 @@ public class Groups {
     private int ageMin;
     private int ageMax;
     private String groupDate;
+    private int membersMin;
     private int membersMax;
     private int partyMember;
     private String content;
@@ -32,7 +33,7 @@ public class Groups {
     private String deletedAt;
 
     // 조인용 객체 선언
-    private User owner;                     // 호스트
+    private UserDTO owner;                     // 호스트
     private CategoryMain categoryMain;     // 대분류
     private CategorySub categorySub;       // 소분류
 

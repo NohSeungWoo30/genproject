@@ -1,6 +1,5 @@
 package generationgap.co.kr.mapper.user;
 
-import generationgap.co.kr.domain.user.User;
 import generationgap.co.kr.domain.user.UserDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -11,7 +10,7 @@ import java.util.List;
 
 @Mapper
 public interface UserMapper {
-    List<User> getAllUsers();
+    List<UserDTO> getAllUsers();
     void insertUser(UserDTO user);
 
     UserDTO findByUserId(@Param("userId") String userId); // 사용자 ID로 UserDTO 조회

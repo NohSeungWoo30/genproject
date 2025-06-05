@@ -58,6 +58,21 @@
             margin-top: 10px;
             font-weight: bold;
         }
+        /* 최소/최대 인원수 드롭다운을 한 줄로 정렬 */
+        .member-count-options {
+            display: flex;
+            align-items: center;
+            gap: 20px; /* 드롭다운 사이 간격 */
+        }
+        .member-count-options > div {
+            flex: 1; /* 각 드롭다운이 공간을 균등하게 차지하도록 */
+        }
+        .member-count-options label {
+            margin-bottom: 5px;
+        }
+        .member-count-options select {
+            width: 100%; /* 부모 div에 맞춰 100% 너비 */
+        }
 
     </style>
 </head>
@@ -74,7 +89,7 @@
     </div>
 
     <div>
-        <label for="groupCategoryMainIdx">카테고리 (대분류):</label>
+        <label for="groupCategoryMainIdx">카테고리 (필수):</label>
         <select id="groupCategoryMainIdx" name="groupCategoryMainIdx">
             <option value="">-- 대분류 선택 --</option>
             <option th:each="maincategory : ${categoryMainList}"
@@ -85,9 +100,9 @@
     </div>
 
     <div>
-        <label for="groupCategorySubIdx">카테고리 (소분류):</label>
+        <label for="groupCategorySubIdx">상세내용 (필수):</label>
         <select id="groupCategorySubIdx" name="groupCategorySubIdx">
-            <option value="">-- 소분류 선택 --</option>
+            <option value="">-- 카테고리부터 선택 해주세요 --</option>
         </select>
     </div>
 
@@ -126,61 +141,69 @@
         <input type="date" id="groupDate" name="groupDate">
     </div>
 
+    <div class="member-count-options">
+        <div>
+            <label for="membersMin">최소 멤버 수:</label>
+            <select id="membersMin" name="membersMin" required>
+                <option value="">-- 최소 선택 --</option>
+            </select>
+        </div>
+        <div>
+            <label for="membersMax">최대 멤버 수:</label>
+            <select id="membersMax" name="membersMax" required>
+                <option value="">-- 최대 선택 --</option>
+            </select>
+        </div>
+    </div>z
+
     <div>
-        <label for="membersMax">최대 멤버 수 (members_max):</label>
-        <input type="number" id="membersMax" name="membersMax" min="1">
+        <label for="content">내용 (content):</label>
+        <textarea id="content" name="content" rows="5" maxlength="1000"></textarea>
     </div>
+
+    <!-- 네이버 플레이스 지도APi 부분 -->
     <!--
-                        <div>
-                            <label for="partyMember">파티 멤버 (party_member):</label>
-                            <input type="number" id="partyMember" name="partyMember" min="0">
-                        </div>
+                            <div>
+                                <label for="placeName">장소명 (place_name):</label>
+                                <input type="text" id="placeName" name="placeName" maxlength="255">
+                            </div>
 
-                        <div>
-                            <label for="content">내용 (content):</label>
-                            <textarea id="content" name="content" rows="5" maxlength="1000"></textarea>
-                        </div>
+                            <div>
+                                <label for="placeCategory">장소 카테고리 (place_category):</label>
+                                <input type="text" id="placeCategory" name="placeCategory" maxlength="100">
+                            </div>
 
-                        <div>
-                            <label for="placeName">장소명 (place_name):</label>
-                            <input type="text" id="placeName" name="placeName" maxlength="255">
-                        </div>
+                            <div>
+                                <label for="placeAddress">장소 주소 (place_address):</label>
+                                <input type="text" id="placeAddress" name="placeAddress" maxlength="500">
+                            </div>
 
-                        <div>
-                            <label for="placeCategory">장소 카테고리 (place_category):</label>
-                            <input type="text" id="placeCategory" name="placeCategory" maxlength="100">
-                        </div>
+                            <div>
+                                <label for="naverPlaceId">네이버 플레이스 ID (naver_place_id):</label>
+                                <input type="text" id="naverPlaceId" name="naverPlaceId" maxlength="50">
+                            </div>
 
-                        <div>
-                            <label for="placeAddress">장소 주소 (place_address):</label>
-                            <input type="text" id="placeAddress" name="placeAddress" maxlength="500">
-                        </div>
+                            <div>
+                                <label for="naverPlaceUrl">네이버 플레이스 URL (naver_place_url):</label>
+                                <input type="url" id="naverPlaceUrl" name="naverPlaceUrl" maxlength="1000">
+                            </div>
 
-                        <div>
-                            <label for="naverPlaceId">네이버 플레이스 ID (naver_place_id):</label>
-                            <input type="text" id="naverPlaceId" name="naverPlaceId" maxlength="50">
-                        </div>
+                            <div>
+                                <label for="latitude">위도 (latitude):</label>
+                                <input type="number" id="latitude" name="latitude" step="any">
+                            </div>
 
-                        <div>
-                            <label for="naverPlaceUrl">네이버 플레이스 URL (naver_place_url):</label>
-                            <input type="url" id="naverPlaceUrl" name="naverPlaceUrl" maxlength="1000">
-                        </div>
+                            <div>
+                                <label for="longitude">경도 (longitude):</label>
+                                <input type="number" id="longitude" name="longitude" step="any">
+                            </div>
 
-                        <div>
-                            <label for="latitude">위도 (latitude):</label>
-                            <input type="number" id="latitude" name="latitude" step="any">
-                        </div>
-
-                        <div>
-                            <label for="longitude">경도 (longitude):</label>
-                            <input type="number" id="longitude" name="longitude" step="any">
-                        </div>
-
-                        <div>
-                            <label for="groupImgUrl">그룹 이미지 URL (group_img_url):</label>
-                            <input type="url" id="groupImgUrl" name="groupImgUrl" maxlength="1000">
-                        </div>
-                    -->
+                            <div>
+                                <label for="groupImgUrl">그룹 이미지 URL (group_img_url):</label>
+                                <input type="url" id="groupImgUrl" name="groupImgUrl" maxlength="1000">
+                            </div>
+                        -->
+    <!-- 네이버 지도API 끝 -->
 
     <div>
         <button type="submit">그룹 생성</button>
@@ -232,22 +255,43 @@
         }
     });
 
-    // 성별 제한(limite) 라디오박스(선택형)
-    const genLimiteBtn = document.getElementsByName('genderLimit');
-    let selectedValue = null;
+    // 성별 제한 라디오 버튼 유효성 검사
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            const genderRadios = document.getElementsByName('genderLimit');
+            let isGenderSelected = false;
+            for (const radio of genderRadios) {
+                if (radio.checked) {
+                    isGenderSelected = true;
+                    break;
+                }
+            }
 
-    for (const radio of genLimiteBtn) {
-      if (radio.checked) {
-        selectedValue = radio.value;
-        break;
-      }
-    }
+            if (!isGenderSelected) {
+                e.preventDefault();
+                alert('성별 제한을 선택해주세요.');
+                return; // 유효성 검사 실패 시 바로 종료
+            }
 
-    // 미선택 시 제출 보류
-    if (!selectedValue) {
-      e.preventDefault(); // 폼 제출 막기
-      alert('성별 제한을 선택해주세요.');
-    }
+            // 최소/최대 멤버 수 유효성 검사
+            const minMembersSelect = document.getElementById('membersMin');
+            const maxMembersSelect = document.getElementById('membersMax');
+
+            const minMembers = parseInt(minMembersSelect.value);
+            const maxMembers = parseInt(maxMembersSelect.value);
+
+            if (minMembersSelect.value === "" || maxMembersSelect.value === "") { // 빈 문자열 (선택 안 함) 체크
+                e.preventDefault();
+                alert('최소/최대 멤버 수를 선택해주세요.');
+                return;
+            }
+
+            if (minMembers > maxMembers) {
+                e.preventDefault();
+                alert('최소 멤버 수는 최대 멤버 수보다 클 수 없습니다.');
+                return; // 유효성 검사 실패 시 바로 종료
+            }
+        });
 
     // 나이 슬라이더 스크립트
         const ageSlider = document.getElementById('age-slider');
@@ -290,6 +334,25 @@
         ageMinDisplay.textContent = `${ageMinInput.value}세`;
         ageMaxDisplay.textContent = `${ageMaxInput.value}세`;
     });
+
+        // --- 최소/최대 멤버 수 옵션 동적 생성 (JavaScript) ---
+        const minMembersSelect = document.getElementById('membersMin');
+        const maxMembersSelect = document.getElementById('membersMax');
+
+        // 옵션 값으로 사용할 배열 정의
+        const membersCountOptions = [2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 30, 50, 100];
+
+        function populateSelectOptions(selectElement) {
+            membersCountOptions.forEach(count => {
+                const option = document.createElement('option');
+                option.value = count;
+                option.textContent = `${count}명`;
+                selectElement.appendChild(option);
+            });
+        }
+
+        populateSelectOptions(minMembersSelect);
+        populateSelectOptions(maxMembersSelect);
 </script>
 
 </body>

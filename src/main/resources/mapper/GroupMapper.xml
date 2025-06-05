@@ -16,6 +16,7 @@
         <result property="ageMin" column="age_min"/>
         <result property="ageMax" column="age_max"/>
         <result property="groupDate" column="group_date"/>
+        <result property="membersMin" column="members_min"/>
         <result property="membersMax" column="members_max"/>
         <result property="partyMember" column="party_member"/>
         <result property="content" column="content"/>
@@ -31,10 +32,10 @@
         <result property="createdAt" column="created_at"/>
         <result property="deletedAt" column="deleted_at"/>
 
-        <association property="owner" javaType="generationgap.co.kr.domain.user.User">
+        <association property="owner" javaType="generationgap.co.kr.domain.user.UserDTO">
             <result property="userIdx" column="user_idx"/>
             <result property="userId" column="user_id"/>
-            <result property="nickname" column="user_nickname"/>
+            <result property="nickname" column="nickname"/>
         </association>
 
         <association property="categoryMain" javaType="generationgap.co.kr.domain.group.CategoryMain">
@@ -89,7 +90,7 @@
         SELECT
         g.group_idx,
         g.owner_idx,
-        u.nickname as user_nickname,
+        u.nickname,
         cm.category_main_idx AS cm_category_main_idx,
         cm.category_main_name,
         cs.category_sub_idx,
@@ -99,6 +100,7 @@
         g.age_min,
         g.age_max,
         g.group_date,
+        g.members_min,
         g.members_max,
         g.party_member,
         g.content,
