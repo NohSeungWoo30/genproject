@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>지도 클릭 & 주소 검색</title>
+    <style>
+        #map { width: 100%; height: 500px; }
+        #place-results-container {
+            margin-top: 15px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            min-height: 100px;
+        }
+        .place-item {
+            margin-bottom: 8px;
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 5px;
+        }
+        .place-item:last-child {
+            border-bottom: none;
+        }
+        .place-item h4 {
+            margin: 0;
+            color: #333;
+        }
+        .place-item p {
+            margin: 2px 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+        #search-input-container {
+            margin-bottom: 10px;
+        }
+        #search-input-container input {
+            padding: 8px;
+            width: 200px;
+            border: 1px solid #ccc;
+        }
+        #search-input-container button {
+            padding: 8px 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+    <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=s2hofoc0b5"></script>
+
+</head>
+<body>
+<div id="map"></div>
+
+<div id="search-input-container">
+    <input type="text" id="queryInput" placeholder="검색할 장소 유형 (예: 카페, 식당)" value="카페">
+    <button id="searchButton">현재 지도 중심 검색</button>
+</div>
+
+<div id="place-results-container">
+    <h3>클릭한 위치 또는 지도 중심 주변 장소 정보</h3>
+    <!-- 동적배열추가 -->
+</div>
+
+<script>
+    const map = new naver.maps.Map('map', {
+        center: new naver.maps.LatLng(37.5665, 126.9780), // 초기 중심 좌표 (서울시청)
+        zoom: 15
+    });
+
+    const marker = new naver.maps.Marker({
+        position: map.getCenter(),
+        map: map
+    });
+
+    const placeResultsDiv = document.getElementById('place-results');
+    const queryInput = document.getElementById('queryInput');
+    const searchButton = document.getElementById('searchButton');
+
+    let currentMarkers = []; // 현재 지도에 표시된 마커들을 관리할 배열
+    let infoWindow = new naver.maps.InfoWindow(); // 마커 클릭 시 정보창
+
+    // 기존 마커를 모두 제거하는 함수
+    function clearMarkers() {
+        currentMarkers.forEach(m => m.setMap(null));
+        currentMarkers = [];
+    }
+
+    // 백엔드 API 호출 함수
+    async function fetchAndDisplayPlaces(lat, lng, query) {
+    console.log(`[Fetch] 검색 시작: 위도=${lat}, 경도=${lng}, 쿼리=${query}`);
+        placeResultsDiv.innerHTML = '장소 정보 로딩 중...';
+        if (infoWindow.getMap()) {
+            infoWindow.close();
+        }
+
+        try {
+            // [중요!] 서버의 컨트롤러 엔드포인트 URL 호출
+            // 이 URL은 백엔드 Spring Controller의 @GetMapping("/places/by-coords")에 매핑됩니다.
+            const response = await fetch(`/api/naver/places/by-coords?lat=${lat}&lng=${lng}&query=${encodeURIComponent(query)}&radius=5000&display=5`);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || '네트워크 응답이 실패했습니다.');
+            }
+            const data = await response.json(); // 서버에서 JSON 형태로 응답 받음
+            console.log('[Fetch Success] API로부터 받은 데이터:', data);
+            clearMarkers(); // 기존 마커 제거
+            displayPlaceResults(data); // 목록에 결과 표시
+            createAndDisplayMarkers(data); // 지도에 새로운 마커 생성 및 표시
+
+        } catch (error) {
+            console.error('API 호출 중 오류 발생:', error);
+            placeResultsDiv.innerHTML = `<p style="color: red;">정보를 가져오는 데 실패했습니다: ${error.message}</p>`;
+        }
+    }
+
+    // 지도 클릭 이벤트 리스너
+    naver.maps.Event.addListener(map, 'click', function(e) {
+        const lat = e.coord.y;
+        const lng = e.coord.x;
+
+        marker.setPosition(new naver.maps.LatLng(lat, lng));
+        map.setCenter(new naver.maps.LatLng(lat, lng));
+
+        const currentQuery = queryInput.value;
+        fetchAndDisplayPlaces(lat, lng, currentQuery);
+    });
+
+    // '현재 지도 중심 검색' 버튼 클릭 이벤트 리스너
+    searchButton.addEventListener('click', function() {
+        const currentMapCenter = map.getCenter();
+        const lat = currentMapCenter.y;
+        const lng = currentMapCenter.x;
+
+        marker.setPosition(new naver.maps.LatLng(lat, lng));
+
+        const currentQuery = queryInput.value;
+        fetchAndDisplayPlaces(lat, lng, currentQuery);
+    });
+
+    // 검색 결과를 화면(장소 목록)에 표시하는 함수
+    function displayPlaceResults(data) {
+    console.log('[Display] displayPlaceResults 함수 호출됨.');
+
+    // 결과 영역 초기화
+    const container = document.getElementById('place-results-container');
+
+    // 기존 결과 div 제거
+    const oldResults = document.getElementById('dynamic-place-results');
+    if (oldResults) {
+        container.removeChild(oldResults);
+    }
+
+    // 새로운 결과 div 생성
+    const newResultsDiv = document.createElement('div');
+    newResultsDiv.id = 'dynamic-place-results';
+
+    if (data.total === 0 || !data.items || data.items.length === 0) {
+        newResultsDiv.innerHTML = '<p>해당 위치 주변에 검색된 장소가 없습니다.</p>';
+        container.appendChild(newResultsDiv);
+        return;
+    }
+
+    console.log(`[Display] ${data.items.length}개의 장소 항목 표시.`);
+    data.items.forEach(place => {
+        const placeItem = document.createElement('div');
+        placeItem.className = 'place-item';
+
+        const title = place.title.replace(/<[^>]*>/g, '');
+        const category = place.category.replace(/<[^>]*>/g, '');
+
+        placeItem.innerHTML = `
+            <h4>${title}</h4>
+            <p><strong>분류:</strong> ${category}</p>
+            <p><strong>주소:</strong> ${place.roadAddress || place.address}</p>
+            ${place.telephone ? `<p><strong>전화:</strong> ${place.telephone}</p>` : ''}
+            ${place.link ? `<p><a href="${place.link}" target="_blank">자세히 보기</a></p>` : ''}
+        `;
+
+        newResultsDiv.appendChild(placeItem);
+    });
+
+    container.appendChild(newResultsDiv);
+}
+
+    // 검색 결과로 마커를 생성하고 지도에 표시하는 함수
+    function createAndDisplayMarkers(data) {
+        const bounds = new naver.maps.LatLngBounds();
+
+        data.items.forEach(place => {
+            const position = new naver.maps.LatLng(parseFloat(place.mapy), parseFloat(place.mapx));
+
+            const newMarker = new naver.maps.Marker({
+                position: position,
+                map: map,
+                title: place.title.replace(/<[^>]*>/g, '')
+            });
+
+            currentMarkers.push(newMarker);
+            bounds.extend(position);
+
+            naver.maps.Event.addListener(newMarker, 'click', function() {
+                if (infoWindow.getMap()) {
+                    infoWindow.close();
+                }
+                infoWindow.setContent(`
+                    <div style="padding:10px; min-width:200px; line-height:150%;">
+                        <h4>${newMarker.getTitle()}</h4>
+                        <p>${place.roadAddress || place.address}</p>
+                        ${place.telephone ? `<p>전화: ${place.telephone}</p>` : ''}
+                        ${place.link ? `<p><a href="${place.link}" target="_blank">자세히 보기</a></p>` : ''}
+                    </div>
+                `);
+                infoWindow.open(map, newMarker);
+            });
+        });
+
+        // 모든 마커가 보이도록 지도 범위 조정 (검색 결과가 있을 때만)
+        if (data.items.length > 0) {
+            map.fitBounds(bounds, { padding: 50 });
+        }
+    }
+
+    // 페이지 로드 시 초기 검색 수행
+    window.onload = function() {
+        const initialQuery = queryInput.value;
+        const initialCenter = map.getCenter();
+        fetchAndDisplayPlaces(initialCenter.y, initialCenter.x, initialQuery);
+    };
+</script>
+</body>
+</html>

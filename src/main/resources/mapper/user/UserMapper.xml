@@ -27,9 +27,9 @@
         <result property="ghost" column="ghost"/>
     </resultMap>
 
-    <select id="getAllUsers" resultMap="userMap">
+    <!--<select id="getAllUsers" resultMap="userMap">
         SELECT * FROM users
-    </select>
+    </select>-->
 
     <insert id="insertUser" parameterType="generationgap.co.kr.domain.user.UserDTO">
         INSERT INTO users (

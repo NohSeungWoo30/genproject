@@ -28,5 +28,4 @@ public class GroupService {
         return groupsMapper.getAllSubCategory(mainCategoryIdx);
     }
 
-
 }
