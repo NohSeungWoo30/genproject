@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 public class ChatMessage {
     private Long messagesIdx;
     private Long groupChatIdx;
-    private Integer senderIdx;
+    private Long senderIdx;
     private String nickname;
     private String content;
     private LocalDateTime sentAt;

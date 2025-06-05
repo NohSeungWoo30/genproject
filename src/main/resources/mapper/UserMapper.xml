@@ -3,8 +3,6 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-
-<!-- 예시 유저 맵퍼 -->
 <mapper namespace="generationgap.co.kr.mapper.user.UserMapper">
 
     <resultMap id="userResultMap" type="generationgap.co.kr.domain.user.UserDTO">
@@ -13,52 +11,75 @@
         <result property="provider" column="provider"/>
         <result property="userName" column="user_name"/>
         <result property="nickname" column="nickname"/>
-        <result property="birthDate" column="birth_date"/>
-        <result property="gender" column="gender"/>
+        <result property="birthDate" column="birth_date" jdbcType="DATE"/>
+        <result property="gender" column="gender" jdbcType="CHAR"/>
         <result property="userCi" column="user_ci"/>
-        <result property="passwordHash" column="password_hash"/> <result property="email" column="email"/>
+        <result property="passwordHash" column="password_hash"/>
+        <result property="email" column="email"/>
         <result property="phone" column="phone"/>
         <result property="profileName" column="profile_name"/>
         <result property="introduction" column="introduction"/>
-        <result property="signupDate" column="signup_date"/>
+        <result property="signupDate" column="signup_date" jdbcType="DATE"/>
         <result property="userStatus" column="user_status"/>
-        <result property="lastLoginAt" column="last_login_at"/>
-        <result property="updateAt" column="update_at"/>
-        <result property="ghost" column="ghost"/>
+        <result property="lastLoginAt" column="last_login_at" jdbcType="DATE"/>
+        <result property="updateAt" column="update_at" jdbcType="DATE"/>
+        <result property="ghost" column="ghost" jdbcType="DATE"/>
     </resultMap>
 
     <insert id="insertUser" parameterType="generationgap.co.kr.domain.user.UserDTO">
         INSERT INTO users (
-        user_id, provider, user_name, nickname, birth_date, gender,
-        user_ci, password_hash, email, phone, profile_name, introduction
+        user_id, provider, user_name, nickname, birth_date, gender, user_ci, password_hash,
+        email, phone, profile_name, introduction, signup_date, user_status, last_login_at, update_at, ghost
         ) VALUES (
-        #{userId}, #{provider}, #{userName}, #{nickname}, #{birthDate, jdbcType=DATE}, #{gender},
-        #{userCi}, #{passwordHash}, #{email}, #{phone}, #{profileName, jdbcType=VARCHAR}, #{introduction}
+        #{userId}, #{provider}, #{userName}, #{nickname}, #{birthDate, jdbcType=DATE}, #{gender, jdbcType=CHAR}, #{userCi}, #{passwordHash},
+        #{email}, #{phone}, #{profileName}, #{introduction}, #{signupDate, jdbcType=DATE}, #{userStatus}, #{lastLoginAt, jdbcType=DATE}, #{updateAt, jdbcType=DATE}, #{ghost, jdbcType=DATE}
         )
     </insert>
 
     <select id="findByUserId" parameterType="string" resultMap="userResultMap">
-        SELECT
-        user_idx, user_id, provider, user_name, nickname, birth_date, gender,
-        user_ci, password_hash, email, phone, profile_name, introduction,
-        signup_date, user_status, last_login_at, update_at, ghost
+        SELECT *
         FROM users
         WHERE user_id = #{userId}
     </select>
 
     <select id="findByUserIdx" parameterType="long" resultMap="userResultMap">
-        SELECT
-        user_idx, user_id, provider, user_name, nickname, birth_date, gender,
-        user_ci, password_hash, email, phone, profile_name, introduction,
-        signup_date, user_status, last_login_at, update_at, ghost
+        SELECT *
         FROM users
         WHERE user_idx = #{userIdx}
     </select>
 
-    <update id="updateUserPassword" parameterType="generationgap.co.kr.domain.user.UserDTO">
+    <update id="updateUserPassword">
         UPDATE users
-        SET password_hash = #{passwordHash},
-        update_at = SYSDATE <!--비밀번호 변경 시 업데이트 시간 기록 (Oracle)-->
-        WHERE user_idx = #{userIdx}
+        SET
+        password_hash = #{passwordHash},
+        update_at = CURRENT_DATE WHERE user_idx = #{userIdx}
     </update>
+
+    <update id="updateUserInfo" parameterType="generationgap.co.kr.domain.user.UserDTO">
+        UPDATE users
+        SET
+        user_name = #{userName},
+        nickname = #{nickname},
+        birth_date = #{birthDate, jdbcType=DATE},
+        gender = #{gender, jdbcType=CHAR},
+        email = #{email},
+        phone = #{phone},
+        profile_name = #{profileName},
+        introduction = #{introduction},
+        update_at = CURRENT_DATE WHERE user_idx = #{userIdx}
+    </update>
+
+    <select id="findByEmail" parameterType="string" resultMap="userResultMap">
+        SELECT *
+        FROM users
+        WHERE email = #{email}
+    </select>
+
+    <select id="findByUserNameAndPhone" parameterType="generationgap.co.kr.domain.user.UserDTO">
+        SELECT
+        user_id
+        FROM users
+        WHERE user_name = #{userName} AND phone = #{phone}
+        FETCH FIRST 1 ROW ONLY
+    </select>
 </mapper>

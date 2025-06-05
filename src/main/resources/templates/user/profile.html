@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>회원 정보</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body { padding: 20px; }
+    .info-section { margin-bottom: 40px; border: 1px solid #eee; padding: 20px; border-radius: 5px; background-color: #f9f9f9;}
+    .info-section h3 { margin-bottom: 20px; color: #0056b3; }
+    .info-item { margin-bottom: 15px; }
+    .info-item label { font-weight: bold; display: block; margin-bottom: 5px; color: #555; }
+    .info-item p { margin: 0; padding: 8px 12px; background-color: #fff; border: 1px solid #ddd; border-radius: 4px; }
+    .btn-edit { background-color: #28a745; color: white; }
+    .btn-edit:hover { background-color: #218838; color: white; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1 class="my-4">내 회원 정보</h1>
+
+  <div class="info-section">
+    <h3>회원 상세 정보</h3>
+    <div class="info-item">
+      <label>아이디</label>
+      <p th:text="${user.userId}">user123</p>
+    </div>
+    <div class="info-item">
+      <label>이름</label>
+      <p th:text="${user.userName}">홍길동</p>
+    </div>
+    <div class="info-item">
+      <label>닉네임</label>
+      <p th:text="${user.nickname}">홍길동</p>
+    </div>
+    <div class="info-item">
+      <label>생년월일</label>
+      <p th:text="${user.birthDate} ? ${#temporals.format(user.birthDate, 'yyyy-MM-dd')} : '미입력'">1990-01-01</p>
+    </div>
+    <div class="info-item">
+      <label>성별</label>
+      <p>
+        <span th:if="${user.gender != null and user.gender.toString().equals('M')}">남성</span>
+        <span th:if="${user.gender != null and user.gender.toString().equals('F')}">여성</span>
+        <span th:if="${user.gender != null and user.gender.toString().equals('O')}">기타</span>
+        <span th:if="${user.gender == null or (user.gender != null and !(user.gender.toString().equals('M') or user.gender.toString().equals('F') or user.gender.toString().equals('O')))}">미입력</span>
+      </p>
+    </div>
+    <div class="info-item">
+      <label>이메일</label>
+      <p th:text="${user.email}">user@example.com</p>
+    </div>
+    <div class="info-item">
+      <label>전화번호</label>
+      <p th:text="${user.phone} ? ${user.phone} : '미입력'">010-1234-5678</p>
+    </div>
+    <div class="info-item">
+      <label>프로필 사진 이름</label>
+      <p th:text="${user.profileName} ? ${user.profileName} : '없음'">profile.jpg</p>
+    </div>
+    <div class="info-item">
+      <label>소개</label>
+      <p th:text="${user.introduction} ? ${user.introduction} : '자기소개가 없습니다.'">안녕하세요!</p>
+    </div>
+
+    <a th:href="@{/user/profile-edit}" class="btn btn-edit mt-3">정보 수정</a>
+  </div>
+
+  <a th:href="@{/main}" class="btn btn-secondary mt-3">메인으로 돌아가기</a>
+</div>
+</body>
+</html>

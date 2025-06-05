@@ -62,7 +62,7 @@ public class ChatHandler extends TextWebSocketHandler {
             JSONObject json = new JSONObject();
             json.put("from", msg.getNickname());
             json.put("msg", msg.getContent());
-            String msgUserId = userMapper.getUserIdByUserIdx(msg.getSenderIdx());
+            String msgUserId = userMapper.getUserIdByUserIdx(Long.valueOf(msg.getSenderIdx()));
             json.put("userId", msgUserId);
             json.put("messageId", msg.getMessagesIdx());
             json.put("sentAt", msg.getSentAt().toString());
@@ -97,7 +97,7 @@ public class ChatHandler extends TextWebSocketHandler {
         if (json.has("type") && json.getString("type").equals("EDIT")) {
             int messageId = json.getInt("messageId");
             String newContent = json.getString("newContent");
-            int userIdx = userMapper.getUserIdxByUserId(userId);
+            long userIdx = userMapper.getUserIdxByUserId(userId);
 
             try {
                 chatService.editMessageWithHistory(messageId, newContent, userIdx, userId);
@@ -130,7 +130,7 @@ public class ChatHandler extends TextWebSocketHandler {
         //DELETE 분기
         if (json.has("type") && json.getString("type").equals("DELETE")) {
             int messageId = json.getInt("messageId");
-            int userIdx = userMapper.getUserIdxByUserId(userId);
+            long userIdx = userMapper.getUserIdxByUserId(userId);
 
             try {
                 chatService.deleteMessage(messageId, userIdx, userId);
@@ -162,7 +162,7 @@ public class ChatHandler extends TextWebSocketHandler {
         // 2. 닉네임 조회
         String nickname = userMapper.getNicknameByUserId(userId);
         // 3. DB저장
-        int userIdx = userMapper.getUserIdxByUserId(userId);
+        long userIdx = userMapper.getUserIdxByUserId(userId);
 
         ChatMessage chatMessage = new ChatMessage();
         chatMessage.setGroupChatIdx(Long.parseLong(groupId));
@@ -215,7 +215,7 @@ public class ChatHandler extends TextWebSocketHandler {
     private void sendSystemMessage(String groupId, String content){
         ChatMessage systemMsg = new ChatMessage();
         systemMsg.setGroupChatIdx(Long.parseLong(groupId));
-        systemMsg.setSenderIdx(1); // 시스템 user_idx
+        systemMsg.setSenderIdx(1L); // 시스템 user_idx
         systemMsg.setNickname("시스템");
         systemMsg.setContent(content);
         systemMsg.setSentAt(LocalDateTime.now());
