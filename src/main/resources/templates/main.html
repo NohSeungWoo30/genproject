@@ -9,7 +9,7 @@
 
 <div sec:authorize="isAuthenticated()">
   <p>
-    현재 로그인된 사용자: <span sec:authentication="name"></span> 님
+    현재 로그인된 사용자: <span sec:authentication="principal.nickname"></span> 님
   </p>
   <form th:action="@{/logout}" method="post"> <button type="submit">로그아웃</button>
   </form>

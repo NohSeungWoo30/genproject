@@ -9,18 +9,18 @@ import java.time.LocalDateTime;
 @Mapper
 public interface PasswordResetMapper {
 
-    // 토큰 정보 저장
-    void insertPasswordReset(PasswordReset passwordReset);
+    // 새 토큰 정보를 저장 (PasswordReset 객체에는 expiresAt 포함)
+    void insertToken(PasswordReset passwordReset);
 
-    // 토큰으로 정보 조회
+    // 토큰 문자열로 재설정 정보 조회
     PasswordReset findByToken(@Param("token") String token);
 
     // 토큰 사용 처리 (used_at 업데이트)
-    void updateUsedAt(@Param("token") String token, @Param("usedAt") LocalDateTime usedAt);
+    void updateTokenUsedAt(@Param("token") String token, @Param("usedAt") LocalDateTime usedAt);
 
-    // user_idx로 사용되지 않은 유효한 토큰이 있는지 확인 (중복 요청 방지)
-    PasswordReset findValidTokenByUserIdx(@Param("userIdx") Long userIdx, @Param("now") LocalDateTime now);
+    // 특정 userIdx의 모든 토큰을 무효화 (used_at 업데이트)
+    void invalidateAllTokensForUserIdx(@Param("userIdx") Long userIdx, @Param("now") LocalDateTime now); // userIdx로 변경
 
-    // 특정 user_idx의 모든 토큰을 무효화 (예: 비밀번호 변경 시 기존 토큰 무효화)
-    void invalidateAllTokensForUser(@Param("userIdx") Long userIdx, @Param("now") LocalDateTime now);
+    // 선택 사항: 특정 유저에게 유효하고 사용되지 않은 토큰이 있는지 확인
+    PasswordReset findValidUnusedTokenByUserIdx(@Param("userIdx") Long userIdx, @Param("now") LocalDateTime now); // userIdx로 변경
 }
