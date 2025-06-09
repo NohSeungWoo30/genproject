@@ -29,23 +29,23 @@
     <insert id="insertUser" parameterType="generationgap.co.kr.domain.user.UserDTO">
         INSERT INTO users (
         user_id, provider, user_name, nickname, birth_date, gender, user_ci, password_hash,
-        email, phone, profile_name, introduction, signup_date, user_status, last_login_at, update_at, ghost
+        email, phone, profile_name, introduction, last_login_at, update_at, ghost
         ) VALUES (
         #{userId}, #{provider}, #{userName}, #{nickname}, #{birthDate, jdbcType=DATE}, #{gender, jdbcType=CHAR}, #{userCi}, #{passwordHash},
-        #{email}, #{phone}, #{profileName}, #{introduction}, #{signupDate, jdbcType=DATE}, #{userStatus}, #{lastLoginAt, jdbcType=DATE}, #{updateAt, jdbcType=DATE}, #{ghost, jdbcType=DATE}
+        #{email}, #{phone}, #{profileName}, #{introduction}, #{lastLoginAt, jdbcType=DATE}, #{updateAt, jdbcType=DATE}, #{ghost, jdbcType=DATE}
         )
     </insert>
 
     <select id="findByUserId" parameterType="string" resultMap="userResultMap">
         SELECT *
         FROM users
-        WHERE user_id = #{userId}
+        WHERE user_id = #{userId} AND user_status = 'ACTIVE'
     </select>
 
     <select id="findByUserIdx" parameterType="long" resultMap="userResultMap">
         SELECT *
         FROM users
-        WHERE user_idx = #{userIdx}
+        WHERE user_idx = #{userIdx} AND user_status = 'ACTIVE'
     </select>
 
     <update id="updateUserPassword">
@@ -72,14 +72,28 @@
     <select id="findByEmail" parameterType="string" resultMap="userResultMap">
         SELECT *
         FROM users
-        WHERE email = #{email}
+        WHERE email = #{email} AND user_status = 'ACTIVE'
     </select>
 
     <select id="findByUserNameAndPhone" parameterType="generationgap.co.kr.domain.user.UserDTO">
         SELECT
         user_id
         FROM users
-        WHERE user_name = #{userName} AND phone = #{phone}
+        WHERE user_name = #{userName} AND phone = #{phone} AND user_status = 'ACTIVE'
         FETCH FIRST 1 ROW ONLY
     </select>
+
+    <update id="updateUserStatusAndUniqueFields" parameterType="generationgap.co.kr.domain.user.UserDTO">
+        UPDATE users
+        SET
+        user_id = #{userId},
+        nickname = #{nickname},
+        user_ci = #{userCi},
+        email = #{email},
+        phone = #{phone},
+        user_status = #{userStatus},
+        update_at = CURRENT_DATE,
+        ghost = #{ghost, jdbcType=DATE}
+        WHERE user_idx = #{userIdx}
+    </update>
 </mapper>

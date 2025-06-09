@@ -18,13 +18,13 @@ public interface UserMapper {
     // 기존 updateUserPassword는 이제 이 메서드에서 비밀번호 변경만 담당하도록 명확화
     void updateUserPassword(@Param("userIdx") Long userIdx, @Param("passwordHash") String passwordHash);
 
-    @Select("SELECT nickname FROM users WHERE user_id = #{userId}")
+    @Select("SELECT nickname FROM users WHERE user_id = #{userId} AND user_status = 'ACTIVE'")
     String getNicknameByUserId(String userId);
 
-    @Select("SELECT user_idx FROM users WHERE user_id = #{userId}")
+    @Select("SELECT user_idx FROM users WHERE user_id = #{userId} AND user_status = 'ACTIVE'")
     long getUserIdxByUserId(String userId);
 
-    @Select("SELECT user_id FROM users WHERE user_idx = #{userIdx}")
+    @Select("SELECT user_id FROM users WHERE user_idx = #{userIdx} AND user_status = 'ACTIVE'")
     String getUserIdByUserIdx(@Param("userIdx") Long userIdx); // int -> Long으로 변경 권장
 
     // user_idx로 사용자 조회 메서드 추가 (필수)
@@ -39,4 +39,17 @@ public interface UserMapper {
 
     // 이름과 전화번호로 사용자 아이디를 찾는 메서드 추가
     Optional<String> findByUserNameAndPhone(UserDTO userDto);
+
+    // 소프트 삭제 로직에서 사용될, user_status에 관계없이 사용자 정보를 조회하는 메서드 추가
+    // 이 메서드는 UNIQUE 컬럼 값을 변경하기 전에 현재 값을 가져오는 데 사용됩니다.
+    // @Select 어노테이션으로 간단히 구현
+    @Select("SELECT user_idx, user_id, provider, user_name, nickname, birth_date, gender, user_ci, " +
+            "password_hash, email, phone, profile_name, introduction, signup_date, user_status, " +
+            "last_login_at, update_at, ghost " +
+            "FROM users " +
+            "WHERE user_id = #{userId}")
+    UserDTO findByUserIdIncludeDeleted(@Param("userId") String userId);
+
+    // 소프트 삭제 시 user_status와 UNIQUE 필드들을 업데이트하는 새로운 메서드 추가
+    void updateUserStatusAndUniqueFields(UserDTO user);
 }

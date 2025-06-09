@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes; // RedirectAttributes 임포트
 import org.slf4j.Logger; // Logger 임포트
 import org.slf4j.LoggerFactory; // LoggerFactory 임포트
-
+import org.springframework.security.core.Authentication;
 import java.util.Optional;
 
 @Controller
@@ -142,7 +142,7 @@ public class UserController {
     }
 
     // 비밀번호 변경 처리
-    @PostMapping("/profile/update-password")
+    @PostMapping("/profile-update-password")
     public String updatePassword(@AuthenticationPrincipal CustomUserDetails userDetails,
                                  @RequestParam("currentPassword") String currentPassword, // 폼 필드 이름 일치
                                  @RequestParam("newPassword") String newPassword,         // 폼 필드 이름 일치
@@ -179,7 +179,7 @@ public class UserController {
         return "redirect:/user/profile-edit"; // 변경 후 다시 프로필 수정 폼으로
     }
 
-    // 회원 정보 보기 페이지 표시 (새로 추가한 메서드)
+    // 회원 정보 보기 페이지 표시
     @GetMapping("/profile") // ✅ 이 부분이 정확히 "/profile" 인지 확인
     public String showProfileView(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         if (userDetails == null) {
@@ -197,5 +197,25 @@ public class UserController {
         model.addAttribute("user", loggedInUser);
         log.info("프로필 보기 페이지 로드: userIdx={}", userDetails.getUserIdx());
         return "user/profile"; // ✅ 이 부분이 "user/profile" 인지 확인 (확장자 .html은 자동으로 붙음)
+    }
+
+    @PostMapping("/delete")
+    public String deleteUser(Authentication authentication,
+                             RedirectAttributes redirectAttributes) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            redirectAttributes.addFlashAttribute("error", "로그인 후 이용해 주세요.");
+            return "redirect:/user/login";
+        }
+
+        String userId = authentication.getName();
+
+        try {
+            userService.softDeleteUser(userId);
+            redirectAttributes.addFlashAttribute("message", "계정이 성공적으로 삭제되었습니다.");
+            return "redirect:/logout"; // Spring Security의 로그아웃 URL 호출
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "계정 삭제 중 오류가 발생했습니다: " + e.getMessage());
+            return "redirect:/user/profile";
+        }
     }
 }

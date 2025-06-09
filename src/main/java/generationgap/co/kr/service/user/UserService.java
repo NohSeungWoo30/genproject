@@ -9,7 +9,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.slf4j.Logger; // Logger 임포트
 import org.slf4j.LoggerFactory; // LoggerFactory 임포트
 import java.util.Optional;
-import java.time.LocalDate; // LocalDate 임포트 (birthDate, signupDate, lastLoginAt, updateAt, ghost)
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.Date; // Date 사용 시
+import java.util.UUID; // UUID를 이용한 고유 접미사 생성 시
 
 @Service
 public class UserService {
@@ -192,5 +195,37 @@ public class UserService {
         // 예: "userid" -> "u*erid"
         // 첫 글자 + '*' + 두 번째 글자부터 끝까지
         return userId.substring(0, 1) + "*" + userId.substring(2);
+    }
+
+    // UserService.java (softDeleteUser 메서드 내에서)
+    @Transactional
+    public void softDeleteUser(String userId) {
+        // 1. 현재 사용자 정보 조회 (user_status에 관계없이 조회)
+        UserDTO userToUpdate = userMapper.findByUserIdIncludeDeleted(userId);
+        if (userToUpdate == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+        }
+
+        // 2. UNIQUE 컬럼 값 변경 (고유한 접미사 추가)
+        // UUID를 사용하면 충돌 가능성이 거의 없는 문자열을 생성할 수 있습니다.
+        String uniqueSuffix = "_DELETED_" + UUID.randomUUID().toString().substring(0, 8); // 예시: "_DELETED_abcdef12"
+
+        // 각 UNIQUE 컬럼에 접미사 추가
+        // DB 컬럼의 VARCHAR2(255) 길이 제한을 항상 고려해야 합니다.
+        // 기존 값이 길면 접미사 추가 시 잘릴 수 있으니 주의.
+        userToUpdate.setUserId(userToUpdate.getUserId() + uniqueSuffix);
+        userToUpdate.setNickname(userToUpdate.getNickname() != null ? userToUpdate.getNickname() + uniqueSuffix : null);
+        userToUpdate.setEmail(userToUpdate.getEmail() + uniqueSuffix);
+        userToUpdate.setPhone(userToUpdate.getPhone() + uniqueSuffix);
+        userToUpdate.setUserCi(userToUpdate.getUserCi() + uniqueSuffix);
+
+        // 3. user_status를 'DELETED'로 변경
+        userToUpdate.setUserStatus("DELETED");
+
+        // 4. ghost 컬럼도 오늘 날짜로 업데이트 (소프트 삭제 시점)
+        userToUpdate.setGhost(LocalDate.now());
+
+        // 5. 변경된 UserDTO 객체를 매퍼를 통해 DB에 업데이트
+        userMapper.updateUserStatusAndUniqueFields(userToUpdate);
     }
 }
