@@ -26,6 +26,15 @@ public class NaverMapApiController {
             @RequestParam(defaultValue = "1000") int radius, // 기본 반경 1000m (1km)
             @RequestParam(defaultValue = "5") int display // 기본 5개 결과
     ) {
+        // [백엔드 로그] 컨트롤러가 받은 파라미터 확인
+        System.out.println("--- [백엔드 컨트롤러 로그] ---");
+        System.out.println("프론트엔드로부터 받은 검색 요청:");
+        System.out.println("  query: " + query);
+        System.out.println("  lat: " + lat);
+        System.out.println("  lng: " + lng);
+        System.out.println("  radius: " + radius);
+        System.out.println("  display: " + display);
+        System.out.println("-------------------------");
         try {
             System.out.println("lat: " + lat + ", lng: " + lng + ", query: " + query);
             String placesJson = naverPlaceService.searchPlacesByCoordinates(lat, lng, query, radius, display);

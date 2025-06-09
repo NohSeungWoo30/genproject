@@ -6,8 +6,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.UnsupportedEncodingException;
@@ -71,14 +69,20 @@ public class NaverPlaceService {
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
             ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.GET, entity, String.class);
+            if (response.getStatusCode().is2xxSuccessful()) {
+                // [백엔드 로그] 네이버 API로부터 받은 원본 응답 JSON 확인
+                System.out.println("--- [백엔드 서비스 로그] ---");
+                System.out.println("네이버 API 원본 응답 JSON:");
+                System.out.println(response.getBody());
+                System.out.println("-------------------------");
             return response.getBody();
-
-        } catch (HttpClientErrorException e) {
-            System.err.println("네이버 Geocoding API 호출 중 클라이언트 에러: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
-            throw new RuntimeException("Geocoding API 호출 오류: " + e.getResponseBodyAsString(), e);
-        } catch (RestClientException e) {
-            System.err.println("네이버 Geocoding API 호출 중 RestClient 에러: " + e.getMessage());
-            throw new RuntimeException("네트워크 또는 Geocoding API 호출 중 알 수 없는 오류 발생", e);
+        } else {
+                System.err.println("네이버 지역 검색 API 호출 실패: " + response.getStatusCode() + " " + response.getBody());
+                throw new RuntimeException("네이버 지역 검색 API 호출 실패: " + response.getStatusCode() + " " + response.getBody());
+            }
+        } catch (Exception e) {
+            System.err.println("네이버 지역 검색 API 호출 중 오류 발생: " + e.getMessage());
+            throw new RuntimeException("네이버 지역 검색 API 처리 중 오류 발생", e);
         }
     }
 

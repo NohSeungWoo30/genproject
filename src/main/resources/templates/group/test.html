@@ -59,6 +59,7 @@
 <div id="place-results-container">
     <h3>클릭한 위치 또는 지도 중심 주변 장소 정보</h3>
     <!-- 동적배열추가 -->
+    <div id="place-results"></div>
 </div>
 
 <script>
@@ -103,7 +104,16 @@
                 throw new Error(errorText || '네트워크 응답이 실패했습니다.');
             }
             const data = await response.json(); // 서버에서 JSON 형태로 응답 받음
-            console.log('[Fetch Success] API로부터 받은 데이터:', data);
+            console.log('API로부터 받은 데이터:', data);
+
+            // 'items' 배열만 따로 확인
+            if (data && data.items) {
+                console.log('[프론트엔드 로그] 수신된 데이터의 "items" 배열:', data.items);
+                console.log('[프론트엔드 로그] "items" 배열의 첫 번째 항목:', data.items[0]); // 첫 항목의 내용 변화 확인
+            } else {
+                console.warn('[프론트엔드 경고] 수신된 데이터에 "items" 배열이 없거나 비어있습니다:', data);
+            }
+
             clearMarkers(); // 기존 마커 제거
             displayPlaceResults(data); // 목록에 결과 표시
             createAndDisplayMarkers(data); // 지도에 새로운 마커 생성 및 표시
@@ -140,6 +150,7 @@
 
     // 검색 결과를 화면(장소 목록)에 표시하는 함수
     function displayPlaceResults(data) {
+    placeResultsDiv.innerHTML = '';
     console.log('[Display] displayPlaceResults 함수 호출됨.');
 
     // 결과 영역 초기화
