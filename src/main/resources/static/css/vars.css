@@ -1,0 +1,43 @@
+:root {
+  /* Colors */
+  --color-white-solid: #ffffff;
+  --color-grey-20: #333333;
+  --color-grey-46: #757575;
+  --color-grey-75: #bcbec0;
+  --color-grey-80: #cccccc;
+  --color-grey-87: #dddddd;
+  --color-grey-89: #e2e2e2;
+  --color-grey-91: #faecd8;
+  --color-grey-93: #eeeeee;
+  --color-grey-96: #f4f4f4;
+  --color-grey-97: #f7f7f7;
+  --color-mine-shaft: #383535;
+  --color-pomegranate: #f43630;
+  --color-pigment-indigo: #bb86fc;
+  --color-dove-gray: #666666;
+  --color-cornflower-blue: #65b1ef;
+  --color-black: #000000;
+
+  /* Fonts */
+  --font-pretendard-regular: "Pretendard-Regular", sans-serif;
+  --font-pretendard-medium: "Pretendard-Medium", sans-serif;
+  --font-roboto-regular: "Roboto-Regular", sans-serif;
+  --font-roboto-medium: "Roboto-Medium", sans-serif;
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   Fallback definitions for legacy browsers (if needed)
+   ──────────────────────────────────────────────────────────────────── */
+body {
+  font-family: var(--font-pretendard-regular);
+}
+
+/* Example usage (already applied in style.css):
+   background: var(--color-white-solid);
+   color: var(--color-black);
+   border-color: var(--color-pigment-indigo);
+   font-family: var(--font-pretendard-regular);
+   font-family: var(--font-pretendard-medium);
+   font-family: var(--font-roboto-regular);
+   font-family: var(--font-roboto-medium);
+*/```

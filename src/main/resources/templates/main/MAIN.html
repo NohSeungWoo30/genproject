@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- vars.css 제거, mainstyle.css만 사용 -->
+  <link rel="stylesheet" href="/css/mainstyle.css" />
+
+  <title>메인 페이지</title>
+</head>
+<body>
+<div class="_1920-w-light">
+  <!-- ─── 1. 상단 내비게이션 바 ─── -->
+  <header class="container-nav">
+    <!-- 좌측 로고 -->
+    <div class="nav-left">
+      <a href="MAIN.html">
+        <img class="logo" src="/img/icons/MT5.png" alt="M 로고" />
+      </a>
+    </div>
+
+    <!-- 우측 로그인·회원가입 -->
+    <div class="nav-right">
+      <a href="login.html" class="login-link">로그인ㆍ회원가입</a>
+    </div>
+  </header>
+
+  <!-- ─── 10. 하단 네비게이션 바 (모임생성 / 모임목록 / 상품목록 / 자유 게시판) ─── -->
+  <section class="bottom-nav-wrapper">
+    <nav class="bottom-nav">
+      <a href="meetingcreate.html" class="bottom-link">모임 생성</a>
+      <a href="Meeting-list.html" class="bottom-link">모임 목록</a>
+      <a href="#" class="bottom-link">상품 목록</a>
+      <a href="board.html" class="bottom-link">자유 게시판</a>
+    </nav>
+  </section>
+
+  <!-- ─── 2. 메인 배너 (세로로 센터 정렬 없이 width:100%) ─── -->
+  <section class="main-banner">
+    <img
+            src="/img/_2025-05-30-182035-10.png"
+            alt="예상 못한 기쁨 배너 이미지"
+            class="banner-image"
+    />
+  </section>
+
+  <!-- ─── 8. 중간 링크 (카테고리별 메뉴) ─── -->
+  <nav class="category-links">
+    <!-- 1. 운동/액티비티 -->
+    <a href="Meeting-list.html" class="cat-link">
+      <img src="/img/icons/ball1.png" alt="운동/액티비티 아이콘" class="cat-icon" />
+      <span class="cat-text">운동/액티비티</span>
+    </a>
+
+    <!-- 2. 문화/예술 -->
+    <a href="Meeting-list.html" class="cat-link">
+      <img src="/img/icons/art1.png" alt="문화/예술 아이콘" class="cat-icon" />
+      <span class="cat-text">문화/예술</span>
+    </a>
+
+    <!-- 3. 지식/스터디 -->
+    <a href="Meeting-list.html" class="cat-link">
+      <img src="/img/icons/book1.png" alt="지식/스터디 아이콘" class="cat-icon" />
+      <span class="cat-text">지식/스터디</span>
+    </a>
+
+    <!-- 4. 음식/카페 -->
+    <a href="Meeting-list.html" class="cat-link">
+      <img src="/img/icons/food1.png" alt="음식/카페 아이콘" class="cat-icon" />
+      <span class="cat-text">음식/카페</span>
+    </a>
+
+    <!-- 5. 여행/탐험 -->
+    <a href="Meeting-list.html" class="cat-link">
+      <img src="/img/icons/travel1.png" alt="여행/탐험 아이콘" class="cat-icon" />
+      <span class="cat-text">여행/탐험</span>
+    </a>
+
+    <!-- 6. 게임/오락 -->
+    <a href="Meeting-list.html" class="cat-link">
+      <img src="/img/icons/game1.png" alt="게임/오락 아이콘" class="cat-icon" />
+      <span class="cat-text">게임/오락</span>
+    </a>
+
+    <!-- 7. 반려동물/자연 -->
+    <a href="Meeting-list.html" class="cat-link">
+      <img src="/img/icons/pet1.png" alt="반려동물/자연 아이콘" class="cat-icon" />
+      <span class="cat-text">반려동물/자연</span>
+    </a>
+
+    <!-- 8. 만들기/공예 -->
+    <a href="Meeting-list.html" class="cat-link">
+      <img src="/img/icons/build1.png" alt="만들기/공예 아이콘" class="cat-icon" />
+      <span class="cat-text">만들기/공예</span>
+    </a>
+
+    <!-- 9. 소셜/친목 -->
+    <a href="Meeting-list.html" class="cat-link">
+      <img src="/img/icons/social3.png" alt="소셜/친목 아이콘" class="cat-icon" />
+      <span class="cat-text">소셜/친목</span>
+    </a>
+
+    <!-- 10. 기타 -->
+    <a href="Meeting-list.html" class="cat-link">
+      <img src="/img/icons/guitar1.png" alt="기타 아이콘" class="cat-icon" />
+      <span class="cat-text">기타</span>
+    </a>
+  </nav>
+
+  <!-- ─── 3. "모임 카드"가 들어갈 가로 스크롤 래퍼 ─── -->
+  <section class="container2">
+    <!-- 첫 번째 줄 -->
+    <div class="flex-row">
+      <!-- 카드 1 -->
+      <div class="card">
+        <div class="card-thumb">
+          <img src="/img/div4.png" alt="망고 빅토리아 케이크 만들기" />
+        </div>
+        <div class="card-info">
+          <div class="card-category">중구 · 푸드·드링크</div>
+          <div class="card-title">
+            🥭생망고 올라간 망고 빅토리아 케이크 만들기!
+          </div>
+          <div class="card-date">2025.05.30(금) 10:00</div>
+        </div>
+      </div>
+
+      <!-- 카드 2 -->
+      <div class="card">
+        <div class="card-thumb">
+          <img src="/img/div7.png" alt="e커머스 광고·SNS 마케팅 클래스" />
+        </div>
+        <div class="card-info">
+          <div class="card-category">강남구 · N잡·재테크</div>
+          <div class="card-title">
+            e커머스 - 광고, SNS 마케팅 패키지 클래스
+          </div>
+          <div class="card-date">2025.06.07(토) 06:00</div>
+        </div>
+      </div>
+
+      <!-- 카드 3 -->
+      <div class="card">
+        <div class="card-thumb">
+          <img src="/img/div8.png" alt="너와나 이어지는 글 파티" />
+        </div>
+        <div class="card-info">
+          <div class="card-category">마포구 · 취미</div>
+          <div class="card-title">
+            🦩너와나&lt;이어지는 글 파티&gt;🎉🖍️모집 중!🔥
+          </div>
+          <div class="card-date">2025.06.07(토) 08:00</div>
+        </div>
+      </div>
+
+      <!-- 카드 4 -->
+      <div class="card">
+        <div class="card-thumb">
+          <img src="/img/div11.png" alt="비주얼파티 토요일 플인서 도파민" />
+        </div>
+        <div class="card-info">
+          <div class="card-category">동작구 · 파티</div>
+          <div class="card-title">
+            🌷비주얼파티🌷토요일은 플인서💜 도파민(ep.46)
+          </div>
+          <div class="card-date">2025.05.31(토) 10:00</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 4. 두 번째 줄 (flex-row-2) ─── -->
+  <section class="container2 second-row">
+    <div class="flex-row">
+      <div class="card">
+        <div class="card-thumb">
+          <img src="/img/div13.png" alt="망고 빅토리아 케이크 만들기 (반복)" />
+        </div>
+        <div class="card-info">
+          <div class="card-category">중구 · 푸드·드링크</div>
+          <div class="card-title">
+            🥭생망고 올라간 망고 빅토리아 케이크 만들기!
+          </div>
+          <div class="card-date">2025.05.30(금) 10:00</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-thumb">
+          <img src="/img/div16.png" alt="e커머스 광고·SNS 마케팅 클래스 (반복)" />
+        </div>
+        <div class="card-info">
+          <div class="card-category">강남구 · N잡·재테크</div>
+          <div class="card-title">
+            e커머스 - 광고, SNS 마케팅 패키지 클래스
+          </div>
+          <div class="card-date">2025.06.07(토) 06:00</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-thumb">
+          <img src="/img/div17.png" alt="너와나 이어지는 글 파티 (반복)" />
+        </div>
+        <div class="card-info">
+          <div class="card-category">마포구 · 취미</div>
+          <div class="card-title">
+            🦩너와나&lt;이어지는 글 파티&gt;🎉🖍️모집 중!🔥
+          </div>
+          <div class="card-date">2025.06.07(토) 08:00</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-thumb">
+          <img src="/img/div20.png" alt="비주얼파티 토요일 플인서 도파민 (반복)" />
+        </div>
+        <div class="card-info">
+          <div class="card-category">동작구 · 파티</div>
+          <div class="card-title">
+            🌷비주얼파티🌷토요일은 플인서💜 도파민(ep.46)
+          </div>
+          <div class="card-date">2025.05.31(토) 10:00</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 5. 세 번째 줄 (flex-row-3) ─── -->
+  <section class="container2 third-row">
+    <div class="flex-row">
+      <div class="card">
+        <div class="card-thumb">
+          <img src="/img/div22.png" alt="[두뇌서바이벌] 오행레이스 대전지부" />
+        </div>
+        <div class="card-info">
+          <div class="card-category">유성구 · 소셜게임</div>
+          <div class="card-title">
+            [두뇌서바이벌] 오행레이스 🎃대전지부
+          </div>
+          <div class="card-date">2025.06.07(토) 11:00</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-thumb">
+          <img src="/img/div25.png" alt="주말 늦은 오후 연남 연희 같이 걸을래요?" />
+        </div>
+        <div class="card-info">
+          <div class="card-category">마포구 · 취미</div>
+          <div class="card-title">
+            주말 늦은 오후 연남 연희 같이 걸을래요?
+          </div>
+          <div class="card-date">2025.05.31(토) 06:30</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-thumb">
+          <img src="/img/div28.png" alt="서울경기근교여행" />
+        </div>
+        <div class="card-info">
+          <div class="card-category">은평구 · 여행·나들이</div>
+          <div class="card-title">서울경기근교여행</div>
+          <div class="card-date">2025.06.02(월) 01:00</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-thumb">
+          <img src="/img/div31.png" alt="런린이 양화한강 러닝" />
+        </div>
+        <div class="card-info">
+          <div class="card-category">영등포구 · 액티비티</div>
+          <div class="card-title">런린이 양화한강 러닝🌹</div>
+          <div class="card-date">2025.05.27(화) 10:30</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 6. 네 번째 줄 (flex-row-4) ─── -->
+  <section class="container2 fourth-row">
+    <div class="flex-row">
+      <div class="card">
+        <div class="card-thumb">
+          <img src="/img/div34.png" alt="후끈 후끈 텍사스 홀덤 116회차" />
+        </div>
+        <div class="card-info">
+          <div class="card-category">중구 · 푸드·드링크</div>
+          <div class="card-title">🔥 후끈 후끈 [텍사스 홀덤] 116회차 🔥</div>
+          <div class="card-date">2025.06.01(일) 09:00</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-thumb">
+          <img src="/img/div36.png" alt="연프에 폭싹 빠졌수다 서브웨이" />
+        </div>
+        <div class="card-info">
+          <div class="card-category">동대문구 · 소셜게임</div>
+          <div class="card-title">
+            마지막❗🌸 연프에 폭싹 빠졌수다🌸 탑승 or 환승❓🚇서브웨이🚇
+          </div>
+          <div class="card-date">2025.05.31(토) 08:30</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-thumb">
+          <img src="/img/div38.png" alt="크림치즈 쿠키 3종 만들기" />
+        </div>
+        <div class="card-info">
+          <div class="card-category">강남구 · 파티</div>
+          <div class="card-title">
+            🧀 크림치즈 쏙 들어간 쿠키 3종 골라 만들기
+          </div>
+          <div class="card-date">2025.06.01(일) 05:00</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-thumb">
+          <img src="/img/div40.png" alt="마피아 진심모드" />
+        </div>
+        <div class="card-info">
+          <div class="card-category">강남구 · 소셜게임</div>
+          <div class="card-title">
+            &lt;현재 여4/남3&gt;🔥[마피아-진심모드]🔥
+          </div>
+          <div class="card-date">2025.05.31(토) 08:30</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 7. 다섯 번째 줄 (flex-row-5) ─── -->
+  <section class="container2 fifth-row">
+    <div class="flex-row">
+      <div class="card">
+        <div class="card-thumb">
+          <img src="/img/div42.png" alt="제주 게하 와인 파티 (일요일 낮)" />
+        </div>
+        <div class="card-info">
+          <div class="card-category">영등포구 · 파티</div>
+          <div class="card-title">
+            ♥일욜낮소규모특집♥/ 제주게하 담은 따뜻한 와인 Party
+          </div>
+          <div class="card-date">2025.06.01(일) 05:00</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-thumb">
+          <img src="/img/div44.png" alt="제주 게하 와인 파티 (토요일 낮)" />
+        </div>
+        <div class="card-info">
+          <div class="card-category">영등포구 · 파티</div>
+          <div class="card-title">
+            ♥토욜낮소규모특집♥/ 제주게하 담은 따뜻한 와인 Party
+          </div>
+          <div class="card-date">2025.05.31(토) 05:00</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-thumb">
+          <img src="/img/div46.png" alt="주말 늦은 오후 연남 연희 같이 걸을래요? (반복)" />
+        </div>
+        <div class="card-info">
+          <div class="card-category">마포구 · 취미</div>
+          <div class="card-title">
+            주말 늦은 오후 연남 연희 같이 걸을래요?
+          </div>
+          <div class="card-date">2025.06.01(일) 09:00</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-thumb">
+          <img src="/img/div49.png" alt="드림 시어터 공연" />
+        </div>
+        <div class="card-info">
+          <div class="card-category">성동구 · 문화·예술</div>
+          <div class="card-title">250523~250608 &lt;드림 시어터&gt;</div>
+          <div class="card-date">2025.06.08(일) 10:00</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 9. 중간 배너 (예: 세로로 길게 내려가는 배너) ─── -->
+  <div class="mid-banner">
+    <img src="/img/_200.png" alt="중간 배너 이미지" class="mid-banner-img" />
+  </div>
+
+  <!-- ─── 11. 하단 Footer ─── -->
+  <footer class="footer">
+    <div class="footer-links">
+      <a href="about.html" class="footer-link">회사소개</a>
+      <span class="footer-divider"></span>
+      <a href="partnership.html" class="footer-link">제휴안내</a>
+      <span class="footer-divider"></span>
+      <a href="advertising.html" class="footer-link">광고안내</a>
+      <span class="footer-divider"></span>
+      <a href="terms.html" class="footer-link">이용약관</a>
+      <span class="footer-divider"></span>
+      <a href="privacy.html" class="footer-link">개인정보처리방침</a>
+      <span class="footer-divider"></span>
+      <a href="youth-policy.html" class="footer-link">청소년보호정책</a>
+    </div>
+    <div class="footer-copyright">
+      © 1999 - 2025 dcinside. All rights reserved.
+    </div>
+  </footer>
+</div>
+</body>
+</html>

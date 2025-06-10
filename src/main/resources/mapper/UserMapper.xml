@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="generationgap.co.kr.mapper.user.UserMapper">
+
+    <resultMap id="userResultMap" type="generationgap.co.kr.domain.user.UserDTO">
+        <id property="userIdx" column="user_idx"/>
+        <result property="userId" column="user_id"/>
+        <result property="provider" column="provider"/>
+        <result property="userName" column="user_name"/>
+        <result property="nickname" column="nickname"/>
+        <result property="birthDate" column="birth_date" jdbcType="DATE"/>
+        <result property="gender" column="gender" jdbcType="CHAR"/>
+        <result property="userCi" column="user_ci"/>
+        <result property="passwordHash" column="password_hash"/>
+        <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
+        <result property="profileName" column="profile_name"/>
+        <result property="introduction" column="introduction"/>
+        <result property="signupDate" column="signup_date" jdbcType="DATE"/>
+        <result property="userStatus" column="user_status"/>
+        <result property="lastLoginAt" column="last_login_at" jdbcType="DATE"/>
+        <result property="updateAt" column="update_at" jdbcType="DATE"/>
+        <result property="ghost" column="ghost" jdbcType="DATE"/>
+    </resultMap>
+
+    <insert id="insertUser" parameterType="generationgap.co.kr.domain.user.UserDTO">
+        INSERT INTO users (
+        user_id, provider, user_name, nickname, birth_date, gender, user_ci, password_hash,
+        email, phone, profile_name, introduction, last_login_at, update_at, ghost
+        ) VALUES (
+        #{userId}, #{provider}, #{userName}, #{nickname}, #{birthDate, jdbcType=DATE}, #{gender, jdbcType=CHAR}, #{userCi}, #{passwordHash},
+        #{email}, #{phone}, #{profileName}, #{introduction}, #{lastLoginAt, jdbcType=DATE}, #{updateAt, jdbcType=DATE}, #{ghost, jdbcType=DATE}
+        )
+    </insert>
+
+    <select id="findByUserId" parameterType="java.lang.String" resultMap="userResultMap">
+        SELECT *
+        FROM users
+        WHERE user_id = #{userId} AND user_status = 'ACTIVE' AND provider = 'LOCAL'
+    </select>
+
+    <select id="findByUserIdx" parameterType="long" resultMap="userResultMap">
+        SELECT *
+        FROM users
+        WHERE user_idx = #{userIdx} AND user_status = 'ACTIVE'
+    </select>
+
+    <update id="updateUserPassword">
+        UPDATE users
+        SET
+        password_hash = #{passwordHash},
+        update_at = CURRENT_DATE WHERE user_idx = #{userIdx}
+    </update>
+
+    <update id="updateUserInfo" parameterType="generationgap.co.kr.domain.user.UserDTO">
+        UPDATE users
+        SET
+        user_name = #{userName},
+        nickname = #{nickname},
+        birth_date = #{birthDate, jdbcType=DATE},
+        gender = #{gender, jdbcType=CHAR},
+        email = #{email},
+        phone = #{phone},
+        profile_name = #{profileName},
+        introduction = #{introduction},
+        update_at = CURRENT_DATE WHERE user_idx = #{userIdx}
+    </update>
+
+    <select id="findByEmail" parameterType="java.lang.String" resultMap="userResultMap">
+        SELECT *
+        FROM users
+        WHERE email = #{email} AND user_status = 'ACTIVE'
+    </select>
+
+    <select id="findByUserNameAndPhone" parameterType="java.lang.String" resultMap="userResultMap">
+        SELECT
+        user_id
+        FROM users
+        WHERE user_name = #{userName} AND phone = #{phone} AND user_status = 'ACTIVE'
+        FETCH FIRST 1 ROW ONLY
+    </select>
+
+    <select id="findByUserIdForAuthentication" parameterType="java.lang.String" resultMap="userResultMap">
+        SELECT
+        user_idx, user_id, provider, user_name, nickname, birth_date, gender, user_ci,
+        password_hash, email, phone, profile_name, introduction, signup_date, user_status,
+        last_login_at, update_at, ghost
+        FROM users
+        WHERE user_id = #{userId}
+    </select>
+
+    <update id="softDeleteUser" parameterType="generationgap.co.kr.domain.user.UserDTO">
+        UPDATE users
+        SET
+        user_id = #{userId},
+        nickname = #{nickname},
+        user_ci = #{userCi},
+        email = #{email},
+        phone = #{phone},
+        user_status = #{userStatus},
+        ghost = CURRENT_DATE,
+        update_at = CURRENT_DATE  WHERE user_idx = #{userIdx}
+    </update>
+
+    <select id="countByUserId" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM users WHERE user_id = #{userId} AND user_status != 'DELETED'
+    </select>
+
+    <select id="countByNickname" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM users WHERE nickname = #{nickname} AND user_status != 'DELETED'
+    </select>
+
+    <select id="countByEmail" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM users WHERE email = #{email} AND user_status != 'DELETED'
+    </select>
+
+    <select id="countByPhone" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM users WHERE phone = #{phone} AND user_status != 'DELETED'
+    </select>
+
+    <select id="findByProviderAndUserId" parameterType="map" resultType="generationgap.co.kr.domain.user.UserDTO">
+        SELECT
+        user_idx, user_id, user_name, nickname, email, phone, user_ci,
+        user_status, password_hash, birth_date, gender, provider, provider_id,
+        introduction, create_at, update_at, ghost, last_login_at FROM users
+        WHERE provider = #{provider}
+        AND user_id = #{userId}
+        AND user_status != 'DELETED'
+    </select>
+</mapper>

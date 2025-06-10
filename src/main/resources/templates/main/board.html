@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>자유 게시판</title>
+
+  <!-- CSS 파일 불러오기 -->
+  <link rel="stylesheet" href="/css/vars.css" />
+  <link rel="stylesheet" href="/css/boardstyle.css" />
+  <link rel="stylesheet" href="/css/mainstyle.css" />
+  <style>
+    /* (기존 스타일 유지) */
+    .sort-buttons {
+      margin-bottom: 16px;
+      display: flex;
+      gap: 8px;
+    }
+    .sort-buttons button {
+      padding: 6px 12px;
+      font-family: var(--font-pretendard-medium);
+      font-size: 14px;
+      border: 1px solid var(--color-grey-80);
+      border-radius: 4px;
+      background: var(--color-white-solid);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .sort-buttons button.active {
+      background: var(--color-pigment-indigo);
+      color: var(--color-white-solid);
+      border-color: var(--color-pigment-indigo);
+    }
+    .sort-buttons button:hover {
+      background: var(--color-grey-96);
+    }
+    .btn-new-post {
+      display: inline-block;
+      padding: 6px 14px;
+      background: var(--color-pigment-indigo);
+      color: var(--color-white-solid);
+      border-radius: 4px;
+      text-decoration: none;
+      font-family: var(--font-pretendard-medium);
+      transition: background 0.2s;
+    }
+    .btn-new-post:hover {
+      background: #9a4ed6;
+    }
+    .thumb {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+    .pagination {
+      margin-top: 16px;
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      font-family: var(--font-pretendard-medium);
+    }
+    .pagination a {
+      padding: 6px 10px;
+      border: 1px solid var(--color-grey-80);
+      border-radius: 4px;
+      text-decoration: none;
+      color: var(--color-mine-shaft);
+      background: var(--color-white-solid);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .pagination a.active {
+      background: var(--color-pigment-indigo);
+      color: var(--color-white-solid);
+      border-color: var(--color-pigment-indigo);
+    }
+    .pagination a:hover {
+      background: var(--color-grey-96);
+    }
+  </style>
+</head>
+<body>
+<!-- 상단 네비게이션 바 -->
+<nav class="container-nav">
+  <div class="nav-left">
+    <a href="MAIN.html">
+      <img class="logo" src="/img/icons/MT5.png" alt="M 로고" />
+    </a>
+  </div>
+  <div class="nav-right">
+    <a href="login.html">로그인·회원가입</a>
+  </div>
+</nav>
+<!-- 하단 서브 네비게이션 바 -->
+<nav class="sub-nav">
+  <a href="meetingcreate.html">모임생성</a>
+  <a href="Meeting-list.html">모임목록</a>
+  <a href="product-list.html">상품목록</a>
+  <a href="board.html">자유 게시판</a>
+</nav>
+
+<section class="board-wrapper">
+  <div class="board-header">
+    <h2>자유 게시판</h2>
+    <a href="write.html" class="btn-new-post">✚ 새 글 작성</a>
+  </div>
+
+  <!-- 정렬 버튼 -->
+  <div class="sort-buttons">
+    <button id="sort-new" class="active">최신순</button>
+    <button id="sort-views">조회순</button>
+    <button id="sort-likes">추천순</button>
+  </div>
+
+  <!-- 게시판 테이블 -->
+  <table class="board-table">
+    <thead>
+    <tr>
+      <th>번호</th>
+      <th>이미지</th>
+      <th>카테고리</th>
+      <th>제목</th>
+      <th>작성자</th>
+      <th>조회수</th>
+      <th>추천수</th>
+      <th>작성일</th>
+    </tr>
+    </thead>
+    <tbody id="boardBody"></tbody>
+  </table>
+  <div class="pagination" id="pagination"></div>
+</section>
+
+<script>
+  // --------------------------------------------------------
+  // 1) 페이징 설정
+  // --------------------------------------------------------
+  const pageSize = 10;
+  let currentPage = 1;
+  let allPosts = [];  // 서버에서 받아온 전체 게시글
+
+  // --------------------------------------------------------
+  // 2) 서버에서 게시글 목록 가져오기
+  //    ?sort=new : 최신순, ?sort=views : 조회순, ?sort=likes : 추천순
+  // --------------------------------------------------------
+  async function fetchPosts(sort = 'new') {
+    try {
+      const response = await fetch(`/api/board-posts?sort=${sort}`);
+      if (!response.ok) throw new Error('게시글을 불러오는 데 실패했습니다.');
+      const data = await response.json();
+      // 예시: data = [{ board_idx, category, title, author_name, view_count, like_count, created_at, thumbnail_url }, ...]
+      allPosts = data.map(item => ({
+        seq: item.board_idx,
+        category: item.category,
+        title: item.title,
+        author: item.author_name,
+        views: item.view_count,
+        likes: item.like_count,
+        date: item.created_at.replace('T', ' '),  // 백엔드가 ISO 문자열로 준다면
+        thumbnail: item.thumbnail_url || null
+      }));
+      renderTable(1);
+    } catch (error) {
+      console.error(error);
+      alert('게시글을 가져오는 중 오류가 발생했습니다.');
+    }
+  }
+
+  // --------------------------------------------------------
+  // 3) 테이블 렌더링 함수
+  // --------------------------------------------------------
+  function renderTable(page) {
+    const tbody = document.getElementById("boardBody");
+    tbody.innerHTML = "";
+
+    const totalPosts = allPosts.length;
+    const totalPages = Math.ceil(totalPosts / pageSize);
+
+    if (page < 1) page = 1;
+    if (page > totalPages) page = totalPages;
+    currentPage = page;
+
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = Math.min(startIndex + pageSize, totalPosts);
+
+    for (let i = startIndex; i < endIndex; i++) {
+      const post = allPosts[i];
+      const tr = document.createElement("tr");
+
+      let imageHtml = `<span style="color: var(--color-grey-80); font-size: 12px;">없음</span>`;
+      if (post.thumbnail) {
+        imageHtml = `<img src="${post.thumbnail}" class="thumb" alt="게시글 이미지">`;
+      }
+
+      tr.innerHTML = `
+        <td>${post.seq}</td>
+        <td>${imageHtml}</td>
+        <td>${post.category}</td>
+        <td><a href="detail.html?seq=${post.seq}" class="post-link">${post.title}</a></td>
+        <td>${post.author}</td>
+        <td>${post.views}</td>
+        <td>${post.likes}</td>
+        <td>${post.date}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+    renderPagination(totalPosts, page);
+  }
+
+  // --------------------------------------------------------
+  // 4) 페이지네이션 렌더링
+  // --------------------------------------------------------
+  function renderPagination(totalPosts, activePage) {
+    const paginationContainer = document.getElementById("pagination");
+    paginationContainer.innerHTML = "";
+
+    const totalPages = Math.ceil(totalPosts / pageSize);
+    for (let p = 1; p <= totalPages; p++) {
+      const a = document.createElement("a");
+      a.href = "#";
+      a.textContent = p;
+      a.dataset.page = p;
+      if (p === activePage) a.classList.add("active");
+      a.addEventListener("click", (e) => {
+        e.preventDefault();
+        goToPage(Number(e.target.dataset.page));
+      });
+      paginationContainer.appendChild(a);
+    }
+  }
+
+  function goToPage(page) {
+    renderTable(page);
+  }
+
+  // --------------------------------------------------------
+  // 5) 정렬 버튼 클릭 시 fetchPosts 재호출
+  // --------------------------------------------------------
+  function setActiveSortButton(activeId) {
+    document.querySelectorAll(".sort-buttons button").forEach(btn => {
+      btn.classList.toggle("active", btn.id === activeId);
+    });
+  }
+  document.getElementById("sort-new").addEventListener("click", () => {
+    setActiveSortButton("sort-new");
+    fetchPosts('new');
+  });
+  document.getElementById("sort-views").addEventListener("click", () => {
+    setActiveSortButton("sort-views");
+    fetchPosts('views');
+  });
+  document.getElementById("sort-likes").addEventListener("click", () => {
+    setActiveSortButton("sort-likes");
+    fetchPosts('likes');
+  });
+
+  // --------------------------------------------------------
+  // 6) 페이지 로드 시 초기 최신순으로 로드
+  // --------------------------------------------------------
+  window.addEventListener("DOMContentLoaded", () => {
+    fetchPosts('new');
+  });
+</script>
+</body>
+</html>

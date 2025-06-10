@@ -1,0 +1,359 @@
+    /* ────────────────────────────────────────────────────────────────────
+       0) vars.css에 정의된 CSS 변수(컬러, 폰트) 사용
+       ──────────────────────────────────────────────────────────────────── */
+    /* (vars.css만으로 충분하므로 별도 정의 없음) */
+
+    /* ────────────────────────────────────────────────────────────────────
+       1) 전체 리셋 + 기본 설정
+       ──────────────────────────────────────────────────────────────────── */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--color-grey-97);
+      font-family: var(--font-pretendard-regular);
+      color: var(--color-mine-shaft);
+      line-height: 1.4;
+    }
+
+    /* ────────────────────────────────────────────────────────────────────
+       2) 상단 네비게이션 바
+       ──────────────────────────────────────────────────────────────────── */
+    .container-nav {
+      background: var(--color-cornflower-blue);
+      padding: 12px 20px;
+      color: white;
+      font-family: var(--font-pretendard-medium);
+      font-size: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .container-nav .logo {
+      font-size: 20px;
+      font-weight: 600;
+      color: white;
+      text-decoration: none;
+    }
+
+    .container-nav .nav-links a {
+      color: white;
+      text-decoration: none;
+      margin-left: 16px;
+      font-size: 14px;
+    }
+
+    .container-nav .nav-links a:hover {
+      text-decoration: underline;
+    }
+
+    /* ────────────────────────────────────────────────────────────────────
+       3) 서브 네비게이션 바
+       ──────────────────────────────────────────────────────────────────── */
+    .sub-nav {
+      background: var(--color-cornflower-blue);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      padding: 8px 24px;
+      font-family: var(--font-pretendard-medium);
+      font-size: 16px;
+    }
+
+    .sub-nav a {
+      color: #ffffff;
+      text-decoration: none;
+    }
+
+    .sub-nav a:hover {
+      text-decoration: underline;
+    }
+
+    /* ────────────────────────────────────────────────────────────────────
+       4) 메인 컨테이너 (게시판 래퍼)
+       ──────────────────────────────────────────────────────────────────── */
+    .board-wrapper {
+      max-width: 900px;
+      margin: 30px auto;
+      background: var(--color-white-solid);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      padding: 24px 20px 40px;
+    }
+
+    .board-wrapper h2 {
+      font-family: var(--font-pretendard-medium);
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: var(--color-mine-shaft);
+    }
+
+    /* ────────────────────────────────────────────────────────────────────
+       5) 게시판 헤더: 제목 + 새 글 작성 버튼
+       ──────────────────────────────────────────────────────────────────── */
+    .board-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .board-header h2 {
+      margin: 0;
+    }
+
+    .btn-new-post {
+      padding: 8px 12px;
+      background: var(--color-pigment-indigo);
+      color: var(--color-white-solid);
+      border: none;
+      border-radius: 4px;
+      font-family: var(--font-pretendard-medium);
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-new-post:hover {
+      background: #9a4ed6;
+    }
+
+    /* ────────────────────────────────────────────────────────────────────
+       6) 정렬 버튼 영역
+       ──────────────────────────────────────────────────────────────────── */
+    .sort-buttons {
+      margin-bottom: 16px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .sort-buttons button {
+      padding: 6px 12px;
+      font-family: var(--font-pretendard-medium);
+      font-size: 14px;
+      border: 1px solid var(--color-grey-80);
+      border-radius: 4px;
+      background: var(--color-white-solid);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .sort-buttons button.active {
+      background: var(--color-pigment-indigo);
+      color: var(--color-white-solid);
+      border-color: var(--color-pigment-indigo);
+    }
+
+    .sort-buttons button:hover {
+      background: var(--color-grey-96);
+    }
+
+    /* ────────────────────────────────────────────────────────────────────
+       7) 게시판 테이블
+       ──────────────────────────────────────────────────────────────────── */
+    .board-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    .board-table th,
+    .board-table td {
+      padding: 12px 8px;
+      border-bottom: 1px solid var(--color-grey-89);
+      text-align: center;
+      font-size: 14px;
+      /* 작성자 칸 줄바꿈 방지 */
+      white-space: nowrap;
+    }
+
+    .board-table th {
+      background: var(--color-grey-96);
+      font-family: var(--font-pretendard-medium);
+      color: var(--color-mine-shaft);
+    }
+
+    .board-table td:nth-child(3) {
+      text-align: left;
+      padding-left: 16px;
+    }
+
+    /* 작성자 열만 별도로 줄바꿈 방지 */
+    .board-table td:nth-child(4),
+    .board-table th:nth-child(4) {
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    /* 호버 시 배경색 */
+    .board-table tbody tr:hover {
+      background: var(--color-grey-97);
+    }
+
+    /* 컬럼별 너비 조정 */
+    .board-table td:first-child,
+    .board-table th:first-child {
+      width: 60px;
+    }
+
+    .board-table td:nth-child(2),
+    .board-table th:nth-child(2) {
+      width: 100px;
+    }
+
+    .board-table td:nth-child(4),
+    .board-table th:nth-child(4) {
+      min-width: 80px;
+    }
+
+    .board-table td:nth-child(5),
+    .board-table th:nth-child(5),
+    .board-table td:nth-child(6),
+    .board-table th:nth-child(6) {
+      width: 80px;
+    }
+
+    .board-table td:nth-child(7),
+    .board-table th:nth-child(7) {
+      width: 160px;
+    }
+
+    /* ────────────────────────────────────────────────────────────────────
+       8) 페이지네이션
+       ──────────────────────────────────────────────────────────────────── */
+    .pagination {
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    .pagination button {
+      display: inline-block;
+      margin: 0 4px;
+      padding: 6px 10px;
+      font-size: 14px;
+      color: var(--color-mine-shaft);
+      text-decoration: none;
+      border: 1px solid var(--color-grey-80);
+      border-radius: 4px;
+      background: var(--color-white-solid);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .pagination button:hover {
+      background: var(--color-grey-96);
+    }
+
+    .pagination .active {
+      background: var(--color-pigment-indigo);
+      color: var(--color-white-solid);
+      border-color: var(--color-pigment-indigo);
+    }
+
+    /* ────────────────────────────────────────────────────────────────────
+       9) 새 글 작성 모달 (overlay + modal box)
+       ──────────────────────────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--color-white-solid);
+      border-radius: 8px;
+      width: 480px;
+      max-width: 90%;
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+      font-family: var(--font-pretendard-regular);
+      position: relative;
+    }
+
+    .modal .close-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: transparent;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .modal h3 {
+      font-size: 20px;
+      margin-bottom: 12px;
+      color: var(--color-mine-shaft);
+      font-family: var(--font-pretendard-medium);
+    }
+
+    .modal .form-group {
+      margin-bottom: 16px;
+    }
+
+    .modal .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: var(--color-mine-shaft);
+      font-family: var(--font-pretendard-medium);
+    }
+
+    .modal .form-group input,
+    .modal .form-group select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--color-grey-80);
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: var(--font-pretendard-regular);
+      color: var(--color-mine-shaft);
+      background: var(--color-white-solid);
+    }
+
+    .modal .btn-group {
+      text-align: right;
+      margin-top: 12px;
+    }
+
+    .modal .btn-group button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: var(--font-pretendard-medium);
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-left: 8px;
+    }
+
+    .modal .btn-submit-post {
+      background: var(--color-pigment-indigo);
+      color: var(--color-white-solid);
+    }
+
+    .modal .btn-submit-post:hover {
+      background: #9a4ed6;
+    }
+
+    .modal .btn-cancel {
+      background: var(--color-grey-89);
+      color: var(--color-white-solid);
+    }
+
+    .modal .btn-cancel:hover {
+      background: var(--color-grey-80);
+    }

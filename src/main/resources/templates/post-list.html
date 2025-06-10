@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>📋 게시판</title>
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    a {
+      text-decoration: none;
+      color: #333;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .write-button {
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>📋 게시판</h2>
+
+<div class="write-button">
+  <button onclick="location.href='/posts/write'">➕ 새 글 작성</button>
+</div>
+
+<table>
+  <thead>
+  <tr>
+    <th>번호</th>
+    <th>제목</th>
+    <th>작성자</th>
+    <th>조회수</th>
+    <th>추천수</th> <!-- ✅ 추가 -->
+    <th>작성일</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="post : ${posts}">
+    <td th:text="${post.postIdx}">1</td>
+    <td>
+      <a th:href="@{/posts/{id}(id=${post.postIdx})}"
+         th:text="${post.title}">제목</a>
+    </td>
+    <td th:text="${post.authorName}">작성자</td>
+    <td th:text="${post.viewCount}">0</td>
+    <td th:text="${post.likeCount}">0</td> <!-- ✅ 추가 -->
+    <td th:text="${#dates.format(post.createdAt, 'yyyy-MM-dd')}">2025-05-30</td>
+  </tr>
+  <tr th:if="${#lists.isEmpty(posts)}">
+    <td colspan="6"><i>게시글이 없습니다.</i></td>
+  </tr>
+  </tbody>
+</table>
+
+</body>
+</html>

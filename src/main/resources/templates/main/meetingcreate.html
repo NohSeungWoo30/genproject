@@ -1,0 +1,137 @@
+<!-- meetingcreate.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>방 생성하기</title>
+  <link rel="stylesheet" href="/css/mypagestyles.css" />
+</head>
+<body>
+<div class="container-grid" id="mainContainer">
+  <section class="form-section" id="formSection">
+    <h1>방 생성하기</h1>
+
+    <div class="form-group">
+      <label for="roomImageInput">방 사진 업로드</label>
+      <input type="file" id="roomImageInput" accept="image/*" />
+    </div>
+
+    <div class="form-group tag-picker">
+      <label>방 카테고리 선택</label>
+      <div class="tag-icon-grid">
+        <div class="tag-icon" data-value="운동/액티비티">운동/액티비티</div>
+        <div class="tag-icon" data-value="문화/예술">문화/예술</div>
+        <div class="tag-icon" data-value="지식/스터디">지식/스터디</div>
+        <div class="tag-icon" data-value="음식/카페">음식/카페</div>
+        <div class="tag-icon" data-value="여행/탐험">여행/탐험</div>
+        <div class="tag-icon" data-value="게임/오락">게임/오락</div>
+        <div class="tag-icon" data-value="반려동물/자연">반려동물/자연</div>
+        <div class="tag-icon" data-value="만들기/공예">만들기/공예</div>
+        <div class="tag-icon" data-value="소셜/친목">소셜/친목</div>
+        <div class="tag-icon" data-value="기타">기타</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="titleInput">방 제목</label>
+      <input type="text" id="titleInput" placeholder="예) 감자탕 맛있다 ~ 모임" />
+    </div>
+
+    <div class="form-group">
+      <label for="descriptionInput">설명</label>
+      <textarea id="descriptionInput" rows="4" placeholder="예) 맛있는 감자탕 먹어용 ..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="locationInput">모임 위치 (주소 입력 후 엔터)</label>
+      <input type="text" id="locationInput" placeholder="주소를 입력하세요" />
+      <div id="map" class="map-area"></div>
+    </div>
+
+    <div class="form-group">
+      <label for="meetingDatetimeInput">모임 날짜·시간</label>
+      <input type="datetime-local" id="meetingDatetimeInput" />
+    </div>
+    <div class="form-group">
+      <label for="remainingTimeDisplay">남은 시간</label>
+      <input type="text" id="remainingTimeDisplay" readonly placeholder="자동 계산됨" />
+    </div>
+
+    <div class="form-group age-slider">
+      <label for="ageRange">
+        나이 <span class="age-label-left">20</span>
+        <input type="range" id="ageRange" min="20" max="50" value="20" step="1" />
+        <span class="age-label-right" id="ageLabelRight">누구나</span>
+      </label>
+      <div class="selected-age-display" id="selectedAgeDisplay">선택 나이: 20</div>
+    </div>
+
+    <div class="form-group">
+      <label for="currentCountInput">현재 인원/최대 인원</label>
+      <input type="text" id="currentCountInput" placeholder="예) 3 / 4" />
+    </div>
+
+    <button id="createRoomButton" class="primary-button">방 생성하기</button>
+  </section>
+
+  <section class="preview-section" id="previewSection">
+    <h2>실시간 미리보기</h2>
+    <div class="card live-card" id="liveCard">
+      <div class="preview-header-background" id="liveHeaderBackground">
+        <div class="room-image-container">
+          <div class="image-preview-placeholder" id="liveRoomPlaceholder"></div>
+          <img id="liveRoomImage" class="room-image hidden" src="" alt="방 이미지" />
+        </div>
+        <div class="profile-block">
+          <div class="profile-placeholder" id="liveProfilePlaceholder"></div>
+          <img class="profile-image hidden" id="liveProfileImage" src="" alt="프로필" />
+          <div class="profile-name" id="liveProfileName">UserNickname</div>
+        </div>
+      </div>
+      <section class="card-body">
+        <div class="tags" id="liveTagsContainer"></div>
+        <div class="tags" id="liveAgeContainer"></div>
+        <h2 class="title" id="liveTitle">방 제목</h2>
+        <div class="content">
+          <div class="description" id="liveDescription">설명 내용이 여기에 표시됩니다.</div>
+          <div class="right-info">
+            <div class="map-preview">
+              <div id="liveSmallMap" class="small-map-area"></div>
+            </div>
+            <div class="info-list">
+              <div class="info-item">
+                <span class="label">모임 시간</span>
+                <span class="value" id="liveMeetingTime"></span>
+              </div>
+              <div class="info-item">
+                <span class="label">남은 시간</span>
+                <span class="value" id="liveRemainingTime"></span>
+              </div>
+              <div class="info-item">
+                <span class="label">현재 인원</span>
+                <span class="value" id="liveCurrentCount"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="join-button">방 참여</button>
+      </section>
+    </div>
+  </section>
+</div>
+
+<section class="room-detail-section hidden" id="roomDetailSection">
+  <h2>방 상세 페이지</h2>
+  <div class="room-detail-card" id="roomDetailCard"></div>
+  <div class="detail-actions">
+    <button id="joinDetailButton" class="detail-btn">방 참여</button>
+    <button id="deleteDetailButton" class="detail-btn delete">방 삭제</button>
+  </div>
+</section>
+
+<script src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=YOUR_CLIENT_ID"></script>
+<script src="/js/meetingcreate.js"></script>
+</body>
+</html>
