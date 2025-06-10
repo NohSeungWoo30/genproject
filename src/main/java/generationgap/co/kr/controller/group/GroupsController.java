@@ -21,7 +21,10 @@ public class GroupsController {
     public GroupsController(GroupService groupService) {
         this.groupService = groupService;
     }
-
+    @GetMapping("/test")
+    public String test(Model model) {
+        return  "group/test";
+    }
     @GetMapping("/group_main")
     public String main(Model model){
         // 그룹 전체 리스트
@@ -73,6 +76,9 @@ public class GroupsController {
         System.out.println("Age Min: " + groupData.getAgeMin());
         System.out.println("Age Max: " + groupData.getAgeMax());
         System.out.println("Group Date: " + groupData.getGroupDate()); //
+        System.out.println("membersMin: " + groupData.getMembersMin());
+        System.out.println("membersMax: " + groupData.getMembersMax());
+        System.out.println("모임방 상세내용: " + groupData.getContent());
 
         try {
             // Service 계층으로 데이터 전달
@@ -101,4 +107,5 @@ public class GroupsController {
         List<CategorySub> subCategories = groupService.getAllSubCategory(mainCategoryIdx);
         return ResponseEntity.ok(subCategories); // HTTP 200 OK와 함께 JSON 데이터 반환
     }
+
 }
