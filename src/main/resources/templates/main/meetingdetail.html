@@ -254,11 +254,12 @@
       const params = new URLSearchParams(window.location.search);
       return params.get("seq");
     }
-    const seq = getSeqFromUrl();
-    if (!seq) {
-      document.getElementById("post-detail").innerHTML = "<p style='font-size:17px'>잘못된 접근입니다.</p><a href='board.html' class='btn-back'>목록으로</a>";
-      throw new Error("No seq provided");
-    }
+    //const seq = getSeqFromUrl();
+    //if (!seq) {
+    //  document.getElementById("post-detail").innerHTML = "<p style='font-size:17px'>잘못된 접근입니다.</p><a href='board.html' class='btn-back'>목록으로</a>";
+    //  throw new Error("No seq provided");
+    //}
+    const seq = 1; // 테스트용
 
     // --------------------------------------------------------
     // 2) 로그인 여부 확인 (추천·댓글 작성 시 필요)
@@ -271,60 +272,44 @@
     //    GET /api/board-posts/:seq
     // --------------------------------------------------------
     async function fetchPostDetail() {
-      try {
-        const response = await fetch(`/api/board-posts/${seq}`, {
-          headers: {
-            'Authorization': 'Bearer ' + authToken
-          }
-        });
-        if (!response.ok) throw new Error('게시글을 불러오는 데 실패했습니다.');
-        const data = await response.json();
-        // 예시: data = { board_idx, category, title, author_name, view_count, like_count, created_at, content, images: [url1, url2...] }
-        return {
-          seq: data.board_idx,
-          category: data.category,
-          title: data.title,
-          author: data.author_name,
-          views: data.view_count,
-          likes: data.like_count,
-          date: data.created_at.replace('T', ' '),
-          content: data.content,
-          images: data.images
-        };
-      } catch (error) {
-        console.error(error);
-        alert('게시글을 불러오는 중 오류가 발생했습니다.');
-        return null;
-      }
-    }
+  return {
+    seq: 1,
+    category: "일반",
+    title: "테스트 게시글입니다",
+    author: "관리자",
+    views: 123,
+    likes: 5,
+    date: "2025-06-10 10:00",
+    content: "이것은 테스트용 본문입니다.",
+    images: [
+      "/img/sample1.jpg",
+      "/img/sample2.jpg"
+    ]
+  };
+}
 
     // --------------------------------------------------------
     // 4) 댓글 목록 가져오기
     //    GET /api/board-posts/:seq/comments
     // --------------------------------------------------------
     async function fetchComments() {
-      try {
-        const response = await fetch(`/api/board-posts/${seq}/comments`, {
-          headers: {
-            'Authorization': 'Bearer ' + authToken
-          }
-        });
-        if (!response.ok) throw new Error('댓글을 불러오는 데 실패했습니다.');
-        const data = await response.json();
-        // 예시: data = [{ id, parentId, author_name, content, created_at }, ...]
-        return data.map(item => ({
-          id: item.comment_id,
-          parentId: item.parent_comment_id,  // 최상위 댓글은 null
-          author: item.author_name,
-          text: item.content,
-          date: item.created_at.replace('T', ' ')
-        }));
-      } catch (error) {
-        console.error(error);
-        alert('댓글을 불러오는 중 오류가 발생했습니다.');
-        return [];
-      }
+  return [
+    {
+      id: 1,
+      parentId: null,
+      author: "홍길동",
+      text: "첫 번째 댓글입니다.",
+      date: "2025-06-10 10:30"
+    },
+    {
+      id: 2,
+      parentId: 1,
+      author: "이순신",
+      text: "답글입니다.",
+      date: "2025-06-10 10:45"
     }
+  ];
+}
 
     // --------------------------------------------------------
     // 5) 현재 시간 문자열 생성 ("YYYY-MM-DD HH:mm")

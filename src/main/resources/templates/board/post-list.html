@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📋 자유 게시판</title>
+
+  <!-- CSS 파일 불러오기 -->
+  <link rel="stylesheet" th:href="@{/css/boardstyle.css}" />
+  <link rel="stylesheet" th:href="@{/css/vars.css}" />
+  <link rel="stylesheet" th:href="@{/css/mainstyle.css}" />
+
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    a {
+      text-decoration: none;
+      color: #333;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .write-button {
+      margin-bottom: 15px;
+    }
+    .sort-buttons a {
+  padding: 6px 12px;
+  font-family: var(--font-pretendard-medium);
+  font-size: 14px;
+  border: 1px solid var(--color-grey-80);
+  border-radius: 4px;
+  background: var(--color-white-solid);
+  cursor: pointer;
+  transition: background 0.2s;
+  display: inline-block;
+}
+
+.sort-buttons a:hover {
+  background: var(--color-grey-96);
+}
+
+.sort-buttons a.active {
+  background: var(--color-pigment-indigo);
+  color: var(--color-white-solid);
+  border-color: var(--color-pigment-indigo);
+}
+
+.board-table th:nth-child(3), /* 제목 */
+.board-table td:nth-child(3) {
+  width: 35%;
+}
+
+.board-table th:nth-child(4), /* 작성자 */
+.board-table td:nth-child(4) {
+  width: 15%;
+
+    select {
+      font-family: inherit;
+      font-size: inherit;
+      background-color: transparent;
+      border: none;
+      outline: none;
+      cursor: pointer;
+    }
+}
+  </style>
+</head>
+<body>
+
+<!-- 상단 네비게이션 바 -->
+<nav class="container-nav">
+  <div class="nav-left">
+    <a th:href="@{/main}">
+      <img class="logo" src="/img/icons/MT5.png" alt="M 로고" />
+    </a>
+  </div>
+  <div class="nav-right">
+    <a th:href="@{/login}">로그인·회원가입</a>
+  </div>
+</nav>
+
+<!-- 하단 서브 네비게이션 바 -->
+<nav class="sub-nav">
+  <a th:href="@{/meetingcreate}">모임생성</a>
+  <a th:href="@{/meetings}">모임목록</a>
+  <a th:href="@{/products}">상품목록</a>
+  <a th:href="@{/posts}">자유 게시판</a>
+</nav>
+
+<section class="board-wrapper">
+  <div class="board-header">
+    <h2>자유 게시판</h2>
+    <a th:href="@{/posts/write}" class="btn-new-post">✚ 새 글 작성</a>
+  </div>
+
+  <!-- 정렬 버튼 -->
+  <div class="sort-buttons">
+    <a th:href="@{/posts(sort='new', category=${category})}" th:classappend="${sort == 'new'} ? 'active'">최신순</a>
+    <a th:href="@{/posts(sort='views', category=${category})}" th:classappend="${sort == 'views'} ? 'active'">조회순</a>
+    <a th:href="@{/posts(sort='likes', category=${category})}" th:classappend="${sort == 'likes'} ? 'active'">추천순</a>
+  </div>
+  <!-- 게시글 테이블 -->
+  <table class="board-table">
+    <thead>
+    <tr>
+      <th>번호</th>
+      <th>
+        <form method="get" th:action="@{/posts}">
+          <select name="category" onchange="this.form.submit()" style="border: none; background: transparent; font-weight: bold;">
+            <option th:value="''" th:selected="${category == null}">카테고리</option>
+            <option th:value="'공지'" th:selected="${category == '공지'}">공지</option>
+            <option th:value="'자유'" th:selected="${category == '자유'}">자유</option>
+            <option th:value="'질문'" th:selected="${category == '질문'}">질문</option>
+            <option th:value="'정보'" th:selected="${category == '정보'}">정보</option>
+          </select>
+
+          <!-- 현재 정렬 상태 유지 -->
+          <input type="hidden" name="sort" th:value="${sort}" />
+        </form>
+      </th>
+      <th>제목</th>
+      <th>작성자</th>
+      <th>조회수</th>
+      <th>추천수</th>
+      <th>작성일</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="post : ${posts}">
+      <td th:text="${post.postIdx}">1</td>
+      <td th:text="${post.category}">카테고리</td>
+      <td>
+        <!--<a th:href="@{'/posts/' + ${post.postIdx} + '?page=' + ${currentPage}}"
+           th:text="${post.title}">제목</a>-->
+        <a th:href="@{'/posts/' + ${post.postIdx} +
+              '?page=' + ${currentPage} +
+              '&category=' + ${category} +
+              '&sort=' + ${sort} +
+              '&keyword=' + ${keyword}}">
+          <span th:text="${post.title}">제목</span>
+        </a>
+        <span th:if="${post.commentCount > 0}" th:text="'(' + ${post.commentCount} + ')'">(0)</span>
+      </td>
+      <td th:text="${post.authorName}">작성자</td>
+      <td th:text="${post.viewCount}">0</td>
+      <td th:text="${post.likeCount}">0</td>
+      <td th:text="${#dates.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">2025-06-09</td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(posts)}">
+      <td colspan="7"><i>게시글이 없습니다.</i></td>
+    </tr>
+    </tbody>
+  </table>
+
+  <!-- 페이징 -->
+  <div class="pagination" style="margin-top: 20px; text-align: center;">
+    <span th:if="${currentPage > 1}">
+      <a th:href="@{/posts(page=${currentPage - 1}, category=${category}, sort=${sort}, keyword=${keyword})}">
+      ◀ 이전 </a>
+    </span>
+
+    <span th:each="i : ${#numbers.sequence(1, totalPages)}">
+    <a th:href="@{/posts(page=${i}, category=${category}, sort=${sort}, keyword=${keyword})}"
+       th:text="${i}"
+       th:classappend="${i == currentPage} ? 'active' : ''"
+       style="margin: 0 5px;">1</a>
+    </span>
+
+    <span th:if="${currentPage < totalPages}">
+      <a th:href="@{/posts(page=${currentPage + 1}, category=${category}, sort=${sort}, keyword=${keyword})}">
+      다음 ▶ </a>
+    </span>
+  </div>
+</section>
+
+<script>
+</script>
+
+</body>
+</html>

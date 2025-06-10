@@ -1,171 +1,171 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>회원가입</title>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-  <style>
-    /* 메시지 스타일 */
-    .error-message {
-        color: red;
-        font-size: 0.9em;
-        margin-top: 5px;
-    }
-    .success-message {
-        color: green;
-        font-size: 0.9em;
-        margin-top: 5px;
-    }
-    /* 입력 필드와 메시지 간격 조정 */
-    div {
-        margin-bottom: 10px;
-    }
-    input {
-        margin-right: 5px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>회원가입</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <style>
+        /* 메시지 스타일 */
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .success-message {
+            color: green;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        /* 입력 필드와 메시지 간격 조정 */
+        div {
+            margin-bottom: 10px;
+        }
+        input {
+            margin-right: 5px;
+        }
+    </style>
 </head>
 <body>
 <h2>회원가입 🙌</h2>
 <form th:action="@{/user/signup}" method="post" th:object="${user}">
-  <div>
-    <label for="userId">아이디:</label>
-    <input type="text" id="userId" th:field="*{userId}" required />
-    <p id="userIdMessage" class="validation-message"></p>
-  </div>
-  <div>
-    <label for="userName">이름:</label>
-    <input type="text" id="userName" th:field="*{userName}" />
-  </div>
-  <div>
-    <label for="nickname">닉네임:</label>
-    <input type="text" id="nickname" th:field="*{nickname}" required />
-    <p id="nicknameMessage" class="validation-message"></p>
-  </div>
-  <div>
-    <label for="birthDate">생년월일:</label>
-    <input type="date" id="birthDate" th:field="*{birthDate}" />
-  </div>
-  <div>
-    <label for="gender">성별:</label>
-    <select id="gender" th:field="*{gender}">
-      <option value="M">남자</option>
-      <option value="F">여자</option>
-    </select>
-  </div>
-  <div>
-    <label for="email">이메일:</label>
-    <input type="email" id="email" th:field="*{email}" required />
-    <p id="emailMessage" class="validation-message"></p>
-  </div>
-  <div>
-    <label for="phone">전화번호:</label>
-    <input type="text" id="phone" th:field="*{phone}" required placeholder="예: 01012345678" />
-    <p id="phoneMessage" class="validation-message"></p>
-  </div>
-  <div>
-    <label for="userCi">CI:</label>
-    <input type="text" id="userCi" th:field="*{userCi}" />
-    <p id="userCiMessage" class="validation-message"></p>
-  </div>
-  <div>
-    <label for="password">비밀번호:</label>
-    <input type="password" id="password" th:field="*{password}" required />
-  </div>
-  <div>
-    <label for="introduction">자기소개:</label>
-    <input type="text" id="introduction" th:field="*{introduction}" />
-  </div>
-  <button type="submit" id="submitButton">가입하기</button>
+    <div>
+        <label for="userId">아이디:</label>
+        <input type="text" id="userId" th:field="*{userId}" required />
+        <p id="userIdMessage" class="validation-message"></p>
+    </div>
+    <div>
+        <label for="userName">이름:</label>
+        <input type="text" id="userName" th:field="*{userName}" />
+    </div>
+    <div>
+        <label for="nickname">닉네임:</label>
+        <input type="text" id="nickname" th:field="*{nickname}" required />
+        <p id="nicknameMessage" class="validation-message"></p>
+    </div>
+    <div>
+        <label for="birthDate">생년월일:</label>
+        <input type="date" id="birthDate" th:field="*{birthDate}" />
+    </div>
+    <div>
+        <label for="gender">성별:</label>
+        <select id="gender" th:field="*{gender}">
+            <option value="M">남자</option>
+            <option value="F">여자</option>
+        </select>
+    </div>
+    <div>
+        <label for="email">이메일:</label>
+        <input type="email" id="email" th:field="*{email}" required />
+        <p id="emailMessage" class="validation-message"></p>
+    </div>
+    <div>
+        <label for="phone">전화번호:</label>
+        <input type="text" id="phone" th:field="*{phone}" required placeholder="예: 01012345678" />
+        <p id="phoneMessage" class="validation-message"></p>
+    </div>
+    <div>
+        <label for="userCi">CI:</label>
+        <input type="text" id="userCi" th:field="*{userCi}" />
+        <p id="userCiMessage" class="validation-message"></p>
+    </div>
+    <div>
+        <label for="password">비밀번호:</label>
+        <input type="password" id="password" th:field="*{password}" required />
+    </div>
+    <div>
+        <label for="introduction">자기소개:</label>
+        <input type="text" id="introduction" th:field="*{introduction}" />
+    </div>
+    <button type="submit" id="submitButton">가입하기</button>
 </form>
 
 <script>
-  $(document).ready(function() {
-      // 모든 유효성 검사 통과 여부를 추적하는 객체
-      const validationStatus = {
-          userId: false,
-          nickname: false,
-          email: false,
-          phone: false,
-          userCi: true // CI는 필수가 아니거나, 중복 확인을 나중에 추가할 경우 기본 true
-      };
+    $(document).ready(function() {
+        // 모든 유효성 검사 통과 여부를 추적하는 객체
+        const validationStatus = {
+            userId: false,
+            nickname: false,
+            email: false,
+            phone: false,
+            userCi: true // CI는 필수가 아니거나, 중복 확인을 나중에 추가할 경우 기본 true
+        };
 
-      // 회원가입 버튼 상태 업데이트 함수
-      function updateSubmitButtonStatus() {
-          const allValid = Object.values(validationStatus).every(status => status === true);
-          $('#submitButton').prop('disabled', !allValid); // 모든 필드가 유효해야 활성화
-      }
+        // 회원가입 버튼 상태 업데이트 함수
+        function updateSubmitButtonStatus() {
+            const allValid = Object.values(validationStatus).every(status => status === true);
+            $('#submitButton').prop('disabled', !allValid); // 모든 필드가 유효해야 활성화
+        }
 
-      // 초기 버튼 상태 설정 (처음에는 비활성화)
-      updateSubmitButtonStatus();
+        // 초기 버튼 상태 설정 (처음에는 비활성화)
+        updateSubmitButtonStatus();
 
-      // 공통 중복 확인 함수
-      function checkDuplication(inputId, messageId, apiEndpoint, paramName, validationKey) {
-          const $input = $('#' + inputId);
-          const $message = $('#' + messageId);
+        // 공통 중복 확인 함수
+        function checkDuplication(inputId, messageId, apiEndpoint, paramName, validationKey) {
+            const $input = $('#' + inputId);
+            const $message = $('#' + messageId);
 
-          $input.on('blur', function() { // 입력창에서 포커스를 잃었을 때 (blur)
-              const value = $input.val().trim();
-              if (value === '') {
-                  $message.text('').removeClass('error-message success-message');
-                  validationStatus[validationKey] = false; // 빈 값은 유효하지 않음
-                  updateSubmitButtonStatus();
-                  return;
-              }
+            $input.on('blur', function() { // 입력창에서 포커스를 잃었을 때 (blur)
+                const value = $input.val().trim();
+                if (value === '') {
+                    $message.text('').removeClass('error-message success-message');
+                    validationStatus[validationKey] = false; // 빈 값은 유효하지 않음
+                    updateSubmitButtonStatus();
+                    return;
+                }
 
-              $.ajax({
-                  url: '/user/' + apiEndpoint, // UserController의 @RequestMapping("/user")와 결합
-                  type: 'GET',
-                  data: { [paramName]: value },
-                  success: function(response) {
-                      if (response.duplicated) {
-                          $message.text('이미 사용 중입니다.').removeClass('success-message').addClass('error-message');
-                          validationStatus[validationKey] = false; // 중복이면 유효하지 않음
-                      } else {
-                          $message.text('사용 가능합니다.').removeClass('error-message').addClass('success-message');
-                          validationStatus[validationKey] = true; // 사용 가능하면 유효
-                      }
-                      updateSubmitButtonStatus(); // 버튼 상태 업데이트
-                  },
-                  error: function(xhr, status, error) {
-                      console.error("AJAX Error: ", status, error);
-                      $message.text('중복 확인 중 오류가 발생했습니다.').addClass('error-message');
-                      validationStatus[validationKey] = false; // 오류 발생 시 유효하지 않음
-                      updateSubmitButtonStatus();
-                  }
-              });
-          });
+                $.ajax({
+                    url: '/user/' + apiEndpoint, // UserController의 @RequestMapping("/user")와 결합
+                    type: 'GET',
+                    data: { [paramName]: value },
+                    success: function(response) {
+                        if (response.duplicated) {
+                            $message.text('이미 사용 중입니다.').removeClass('success-message').addClass('error-message');
+                            validationStatus[validationKey] = false; // 중복이면 유효하지 않음
+                        } else {
+                            $message.text('사용 가능합니다.').removeClass('error-message').addClass('success-message');
+                            validationStatus[validationKey] = true; // 사용 가능하면 유효
+                        }
+                        updateSubmitButtonStatus(); // 버튼 상태 업데이트
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("AJAX Error: ", status, error);
+                        $message.text('중복 확인 중 오류가 발생했습니다.').addClass('error-message');
+                        validationStatus[validationKey] = false; // 오류 발생 시 유효하지 않음
+                        updateSubmitButtonStatus();
+                    }
+                });
+            });
 
-          // (선택 사항) 입력 중에도 실시간으로 체크하려면 'keyup' 이벤트 추가
-          // $input.on('keyup', function() {
-          //     // blur와 동일한 로직을 적용하거나, 조금 더 가벼운 유효성 검사 (예: 길이 제한)만 수행
-          // });
-      }
+            // (선택 사항) 입력 중에도 실시간으로 체크하려면 'keyup' 이벤트 추가
+            // $input.on('keyup', function() {
+            //     // blur와 동일한 로직을 적용하거나, 조금 더 가벼운 유효성 검사 (예: 길이 제한)만 수행
+            // });
+        }
 
-      // 각 필드에 대한 중복 확인 설정
-      checkDuplication('userId', 'userIdMessage', 'check/userId', 'userId', 'userId');
-      checkDuplication('nickname', 'nicknameMessage', 'check/nickname', 'nickname', 'nickname');
-      checkDuplication('email', 'emailMessage', 'check/email', 'email', 'email');
-      checkDuplication('phone', 'phoneMessage', 'check/phone', 'phone', 'phone');
-      // userCi도 UNIQUE 제약 조건이 있다면 추가
-      checkDuplication('userCi', 'userCiMessage', 'check/userCi', 'userCi', 'userCi');
+        // 각 필드에 대한 중복 확인 설정
+        checkDuplication('userId', 'userIdMessage', 'check/userId', 'userId', 'userId');
+        checkDuplication('nickname', 'nicknameMessage', 'check/nickname', 'nickname', 'nickname');
+        checkDuplication('email', 'emailMessage', 'check/email', 'email', 'email');
+        checkDuplication('phone', 'phoneMessage', 'check/phone', 'phone', 'phone');
+        // userCi도 UNIQUE 제약 조건이 있다면 추가
+        checkDuplication('userCi', 'userCiMessage', 'check/userCi', 'userCi', 'userCi');
 
 
-      // 폼 제출 이벤트 가로채기 (선택 사항)
-      // 모든 필수 필드가 유효성 검사를 통과했는지 최종적으로 다시 확인
-      $('#signupForm').on('submit', function(event) {
-          // 모든 필드의 현재 유효성 상태를 다시 확인
-          const allFieldsValid = Object.values(validationStatus).every(status => status === true);
+        // 폼 제출 이벤트 가로채기 (선택 사항)
+        // 모든 필수 필드가 유효성 검사를 통과했는지 최종적으로 다시 확인
+        $('#signupForm').on('submit', function(event) {
+            // 모든 필드의 현재 유효성 상태를 다시 확인
+            const allFieldsValid = Object.values(validationStatus).every(status => status === true);
 
-          // 비밀번호 등 다른 필수 필드의 유효성 검사도 필요하다면 여기에 추가
-          // 예: 비밀번호 길이, 특수문자 포함 여부 등
+            // 비밀번호 등 다른 필수 필드의 유효성 검사도 필요하다면 여기에 추가
+            // 예: 비밀번호 길이, 특수문자 포함 여부 등
 
-          if (!allFieldsValid || !$('#password').val()) { // 비밀번호 필드가 비어있으면 막기
-              alert("필수 입력 필드를 모두 올바르게 작성해주세요.");
-              event.preventDefault(); // 폼 제출 중단
-          }
-      });
-  });
+            if (!allFieldsValid || !$('#password').val()) { // 비밀번호 필드가 비어있으면 막기
+                alert("필수 입력 필드를 모두 올바르게 작성해주세요.");
+                event.preventDefault(); // 폼 제출 중단
+            }
+        });
+    });
 </script>
 </body>
 </html>
