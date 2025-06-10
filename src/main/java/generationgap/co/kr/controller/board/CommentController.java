@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @Controller
@@ -99,19 +100,25 @@ public class CommentController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "본인의 댓글만 수정할 수 있습니다.");
         }
 
-        System.out.println("수정 대상 댓글 ID: " + commentIdx);
-        System.out.println("기존 내용: " + original.getContent());
-        System.out.println("새 내용: " + payload.get("content"));
-        System.out.println("작성자 ID: " + userIdx);
 
         String newContent = payload.get("content");
 
         commentMapper.updateCommentContent(commentIdx, newContent);
-
         // 기존 내용 수정 이력 테이블에 기록
         commentMapper.insertCommentEdit(commentIdx, original.getContent(), userIdx);
 
-        return Map.of("updatedContent", newContent);
+        Comment updated = commentMapper.getCommentById(commentIdx);
+
+
+        String formattedTime = "";
+        if (updated.getUpdateAt() != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            formattedTime = updated.getUpdateAt().format(formatter);
+        }
+
+        return Map.of("updatedContent", newContent,
+                "formattedDisplayTime", formattedTime,
+                "isEdited", true);
     }
 
 }

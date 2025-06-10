@@ -12,7 +12,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -22,14 +24,12 @@ public class PostServiceImpl implements PostService{
     private final PostMapper postMapper;
 
 
-    @Override
-    public List<Post> getPostListPaged(int offset, int limit) {
-        return postMapper.getPostsPaged(offset, limit);
-    }
+
 
     @Override
-    public int getTotalPostCount(){
-        return postMapper.getPostCount();
+    public int getTotalPostCountFiltered(String category){
+
+        return postMapper.getPostCountFiltered(category);
     }
 
     @Override
@@ -190,6 +190,27 @@ public class PostServiceImpl implements PostService{
             }
         }
         }
+    }
+
+    @Override
+    public Map<Integer, Integer> getVisibleCommentCounts(List<Integer> postIds) {
+        Map<Integer, Integer> result = new HashMap<>();
+        for (Integer postId : postIds) {
+            int count = postMapper.getVisibleCommentCountByPost(postId);
+            result.put(postId, count);
+        }
+        return result;
+    }
+
+    @Override
+    public List<Post> getPostListPaged(int offset, int limit, String sort) {
+        return postMapper.getPostsPagedFiltered(offset, limit, null, sort);
+
+    }
+
+    @Override
+    public List<Post> getPostListPagedFiltered(int offset, int limit, String category, String sort) {
+        return postMapper.getPostsPagedFiltered(offset, limit, category, sort);
     }
 
 

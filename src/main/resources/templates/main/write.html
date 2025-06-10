@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>글 작성하기</title>
+  <link rel="stylesheet" href="/css/vars.css" />
+  <link rel="stylesheet" href="/css/boardstyle.css" />
+  <link rel="stylesheet" href="/css/mainstyle.css" />
+  <style>
+    .write-container {
+      max-width: 600px;
+      margin: 60px auto;
+      background: var(--color-white-solid);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      padding: 24px 20px 40px;
+    }
+    .write-container h2 {
+      font-family: var(--font-pretendard-medium);
+      font-size: 22px;
+      margin-bottom: 20px;
+      color: var(--color-mine-shaft);
+      text-align: center;
+    }
+    .write-container .form-group {
+      margin-bottom: 16px;
+    }
+    .write-container label {
+      display: block;
+      font-family: var(--font-pretendard-medium);
+      font-size: 14px;
+      margin-bottom: 6px;
+      color: var(--color-mine-shaft);
+    }
+    .write-container input[type="text"],
+    .write-container select,
+    .write-container textarea {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 14px;
+      border: 1px solid var(--color-grey-80);
+      border-radius: 4px;
+      background: var(--color-white-solid);
+      font-family: var(--font-pretendard-regular);
+      color: var(--color-mine-shaft);
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .write-container input:focus,
+    .write-container textarea:focus,
+    .write-container select:focus {
+      outline: none;
+      border-color: var(--color-pigment-indigo);
+      background: var(--color-white-solid);
+    }
+    .write-container textarea {
+      resize: vertical;
+      min-height: 150px;
+    }
+    .write-container .btn-submit,
+    .write-container .btn-cancel {
+      padding: 10px 16px;
+      font-size: 14px;
+      font-family: var(--font-pretendard-medium);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .write-container .btn-submit {
+      background: var(--color-pigment-indigo);
+      color: var(--color-white-solid);
+      margin-right: 8px;
+    }
+    .write-container .btn-submit:hover {
+      background: #9a4ed6;
+    }
+    .write-container .btn-cancel {
+      background: var(--color-grey-89);
+      color: var(--color-white-solid);
+    }
+    .write-container .btn-cancel:hover {
+      background: var(--color-grey-80);
+    }
+    .image-preview-list {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .image-preview-list img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid #eee;
+      background: #fafafa;
+    }
+  </style>
+</head>
+<body>
+
+<!-- 상단 네비게이션 바 -->
+<nav class="container-nav">
+  <div class="nav-left">
+    <a href="MAIN.html">
+      <img class="logo" src="/img/icons/MT5.png" alt="M 로고" />
+    </a>
+  </div>
+  <div class="nav-right">
+    <a href="login.html">로그인·회원가입</a>
+  </div>
+</nav>
+<!-- 하단 서브 네비게이션 바 -->
+<nav class="sub-nav">
+  <a href="meeting-create.html">모임생성</a>
+  <a href="Meeting-list.html">모임목록</a>
+  <a href="product-list.html">상품목록</a>
+  <a href="board.html">자유 게시판</a>
+</nav>
+
+<section class="write-container">
+  <h2>글 작성하기</h2>
+  <form id="writePostForm" enctype="multipart/form-data">
+    <!-- 카테고리 선택 -->
+    <div class="form-group">
+      <label for="category">카테고리<span class="div-4-span2">*</span></label>
+      <select id="category" name="category" required>
+        <option value="">– 선택 –</option>
+        <option value="자유">자유</option>
+        <option value="질문">질문</option>
+        <option value="정보">정보</option>
+        <option value="공지">공지</option>
+      </select>
+    </div>
+    <!-- 제목 입력 -->
+    <div class="form-group">
+      <label for="title">제목<span class="div-4-span2">*</span></label>
+      <input type="text" id="title" name="title" placeholder="제목을 입력하세요" required />
+    </div>
+    <!-- 본문 입력 -->
+    <div class="form-group">
+      <label for="content">본문<span class="div-4-span2">*</span></label>
+      <textarea id="content" name="content" placeholder="내용을 입력하세요" required></textarea>
+    </div>
+    <!-- 이미지 업로드(여러장) -->
+    <div class="form-group">
+      <label for="images">이미지 첨부 (여러장 선택 가능)</label>
+      <input type="file" id="images" name="images" accept="image/*" multiple />
+      <div class="image-preview-list" id="imagePreviewList"></div>
+    </div>
+    <!-- 작성자 입력 (실제 연동 시 불필요, 백엔드가 user_idx를 세션에서 받음) -->
+    <div class="form-group" style="display: none;">
+      <label for="author">작성자<span class="div-4-span2">*</span></label>
+      <input type="text" id="author" name="author" placeholder="작성자 이름" />
+    </div>
+    <!-- 버튼 그룹 -->
+    <div class="btn-group" style="text-align: right; margin-top: 24px;">
+      <button type="button" class="btn-cancel" id="cancelBtn">취소</button>
+      <button type="submit" class="btn-submit">등록</button>
+    </div>
+  </form>
+</section>
+
+<script>
+  // -------------------------------------------------------
+  // 1) 이미지 미리보기 로직
+  // -------------------------------------------------------
+  const imagesInput = document.getElementById('images');
+  const imagePreviewList = document.getElementById('imagePreviewList');
+  let imageFiles = [];
+
+  imagesInput.addEventListener('change', function (e) {
+    imagePreviewList.innerHTML = '';
+    imageFiles = Array.from(e.target.files);
+    imageFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = function (evt) {
+        const img = document.createElement('img');
+        img.src = evt.target.result;
+        imagePreviewList.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  // -------------------------------------------------------
+  // 2) 글 작성 폼 제출 핸들러
+  // -------------------------------------------------------
+  document.getElementById('writePostForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    // 사용자 로그인 여부 확인
+    const userIdx = sessionStorage.getItem('user_idx');
+    const authToken = sessionStorage.getItem('auth_token');
+    if (!userIdx || !authToken) {
+      alert('로그인 후 이용해주세요.');
+      window.location.href = 'login.html';
+      return;
+    }
+
+    const category = document.getElementById('category').value.trim();
+    const title = document.getElementById('title').value.trim();
+    const content = document.getElementById('content').value.trim();
+
+    if (!category || !title || !content) {
+      alert('필수 항목을 모두 입력해주세요.');
+      return;
+    }
+
+    // -------------------------------------------------------
+    // 3) FormData 로 묶어서 서버로 전송
+    // -------------------------------------------------------
+    const formData = new FormData();
+    formData.append('user_idx', userIdx);
+    formData.append('category', category);
+    formData.append('title', title);
+    formData.append('content', content);
+    imageFiles.forEach((file, idx) => {
+      formData.append('images', file);
+    });
+
+    try {
+      const response = await fetch('/api/board-posts-with-images', {
+        method: 'POST',
+        headers: {
+          // 'Content-Type' 자동으로 multipart/form-data 로 설정됨
+          'Authorization': 'Bearer ' + authToken
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        alert('글 작성 실패: ' + (err.message || '잠시 후 다시 시도해주세요.'));
+        return;
+      }
+
+      alert('글이 성공적으로 등록되었습니다.');
+      window.location.href = 'board.html';
+    } catch (error) {
+      console.error(error);
+      alert('서버 요청 중 오류가 발생했습니다.');
+    }
+  });
+
+  document.getElementById('cancelBtn').addEventListener('click', function () {
+    window.location.href = 'board.html';
+  });
+</script>
+</body>
+</html>

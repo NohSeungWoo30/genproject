@@ -80,6 +80,7 @@ public class ChatHandler extends TextWebSocketHandler {
         JSONObject identityMsg = new JSONObject();
         identityMsg.put("type", "IDENTIFY");
         identityMsg.put("userId", userId); // 현재 접속자 ID
+        identityMsg.put("userIdx", userIdx);
         session.sendMessage(new TextMessage(identityMsg.toString()));
 
         // 2. 과거 메세지 조회
@@ -90,6 +91,7 @@ public class ChatHandler extends TextWebSocketHandler {
             json.put("msg", msg.getContent());
             String msgUserId = userMapper.getUserIdByUserIdx(msg.getSenderIdx());
             json.put("userId", msgUserId);
+            json.put("userIdx", msg.getSenderIdx()); // ✅ 숫자형 고유 ID 추가
             json.put("messageId", msg.getMessagesIdx());
             json.put("sentAt", msg.getSentAt().toString());
             session.sendMessage(new TextMessage(json.toString()));
@@ -145,8 +147,10 @@ public class ChatHandler extends TextWebSocketHandler {
                 response.put("from",  nickname); // userMapper.getNicknameByUserId(userId)); // 닉네임
                 response.put("msg", newContent); // 수정된 내용
                 response.put("userId", userId); // 클라이언트 비교용
+                response.put("userIdx", userIdx);     // IDX 추가
 
-                
+
+
                 for (WebSocketSession s : groupSessions.getOrDefault(groupId, Set.of())) {
                     if (s.isOpen()) {
                         s.sendMessage(new TextMessage(response.toString()));
@@ -174,6 +178,8 @@ public class ChatHandler extends TextWebSocketHandler {
                 response.put("msg", "삭제된 메시지입니다.");
                 response.put("from", nickname); //userMapper.getNicknameByUserId(userId));
                 response.put("userId", userId);
+                response.put("userIdx", userIdx);     // IDX 추가
+
 
                 for (WebSocketSession s : groupSessions.getOrDefault(groupId, Set.of())) {
                     if (s.isOpen()) {
@@ -212,6 +218,7 @@ public class ChatHandler extends TextWebSocketHandler {
         response.put("from", nickname);
         response.put("msg", msg);
         response.put("userId", userId); // 본인 메세지만 수정 가능하게 하기 위해 추가됨
+        response.put("userIdx", userIdx);     // IDX 추가
         response.put("messageId", id);
         response.put("sentAt", chatMessage.getSentAt().toString());
 

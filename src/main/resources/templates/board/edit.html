@@ -1,89 +1,104 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>게시글 수정</title>
+    <link rel="stylesheet" href="/css/vars.css" />
+    <link rel="stylesheet" href="/css/boardstyle.css" />
+    <link rel="stylesheet" href="/css/mainstyle.css" />
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 30px;
-            background-color: #f9f9f9;
+        .detail-container {
+          max-width: 900px;
+          margin: 60px auto;
+          background: var(--color-white-solid, #fff);
+          border-radius: 10px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+          padding: 36px 32px 40px;
+          font-family: var(--font-pretendard-regular, sans-serif);
         }
-
-        form {
-            max-width: 600px;
-            margin: auto;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+        form label {
+          font-weight: bold;
+          display: block;
+          margin-top: 16px;
+          font-size: 15px;
         }
-
+        form input[type="text"],
+        form textarea,
+        form input[type="file"] {
+          width: 100%;
+          padding: 10px;
+          margin-top: 6px;
+          border: 1px solid var(--color-grey-80);
+          border-radius: 4px;
+          font-family: var(--font-pretendard-regular);
+          font-size: 14px;
+          box-sizing: border-box;
+        }
+        form textarea {
+          height: 220px;
+          resize: vertical;
+        }
+        .submit-button {
+          margin-top: 24px;
+          padding: 10px 20px;
+          width: 100%;
+          background-color: var(--color-cornflower-blue);
+          color: #fff;
+          font-size: 16px;
+          font-family: var(--font-pretendard-medium);
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+        .submit-button:hover {
+          background-color: #3f8edc;
+        }
         h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        label {
-            font-weight: bold;
-            display: block;
-            margin-top: 15px;
-        }
-
-        input[type="text"],
-        textarea {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-
-        textarea {
-            height: 200px;
-            resize: vertical;
-        }
-
-        input[type="file"] {
-            margin-top: 8px;
-        }
-
-        button {
-            margin-top: 20px;
-            width: 100%;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            font-size: 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #45a049;
+          text-align: center;
+          font-size: 24px;
+          margin-bottom: 24px;
         }
     </style>
 </head>
 <body>
 
-<form th:action="@{/posts/{id}/edit(id=${post.postIdx})}"
-      method="post" enctype="multipart/form-data">
+<!-- 상단 네비게이션 바 -->
+<nav class="container-nav">
+    <div class="nav-left">
+        <a th:href="@{/main}">
+            <img class="logo" src="/img/icons/MT5.png" alt="M 로고" />
+        </a>
+    </div>
+    <div class="nav-right">
+        <a href="login.html">로그인·회원가입</a>
+    </div>
+</nav>
+<!-- 하단 서브 네비게이션 바 -->
+<nav class="sub-nav">
+    <a href="meetingcreate.html">모임생성</a>
+    <a href="Meeting-list.html">모임목록</a>
+    <a href="product-list.html">상품목록</a>
+    <a th:href="@{/posts}">자유 게시판</a>
+</nav>
 
-    <h2>게시글 수정</h2>
+<div class="detail-container">
+    <form th:action="@{/posts/{id}/edit(id=${post.postIdx})}"
+          method="post" enctype="multipart/form-data">
 
-    <label for="title">제목</label>
-    <input type="text" id="title" name="title" th:value="${post.title}" required />
+        <h2>게시글 수정</h2>
 
-    <label for="content">내용</label>
-    <textarea id="content" name="content" th:text="${post.content}"></textarea>
+        <label for="title">제목</label>
+        <input type="text" id="title" name="title" th:value="${post.title}" required />
 
-    <label for="files">첨부파일 (새로 선택 시 교체됨)</label>
-    <input type="file" id="files" name="files" multiple />
+        <label for="content">내용</label>
+        <textarea id="content" name="content" th:text="${post.content}"></textarea>
 
-    <button type="submit">수정 완료</button>
-</form>
+        <label for="files">첨부파일</label>
+        <input type="file" id="files" name="files" multiple />
+
+        <button type="submit" class="submit-button">수정 완료</button>
+    </form>
+</div>
 
 </body>
 </html>

@@ -5,11 +5,14 @@ import generationgap.co.kr.dto.post.Attachment;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 public interface PostService {
-    List<Post> getPostListPaged(int offset, int limit);
+    List<Post> getPostListPaged(int offset, int limit, String sort);
 
-    int getTotalPostCount();
+    List<Post> getPostListPagedFiltered(int offset, int limit, String category, String sort);
+
+    int getTotalPostCountFiltered(String category);
 
     void writePostWithAttachments(Post post, List<MultipartFile> files);
 
@@ -24,5 +27,8 @@ public interface PostService {
     List<Attachment> getAttachmentsByPostId(Long postIdx);
 
     void updatePost(Post post, List<MultipartFile> files);
+
+    Map<Integer, Integer> getVisibleCommentCounts(List<Integer> postIds);
+
 }
 

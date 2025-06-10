@@ -5,12 +5,13 @@ import generationgap.co.kr.domain.board.Post;
 import generationgap.co.kr.dto.post.Attachment;
 import generationgap.co.kr.mapper.board.CommentMapper;
 import generationgap.co.kr.security.CustomUserDetails;
+import generationgap.co.kr.service.board.CommentService;
 import generationgap.co.kr.service.board.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
@@ -19,8 +20,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/posts")
@@ -29,6 +33,7 @@ public class PostController {
 
     private final PostService postService;
     private final CommentMapper commentMapper;
+    private final CommentService commentService;
 
     @GetMapping("/write")
     public String showWriteForm(Model model){
@@ -40,6 +45,13 @@ public class PostController {
     public String submitPost(@ModelAttribute Post post,
                              @RequestParam("files")List<MultipartFile> files){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        // 로그인 여부 및 타입 체크
+        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof CustomUserDetails)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "로그인이 필요합니다.");
+        }
+
+
         CustomUserDetails userDetails = (CustomUserDetails)auth.getPrincipal();
 
         post.setAuthorIdx(userDetails.getUserIdx().intValue());
@@ -50,17 +62,55 @@ public class PostController {
     }
 
     @GetMapping
-    public String getPostList(@RequestParam(defaultValue = "1") int page, Model model){
+    public String getPostList(@RequestParam(defaultValue = "1") int page,
+                              @RequestParam(defaultValue = "new")String sort,
+                              @RequestParam(required = false) String category,
+                              @RequestParam(required = false) String keyword,
+                              Model model){
         int pageSize =10;
         int offset = (page - 1) * pageSize;
 
-        List<Post> posts = postService.getPostListPaged(offset, pageSize);
-        int totalCount = postService.getTotalPostCount();
+
+        if (category == null || category.equalsIgnoreCase("null") || category.isBlank()) {
+            category = null;
+        }
+        if (keyword == null || keyword.equalsIgnoreCase("null") || keyword.isBlank()) {
+            keyword = null;
+        }
+        if (sort == null || sort.equalsIgnoreCase("null") || sort.isBlank()) {
+            sort = "new"; // 기본 정렬 방식 지정
+        }
+
+        List<Post> posts = postService.getPostListPagedFiltered(offset, pageSize, category, sort);
+
+
+        // ✅ 댓글 수 계산 추가
+        for (Post post : posts) {
+            List<Comment> all = commentService.getFilteredCommentsByPost(post.getPostIdx().intValue());
+            int visibleCount = (int) all.stream()
+                    .filter(c -> {
+                        if ("Y".equals(c.getIsDeleted())) return false;
+                        if (c.getParentCommentId() != null) {
+                            Comment parent = all.stream()
+                                    .filter(p -> p.getCommentIdx().equals(c.getParentCommentId()))
+                                    .findFirst().orElse(null);
+                            return parent != null && !"Y".equals(parent.getIsDeleted());
+                        }
+                        return true;
+                    }).count();
+            post.setCommentCount(visibleCount);
+        }
+
+
+        int totalCount = postService.getTotalPostCountFiltered(category);
         int totalPages = (int) Math.ceil((double) totalCount / pageSize);
 
         model.addAttribute("posts", posts);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", totalPages);
+        model.addAttribute("sort", sort);
+        model.addAttribute("category", category);
+
 
         return "board/post-list";
     }
@@ -68,8 +118,12 @@ public class PostController {
     @GetMapping("/{id}")
     public String showPostDetail(@PathVariable("id") int postIdx,
                                  @RequestParam(defaultValue = "1") int page,
+                                 @RequestParam(required = false) String category,
+                                 @RequestParam(defaultValue = "new") String sort,
+                                 @RequestParam(required = false) String keyword,
                                  Model model,
                                  HttpServletRequest request){
+
         postService.incrementViewCount(postIdx); // 조회수 증가시키기
         Post post = postService.getPostById(postIdx); // 게시글 가져오기
         if(post==null || "Y".equals(post.getIsDeleted())){
@@ -82,13 +136,66 @@ public class PostController {
         List<Attachment> attachments = postService.getAttachmentsByPostId((long) postIdx);
         model.addAttribute("attachments", attachments);
 
-        List<Comment> comments = commentMapper.getCommentsByPost(postIdx);// 댓글도 같이 조회되도록 추가
-        model.addAttribute("comments", comments);
-        model.addAttribute("currentPage", page); // 페이징 시 원페이지로 돌아가도록 추가
+        //댓글
+        List<Comment> allComments = commentService.getFilteredCommentsByPost(postIdx);// 댓글도 같이 조회되도록 추가
+
+        int visibleCommentCount = (int) allComments.stream()          // 카운트용 숫자
+                .filter(c->{
+                    if("Y".equals(c.getIsDeleted())) return false;
+                    if(c.getParentCommentId()!= null){
+                        // 대댓글의 경우, 부모가 삭제되었는지도 확인해야 함
+                        Comment parent = allComments.stream()
+                                .filter(p -> p.getCommentIdx().equals(c.getParentCommentId()))
+                                .findFirst()
+                                .orElse(null);
+                        return parent != null && !"Y".equals(parent.getIsDeleted());
+                    }
+                    return true;
+                })
+                .count();
+
+        //댓글 정렬방식 추가
+        //원댓글만 필터링
+        List<Comment> parentComments = allComments.stream()
+                        .filter(c -> c.getParentCommentId() == null)
+                        .sorted(Comparator.comparing(Comment::getCommentIdx))
+                        .toList();
+
+        //대댓글 그룹핑
+        Map<Long, List<Comment>> repliesGroupedByParentId = allComments.stream()
+                        .filter(c-> c.getParentCommentId() != null)
+                        .sorted(Comparator.comparing(Comment::getCommentIdx))
+                        .collect(Collectors.groupingBy(Comment::getParentCommentId));
+//        model.addAttribute("post", post);
+//        model.addAttribute("attachments", postService.getAttachmentsByPostId((long) postIdx));
+        model.addAttribute("parentComments", parentComments);
+        model.addAttribute("repliesMap", repliesGroupedByParentId);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("_csrf", request.getAttribute(CsrfToken.class.getName()));
 
 
-        CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
-        model.addAttribute("_csrf", csrfToken);
+        //대댓글 갯수 파악하기 위해 추가
+        Map<Long, Integer> replyCounts = new HashMap<>();
+        for (Comment parent : parentComments) {
+            List<Comment> replies = repliesGroupedByParentId.get(parent.getCommentIdx());
+
+            // 🔐 null 방지
+            if (replies == null) {
+                replyCounts.put(parent.getCommentIdx(), 0);
+            } else {
+                int visibleCount = (int) replies.stream()
+                        .filter(r -> !"Y".equals(r.getIsDeleted()))
+                        .count();
+                replyCounts.put(parent.getCommentIdx(), visibleCount);
+            }
+        }
+        model.addAttribute("replyCounts", replyCounts);
+        model.addAttribute("commentCount", visibleCommentCount);
+
+        //페이징 위해 추가
+        model.addAttribute("category", category);
+        model.addAttribute("sort", sort);
+        model.addAttribute("keyword", keyword);
 
         return "board/detail";
     }

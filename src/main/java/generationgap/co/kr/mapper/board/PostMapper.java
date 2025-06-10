@@ -44,5 +44,20 @@ public interface PostMapper {
                                @Param("contentBefore") String contentBefore,
                                @Param("editedBy") int editedBy);
 
+    int getVisibleCommentCountByPost(@Param("postIdx") int postIdx);
+
+    List<Post> getPostsPagedByViews(@Param("offset") int offset, @Param("limit") int limit);
+    List<Post> getPostsPagedByLikes(@Param("offset") int offset, @Param("limit") int limit);
+    List<Post> getPostsPagedDefault(@Param("offset") int offset, @Param("limit") int limit);
+
+    // 정렬 + 카테고리 필터
+    List<Post> getPostsPagedFiltered(@Param("offset") int offset,
+                                     @Param("limit") int limit,
+                                     @Param("category") String category,
+                                     @Param("sort") String sort);
+
+    // 필터링된 게시글 수 계산
+    int getPostCountFiltered(@Param("category") String category);
+
 
 }
