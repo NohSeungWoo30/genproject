@@ -38,7 +38,7 @@ public class MainController {
         List<Groups> recommendGroupsList = groupService.getRecommendGroup();
         model.addAttribute("recommendGroupsList", recommendGroupsList);
 
-        return "main";
+        return "main/main";
     }
 
     @GetMapping("/main/MAIN")

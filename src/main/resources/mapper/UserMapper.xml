@@ -38,7 +38,7 @@
         user_ci, password_hash, email, phone, profile_name, introduction
         ) VALUES (
         #{userId}, #{provider}, #{userName}, #{nickname}, #{birthDate}, #{gender},
-        #{userCi}, #{passwordHash}, #{email}, #{phone}, #{profileName, jdbcType=VARCHAR}, #{introduction}
+        #{userCi, jdbcType=VARCHAR}, #{passwordHash}, #{email}, #{phone}, #{profileName, jdbcType=VARCHAR}, #{introduction}
         )
     </insert>
 
@@ -67,13 +67,6 @@
         update_at = CURRENT_DATE WHERE user_idx = #{userIdx}
     </update>
 
-    <update id="updateUserPassword">
-        UPDATE users
-        SET
-        password_hash = #{passwordHash},
-        update_at = CURRENT_DATE WHERE user_idx = #{userIdx}
-    </update>
-
     <update id="updateUserInfo" parameterType="generationgap.co.kr.domain.user.UserDTO">
         UPDATE users
         SET
@@ -94,7 +87,7 @@
         WHERE email = #{email} AND user_status = 'ACTIVE'
     </select>
 
-    <select id="findByUserNameAndPhone" parameterType="java.lang.String" resultMap="userResultMap">
+    <select id="findByUserNameAndPhone" parameterType="map" resultMap="userResultMap">
         SELECT
         user_id
         FROM users
@@ -197,8 +190,5 @@
         ]]>
     </select>
 
-    <!-- idx로 정보가져오기 ksm-->
-    <select id="findByUserIdx" resultMap="userResultMap">
-        SELECT * FROM users WHERE user_idx = #{userIdx}
-    </select>
+
 </mapper>
