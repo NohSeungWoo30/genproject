@@ -28,6 +28,8 @@ public interface UserMapper {
     // user_idx로 사용자 조회 메서드 추가 (필수)
     UserDTO findByUserIdx(@Param("userIdx") Long userIdx);
 
+    UserDTO findByOAuth2UserId(@Param("userId") String userId);
+
     // 회원 일반 정보 수정 메서드 추가
     // UserDTO 객체를 받아서 해당 필드들을 업데이트합니다.
     void updateUserInfo(UserDTO user);
@@ -51,8 +53,13 @@ public interface UserMapper {
     int countByNickname(@Param("nickname") String nickname);
     int countByEmail(@Param("email") String email);
     int countByPhone(@Param("phone") String phone);
+    int countByUserCi(@Param("userCi") String userCi);
 
     // OAuth2 연동을 위한 신규 메서드 추가
     // provider와 userId(구글의 'sub')로 사용자 조회
     UserDTO findByProviderAndUserId(@Param("provider") String provider, @Param("userId") String userId);
+
+    void insertOAuthUser(UserDTO user);
+
+    void updateProfileName(@Param("userIdx") Long userIdx, @Param("profileName") String profileName);
 }

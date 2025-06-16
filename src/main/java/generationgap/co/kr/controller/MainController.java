@@ -10,4 +10,9 @@ public class MainController {
     public String mainPage() {
         return "main"; // main.html 템플릿 반환
     }
+
+    @GetMapping("/main/MAIN")
+    public String mainPage2() {
+        return "main/MAIN"; // main.html 템플릿 반환
+    }
 }

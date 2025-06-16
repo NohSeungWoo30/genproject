@@ -31,8 +31,8 @@
         user_id, provider, user_name, nickname, birth_date, gender, user_ci, password_hash,
         email, phone, profile_name, introduction, last_login_at, update_at, ghost
         ) VALUES (
-        #{userId}, #{provider}, #{userName}, #{nickname}, #{birthDate, jdbcType=DATE}, #{gender, jdbcType=CHAR}, #{userCi}, #{passwordHash},
-        #{email}, #{phone}, #{profileName}, #{introduction}, #{lastLoginAt, jdbcType=DATE}, #{updateAt, jdbcType=DATE}, #{ghost, jdbcType=DATE}
+        #{userId}, #{provider}, #{userName}, #{nickname}, #{birthDate, jdbcType=DATE}, #{gender, jdbcType=CHAR}, #{userCi, jdbcType=VARCHAR}, #{passwordHash},
+        #{email}, #{phone, jdbcType=VARCHAR}, #{profileName}, #{introduction, jdbcType=VARCHAR}, #{lastLoginAt, jdbcType=DATE}, #{updateAt, jdbcType=DATE}, #{ghost, jdbcType=DATE}
         )
     </insert>
 
@@ -45,7 +45,13 @@
     <select id="findByUserIdx" parameterType="long" resultMap="userResultMap">
         SELECT *
         FROM users
-        WHERE user_idx = #{userIdx} AND user_status = 'ACTIVE'
+        WHERE user_idx = #{userIdx, jdbcType=NUMERIC} AND user_status = 'ACTIVE'
+    </select>
+
+    <select id="findByOAuth2UserId" parameterType="java.lang.String" resultMap="userResultMap">
+        SELECT *
+        FROM users
+        WHERE user_id = #{userId} AND user_status = 'ACTIVE' AND provider = 'GOOGLE'
     </select>
 
     <update id="updateUserPassword">
@@ -63,10 +69,10 @@
         birth_date = #{birthDate, jdbcType=DATE},
         gender = #{gender, jdbcType=CHAR},
         email = #{email},
-        phone = #{phone},
+        phone = #{phone, jdbcType=VARCHAR},
         profile_name = #{profileName},
-        introduction = #{introduction},
-        update_at = CURRENT_DATE WHERE user_idx = #{userIdx}
+        introduction = #{introduction, jdbcType=VARCHAR},
+        update_at = CURRENT_DATE WHERE user_id = #{userId, jdbcType=VARCHAR}
     </update>
 
     <select id="findByEmail" parameterType="java.lang.String" resultMap="userResultMap">
@@ -79,7 +85,7 @@
         SELECT
         user_id
         FROM users
-        WHERE user_name = #{userName} AND phone = #{phone} AND user_status = 'ACTIVE'
+        WHERE user_name = #{userName} AND phone = #{phone, jdbcType=VARCHAR} AND user_status = 'ACTIVE'
         FETCH FIRST 1 ROW ONLY
     </select>
 
@@ -97,12 +103,11 @@
         SET
         user_id = #{userId},
         nickname = #{nickname},
-        user_ci = #{userCi},
         email = #{email},
-        phone = #{phone},
+        phone = #{phone, jdbcType=VARCHAR},
         user_status = #{userStatus},
         ghost = CURRENT_DATE,
-        update_at = CURRENT_DATE  WHERE user_idx = #{userIdx}
+        update_at = CURRENT_DATE  WHERE user_idx = #{userIdx, jdbcType=NUMERIC}
     </update>
 
     <select id="countByUserId" parameterType="string" resultType="int">
@@ -121,13 +126,31 @@
         SELECT COUNT(*) FROM users WHERE phone = #{phone} AND user_status != 'DELETED'
     </select>
 
-    <select id="findByProviderAndUserId" parameterType="map" resultType="generationgap.co.kr.domain.user.UserDTO">
-        SELECT
-        user_idx, user_id, user_name, nickname, email, phone, user_ci,
-        user_status, password_hash, birth_date, gender, provider, provider_id,
-        introduction, create_at, update_at, ghost, last_login_at FROM users
+    <select id="countByUserCi" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM users WHERE user_ci = #{userCi} AND user_status != 'DELETED'
+    </select>
+
+    <select id="findByProviderAndUserId" parameterType="map" resultMap="userResultMap">
+        SELECT *
+        FROM users
         WHERE provider = #{provider}
         AND user_id = #{userId}
         AND user_status != 'DELETED'
     </select>
+
+    <insert id="insertOAuthUser" parameterType="generationgap.co.kr.domain.user.UserDTO">
+        INSERT INTO users (
+        user_id, provider, user_name, nickname, birth_date, gender, user_ci,
+        email, phone, profile_name, introduction, last_login_at, update_at, ghost
+        ) VALUES (
+        #{userId}, #{provider}, #{userName}, #{nickname}, #{birthDate, jdbcType=DATE}, #{gender, jdbcType=CHAR}, #{userCi, jdbcType=VARCHAR},
+        #{email}, #{phone, jdbcType=VARCHAR}, #{profileName}, #{introduction, jdbcType=VARCHAR}, #{lastLoginAt, jdbcType=DATE}, #{updateAt, jdbcType=DATE}, #{ghost, jdbcType=DATE}
+        )
+    </insert>
+
+    <update id="updateProfileName">
+        UPDATE users
+        SET profile_name = #{profileName}
+        WHERE user_idx = #{userIdx}
+    </update>
 </mapper>

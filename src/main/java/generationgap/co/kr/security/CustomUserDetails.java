@@ -1,44 +1,47 @@
-package generationgap.co.kr.security; // 이 패키지 경로가 맞다면 그대로 사용
+package generationgap.co.kr.security;
 
 import generationgap.co.kr.domain.user.UserDTO;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.user.OAuth2User; // OAuth2User 임포트 추가
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import java.io.Serializable;
-import java.time.LocalDate;
+import java.io.Serializable; // 이 임포트는 현재 코드에서 직접 사용되지 않으므로 제거 가능 (UserDTO에 이미 Serializable 구현)
+import java.time.LocalDate; // 이 임포트도 현재 클래스에서 직접 사용되지 않으므로 제거 가능
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List; // List 임포트 추가
-import java.util.Map;   // Map 임포트 추가
+import java.util.List;
+import java.util.Map;
 
-// UserDetails와 OAuth2User 인터페이스를 모두 구현
-public class CustomUserDetails implements UserDetails, OAuth2User, Serializable {
+public class CustomUserDetails implements UserDetails, OAuth2User {
 
-    private UserDTO userDTO; // 실제 사용자 정보를 담을 UserDTO 객체
-    private Map<String, Object> oauth2Attributes; // OAuth2 제공자가 제공한 원본 속성 (OAuth2User 구현용)
-    private List<GrantedAuthority> authorities; // 권한 (생성자에서 초기화)
-
+    private UserDTO userDTO;
+    private Map<String, Object> oauth2Attributes;
+    private List<GrantedAuthority> authorities;
 
     // 1. 일반 로그인 사용자를 위한 생성자 (UserDetailsService에서 사용)
     public CustomUserDetails(UserDTO userDTO) {
+        // ⭐ 중요: userDTO가 null이거나 핵심 식별자(userId)가 null/empty인지 여기서 검증
+        if (userDTO == null || userDTO.getUserId() == null || userDTO.getUserId().trim().isEmpty()) {
+            throw new IllegalArgumentException("UserDTO or userDTO.userId cannot be null or empty for CustomUserDetails.");
+        }
         this.userDTO = userDTO;
-        // UserDTO의 userStatus 등에 따라 권한을 동적으로 부여할 수도 있습니다.
-        // 현재는 모든 사용자에게 기본 "ROLE_USER" 부여
         this.authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
     // 2. OAuth2 로그인 사용자를 위한 생성자 (CustomOAuth2UserService에서 사용)
     public CustomUserDetails(UserDTO userDTO, Map<String, Object> oauth2Attributes) {
+        // ⭐ 중요: userDTO가 null이거나 핵심 식별자(userId)가 null/empty인지 여기서 검증
+        if (userDTO == null || userDTO.getUserId() == null || userDTO.getUserId().trim().isEmpty()) {
+            throw new IllegalArgumentException("UserDTO or userDTO.userId cannot be null or empty for CustomUserDetails (OAuth2).");
+        }
         this.userDTO = userDTO;
         this.oauth2Attributes = oauth2Attributes;
-        // OAuth2 사용자의 권한도 "ROLE_USER"로 부여 (필요 시 역할 로직 추가 가능)
         this.authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
 
-    // --- UserDetails 인터페이스 구현 (기존과 동일) ---
+    // --- UserDetails 인터페이스 구현 ---
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
@@ -46,12 +49,15 @@ public class CustomUserDetails implements UserDetails, OAuth2User, Serializable 
 
     @Override
     public String getPassword() {
-        return userDTO.getPasswordHash();
+        return userDTO.getPasswordHash(); // 일반 로그인 시 필요
     }
 
     @Override
     public String getUsername() {
-        return userDTO.getUserId(); // 사용자 ID를 Spring Security의 "username"으로 사용
+        // ⭐ 핵심: 이 값이 Spring Security의 Principal Name이 됩니다.
+        // userDTO.getUserId()가 null이거나 비어있으면 "principalName cannot be empty" 오류 발생.
+        // 생성자에서 이미 검증했으니 여기서는 그대로 반환.
+        return userDTO.getUserId();
     }
 
     @Override
@@ -66,74 +72,35 @@ public class CustomUserDetails implements UserDetails, OAuth2User, Serializable 
         return userDTO.getUserStatus() != null && userDTO.getUserStatus().equals("ACTIVE");
     }
 
-    // --- OAuth2User 인터페이스 구현 (새롭게 추가) ---
+    // --- OAuth2User 인터페이스 구현 ---
     @Override
     public Map<String, Object> getAttributes() {
-        // OAuth2 제공자가 제공한 원본 속성 맵을 반환
         return this.oauth2Attributes;
     }
 
     @Override
     public String getName() {
-        // OAuth2User의 'name'은 주로 사용자의 고유 식별자 또는 이름을 반환합니다.
-        // 여기서는 UserDTO의 userId를 반환하거나, attributes에서 'name'을 반환할 수 있습니다.
-        // main.html에서 principal.attributes['name']을 사용하므로,
-        // 여기서는 userDTO의 userId (Google의 sub 값)를 반환하는 것이 일관적입니다.
-        return userDTO.getUserId();
-        // 또는, Google 계정 이름에 더 가깝게
+        // ⭐ 핵심: 이 값이 OAuth2User 인터페이스의 'name' 속성으로 사용됩니다.
+        // Spring Security는 보통 이 값을 Authentication.getName()으로 사용합니다.
+        // getUsername()과 동일한 값을 반환하는 것이 일관적이고 일반적입니다.
+        return getUsername(); // userDTO.getUserId()와 동일
+        // 만약 principal.attributes['name']을 사용하고 싶다면,
         // return (String) oauth2Attributes.get("name");
+        // 이 경우 oauth2Attributes에 'name' 키가 없을 때 null 반환 가능성이 있습니다.
+        // 안전하게 getUsername()을 따르는 것이 좋습니다.
     }
 
-    // --- UserDTO의 추가 정보를 얻기 위한 메서드들 (기존과 동일) ---
-    // UserDTO에서 필요한 모든 정보들을 직접 가져올 수 있도록 Getter 추가
-    public Long getUserIdx() {
-        return userDTO.getUserIdx();
-    }
-
-    public String getProvider() {
-        return userDTO.getProvider();
-    }
-
-    public String getUserName() { // UserDTO의 userName 필드
-        return userDTO.getUserName();
-    }
-
-    public String getNickname() { // UserDTO의 nickname 필드
-        return userDTO.getNickname();
-    }
-
-    public LocalDate getBirthDate() {
-        return userDTO.getBirthDate();
-    }
-
-    public Character getGender() {
-        return userDTO.getGender();
-    }
-
-    public String getEmail() {
-        return userDTO.getEmail();
-    }
-
-    public String getPhone() {
-        return userDTO.getPhone();
-    }
-
-    // UserDTO에 profileName 필드가 없다면 이 메서드는 제거하거나,
-    // 필요에 따라 UserDTO에 필드를 추가해야 합니다.
-    // public String getProfileName() {
-    //     return userDTO.getProfileName();
-    // }
-
-    public String getIntroduction() {
-        return userDTO.getIntroduction();
-    }
-
-    public String getUserStatus() {
-        return userDTO.getUserStatus();
-    }
-
-    // 필요하다면 UserDTO 자체를 반환하는 메서드 (모든 정보를 한 번에 받을 때 유용)
-    public UserDTO getUserDTO() {
-        return this.userDTO;
-    }
+    // --- UserDTO의 추가 정보를 얻기 위한 메서드들 ---
+    public Long getUserIdx() { return userDTO.getUserIdx(); }
+    public String getProvider() { return userDTO.getProvider(); }
+    public String getUserName() { return userDTO.getUserName(); }
+    public String getNickname() { return userDTO.getNickname(); }
+    public LocalDate getBirthDate() { return userDTO.getBirthDate(); }
+    public Character getGender() { return userDTO.getGender(); }
+    public String getEmail() { return userDTO.getEmail(); }
+    public String getPhone() { return userDTO.getPhone(); }
+    public String getProfileName() { return userDTO.getProfileName(); } // UserDTO에 이 필드가 있다면 유지
+    public String getIntroduction() { return userDTO.getIntroduction(); }
+    public String getUserStatus() { return userDTO.getUserStatus(); }
+    public UserDTO getUserDTO() { return this.userDTO; }
 }

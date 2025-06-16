@@ -161,11 +161,20 @@
       </button>
     </div>
     <div class="modal-body">
-      <p>계정을 삭제하시려면 현재 비밀번호를 입력해 주세요. 계정 삭제 후에는 복구할 수 없습니다.</p>
-      <div class="mb-3">
-        <label for="currentPasswordConfirm" class="form-label">현재 비밀번호</label>
-        <input type="password" class="form-control" id="currentPasswordConfirm">
+      <div id="passwordConfirmSection" style="display:none;">
+        <p>계정을 삭제하시려면 현재 비밀번호를 입력해 주세요. 계정 삭제 후에는 복구할 수 없습니다.</p>
+        <div class="mb-3">
+          <label for="currentPasswordConfirm" class="form-label">현재 비밀번호</label>
+          <input type="password" class="form-control" id="currentPasswordConfirm">
+        </div>
       </div>
+
+      <div id="googleDeleteConfirmSection" style="display:none;">
+        <p><strong>정말 계정을 삭제하시겠습니까?</strong></p>
+        <p>계정 삭제 후에는 모든 정보가 삭제되며, 계정은 복구할 수 없습니다.</p>
+        <p class="text-danger">⚠️ 이 작업은 되돌릴 수 없습니다. 신중하게 결정해 주세요.</p>
+      </div>
+
       <div id="deleteErrorMsg" class="text-danger mt-2" style="display:none;"></div>
     </div>
     <div class="custom-modal-footer">
@@ -180,6 +189,10 @@
   // CSRF 토큰 값을 Thymeleaf에서 JavaScript 변수로 가져옵니다.
   const csrfParameterName = /*[[${_csrf != null ? _csrf.parameterName : ''}]]*/ '';
   const csrfToken = /*[[${_csrf != null ? _csrf.token : ''}]]*/ '';
+
+  // ⭐ 중요: 서버에서 이 값을 Thymeleaf 모델에 추가하여 전달해야 합니다. ⭐
+  // 예: model.addAttribute("isGoogleUser", "google".equalsIgnoreCase(currentUser.getUserDTO().getProvider()));
+  const isGoogleUser = /*[[${isGoogleUser}]]*/ false;
   /*]]>*/
 
   // 모달 요소 가져오기
@@ -191,16 +204,29 @@
   const currentPasswordConfirmInput = document.getElementById('currentPasswordConfirm');
   const deleteErrorMsg = document.getElementById('deleteErrorMsg');
 
+  // ⭐ 새로 추가된 요소들 ⭐
+  const passwordConfirmSection = document.getElementById('passwordConfirmSection');
+  const googleDeleteConfirmSection = document.getElementById('googleDeleteConfirmSection');
+
   // 모달 열기 함수
   function openModal() {
-      deleteAccountModal.classList.add('show'); // show 클래스 추가하여 모달 보이게 함
+      deleteAccountModal.classList.add('show');
       currentPasswordConfirmInput.value = ''; // 비밀번호 입력 필드 초기화
       deleteErrorMsg.style.display = 'none'; // 에러 메시지 숨김
+
+      // ⭐ 사용자 유형에 따라 모달 내용 변경 ⭐
+      if (isGoogleUser) {
+          passwordConfirmSection.style.display = 'none'; // 비밀번호 입력 숨김
+          googleDeleteConfirmSection.style.display = 'block'; // 구글용 확인 메시지 표시
+      } else {
+          passwordConfirmSection.style.display = 'block'; // 비밀번호 입력 표시
+          googleDeleteConfirmSection.style.display = 'none'; // 구글용 확인 메시지 숨김
+      }
   }
 
   // 모달 닫기 함수
   function closeModal() {
-      deleteAccountModal.classList.remove('show'); // show 클래스 제거하여 모달 숨김
+      deleteAccountModal.classList.remove('show');
   }
 
   // '계정 삭제' 버튼 클릭 시 모달 열기
@@ -221,50 +247,51 @@
 
   // 모달 내 '삭제' 버튼 클릭 시
   confirmDeleteBtn.addEventListener('click', function() {
-      const passwordConfirm = currentPasswordConfirmInput.value;
       deleteErrorMsg.style.display = 'none'; // 기존 에러 메시지 초기화
 
-      if (!passwordConfirm) {
-          deleteErrorMsg.textContent = '비밀번호를 입력해주세요.';
-          deleteErrorMsg.style.display = 'block';
-          return;
-      }
-
       const formData = new URLSearchParams();
-      formData.append('passwordConfirm', passwordConfirm);
+
+      // ⭐ 사용자 유형에 따라 비밀번호 확인 로직 분기 ⭐
+      if (!isGoogleUser) { // 로컬 유저인 경우에만 비밀번호 확인
+          const passwordConfirm = currentPasswordConfirmInput.value;
+          if (!passwordConfirm) {
+              deleteErrorMsg.textContent = '비밀번호를 입력해주세요.';
+              deleteErrorMsg.style.display = 'block';
+              return;
+          }
+          formData.append('passwordConfirm', passwordConfirm);
+      }
+      // 구글 유저는 passwordConfirm을 보내지 않아도 됩니다.
+      // 서버에서 AuthenticationPrincipal을 통해 provider를 확인하므로, 클라이언트에서 굳이 isGoogleUser 플래그를 보낼 필요는 없습니다.
 
       if (csrfParameterName && csrfToken) {
           formData.append(csrfParameterName, csrfToken);
       }
 
-      fetch('/user/delete', {
+      fetch('/user/delete', { // 이 경로는 컨트롤러의 @PostMapping("/delete")와 일치해야 합니다.
           method: 'POST',
           headers: {
               'Content-Type': 'application/x-www-form-urlencoded'
           },
           body: formData.toString(),
-          credentials: 'include' // 세션 쿠키 등을 전송하기 위해 필요
+          credentials: 'include'
       })
       .then(response => {
           if (response.redirected) {
-              // 서버에서 리다이렉트 응답을 보냈을 때 (예: 302 Found)
-              // Spring Security의 로그인 페이지 리다이렉트가 이 경우입니다.
               console.warn('Redirect detected. Navigating to:', response.url);
               window.location.href = response.url;
-              return null; // 이후 .then 체인을 중단
+              return null;
           }
           if (response.ok) {
-              // 200 OK 응답일 때
               return response.json();
           } else {
-              // 4xx, 5xx 오류 응답일 때 (그러나 JSON 응답인 경우)
               return response.json().then(errorData => {
                   throw new Error(errorData.message || '계정 삭제 실패');
               });
           }
       })
       .then(data => {
-          if (data === null) return; // 리다이렉트된 경우 data가 null이므로 처리 중단
+          if (data === null) return;
 
           if (data.success) {
               alert(data.message || '계정이 성공적으로 삭제되었습니다.');

@@ -79,7 +79,7 @@
 
     <div sec:authorize="isAuthenticated()" class="section authenticated-section">
         <p>
-            안녕하세요, <!--<span th:text="${#authentication.principal.attributes['name']}">사용자</span>-->님!
+            안녕하세요, <strong sec:authentication="principal.nickname">사용자</strong> 님
         </p>
         <div class="button-group">
             <a th:href="@{/user/profile}" class="button info-button">내 정보 확인</a>

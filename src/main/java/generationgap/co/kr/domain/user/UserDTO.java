@@ -22,7 +22,6 @@ public class UserDTO implements Serializable {
     private LocalDate birthDate;
     private Character gender;
     private String userCi;
-    // --- 이 부분 추가 ---
     private String password; // 사용자가 폼에 입력하는 원본 비밀번호를 받을 필드
     private String passwordHash; // 데이터베이스에 저장될 해싱된 비밀번호
     private String email;
