@@ -14,6 +14,8 @@
   <form th:action="@{/logout}" method="post"> <button type="submit">로그아웃</button>
   </form>
   <a th:href="@{/user/my-page}">마이페이지로 이동</a>
+  <a th:href="@{/product-list.html}">상품목록으로 이동</a>
+  <a th:href="@{/mypage.html}">상품목록으로 이동</a>
 </div>
 
 <div sec:authorize="isAnonymous()">

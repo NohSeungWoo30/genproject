@@ -53,6 +53,7 @@ public class SecurityConfig {
                                 new AntPathRequestMatcher("/js/**"),      // JavaScript 파일 접근 허용
                                 new AntPathRequestMatcher("/images/**"),  // 이미지 파일 접근 허용
                                 new AntPathRequestMatcher("/**"),          // 모든 요청 일단 허용 (개발 초기 단계)
+                                new AntPathRequestMatcher("/**/**"),
                                 // 나중에 로그인 기능 구현 후 .authenticated()로 변경
 
                                 // *** 이 부분 추가: 비밀번호 재설정 관련 URL 허용 ***

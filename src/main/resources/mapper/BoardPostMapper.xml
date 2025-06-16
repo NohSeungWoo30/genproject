@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="generationgap.co.kr.mapper.post.BoardPostMapper">
+
+    <select id="findPostsByAuthorIdx" resultType="generationgap.co.kr.domain.mypage.PostDto">
+        SELECT
+        title,
+        category,
+        created_at AS createdAt,
+        view_count AS views
+        FROM board_posts
+        WHERE author_idx = #{authorIdx}
+        AND is_deleted = 'N'
+        ORDER BY post_idx DESC
+    </select>
+</mapper>

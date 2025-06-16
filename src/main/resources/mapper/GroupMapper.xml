@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+
+<mapper namespace="generationgap.co.kr.mapper.group.GroupsMapper">
+    <resultMap id="Groups" type="generationgap.co.kr.domain.group.Groups">
+        <id property="groupIdx" column="group_idx"/>
+        <result property="ownerIdx" column="owner_idx"/>
+        <result property="groupCategoryMainIdx" column="category_main_idx"/>
+        <result property="groupCategorySubIdx" column="category_sub_idx"/>
+        <result property="title" column="title"/>
+        <result property="genderLimit" column="gender_limit"/>
+        <result property="ageMin" column="age_min"/>
+        <result property="ageMax" column="age_max"/>
+        <result property="groupDate" column="group_date"/>
+        <result property="membersMin" column="members_min"/>
+        <result property="membersMax" column="members_max"/>
+        <result property="partyMember" column="party_member"/>
+        <result property="content" column="content"/>
+        <result property="placeName" column="place_name"/>
+        <result property="placeCategory" column="place_category"/>
+        <result property="placeAddress" column="place_address"/>
+        <result property="naverPlaceId" column="naver_place_id"/>
+        <result property="naverPlaceUrl" column="naver_place_url"/>
+        <result property="latitude" column="latitude"/>
+        <result property="longitude" column="longitude"/>
+        <result property="groupImgUrl" column="group_img_url"/>
+        <result property="groupsStatus" column="groups_status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="deletedAt" column="deleted_at"/>
+
+        <association property="owner" javaType="generationgap.co.kr.domain.user.UserDTO">
+            <result property="userIdx" column="user_idx"/>
+            <result property="userId" column="user_id"/>
+            <result property="nickname" column="nickname"/>
+        </association>
+
+        <association property="categoryMain" javaType="generationgap.co.kr.domain.group.CategoryMain">
+            <result property="cmCategoryMainIdx" column="cm_category_main_idx"/>
+            <result property="categoryMainName" column="category_main_name"/>
+        </association>
+
+        <association property="categorySub" javaType="generationgap.co.kr.domain.group.CategorySub">
+            <result property="categorySubIdx" column="category_sub_idx"/>
+            <result property="csCategoryMainIdx" column="category_main_idx"/>
+            <result property="categorySubName" column="category_sub_name"/>
+        </association>
+    </resultMap>
+
+    <!-- 카테고리 대 -->
+    <resultMap id="categoryMain" type="generationgap.co.kr.domain.group.CategoryMain">
+        <id property="cmCategoryMainIdx" column="category_main_idx"/>
+        <result property="categoryMainName" column="category_main_name"/>
+    </resultMap>
+    <!-- 카테고리 세부사항 -->
+    <resultMap id="categorySub" type="generationgap.co.kr.domain.group.CategorySub">
+        <id property="categorySubIdx" column="category_sub_idx"/>
+        <result property="csCategoryMainIdx" column="category_main_idx"/>
+        <result property="categorySubName" column="category_sub_name"/>
+
+        <association property="categoryMain" javaType="generationgap.co.kr.domain.group.CategoryMain">
+            <result property="cmCategoryMainIdx" column="cm_category_main_idx"/>
+            <result property="categoryMainName" column="category_main_name"/>
+        </association>
+
+    </resultMap>
+
+    <!-- 메인 카테고리 전체 가져오기 -->
+    <select id="getAllMainCategory" resultMap="categoryMain">
+        select * from group_category_main
+    </select>
+    <!-- 메인 카테고리 선택 후 파라메터 값 받아서 나오게 만들기위한 서브 세부사항 -->
+    <select id="getAllSubCategory" parameterType="int" resultMap="categorySub">
+        SELECT
+        csub.category_main_idx,
+        csub.category_sub_idx,
+        csub.category_sub_name,
+        cmain.category_main_name
+        FROM group_category_sub csub
+        JOIN group_category_main cmain
+        ON csub.category_main_idx = cmain.category_main_idx
+        where cmain.category_main_idx=#{mainCategoryIdx} and csub.is_active='N'
+    </select>
+
+    <!-- 그룹 전체 리스트(닉네임, 선택한 카테고리 이름 추가) -->
+    <select id="getAllGroups" resultMap="Groups">
+        SELECT
+        g.group_idx,
+        g.owner_idx,
+        u.nickname,
+        cm.category_main_idx AS cm_category_main_idx,
+        cm.category_main_name,
+        cs.category_sub_idx,
+        cs.category_sub_name,
+        g.title,
+        g.gender_limit,
+        g.age_min,
+        g.age_max,
+        g.group_date,
+        g.members_min,
+        g.members_max,
+        g.party_member,
+        g.content,
+        g.place_name,
+        g.place_category,
+        g.place_address,
+        g.naver_place_id,
+        g.naver_place_url,
+        g.latitude,
+        g.longitude,
+        g.group_img_url,
+        g.groups_status,
+        g.created_at,
+        g.deleted_at
+
+        FROM groups g
+        JOIN users u ON g.owner_idx = u.user_idx
+        JOIN group_category_main cm ON g.category_main_idx = cm.category_main_idx
+        JOIN group_category_sub cs ON g.category_sub_idx = cs.category_sub_idx
+    </select>
+
+    <!-- 단순 select문 같은 하나의 객체에 필드명/컬럼명이 동일하면 쓰기 좋음-->
+    <!--<select id="getAllGroups" resultType="generationgap.co.kr.domain.group.Groups">
+        SELECT * FROM Groups
+    </select>-->
+    <insert id="insertGroup" parameterType="generationgap.co.kr.domain.group.Groups"
+            useGeneratedKeys="true"
+            keyProperty="groupIdx"
+            keyColumn="group_idx">
+        INSERT INTO groups (
+        owner_idx,
+        category_main_idx,
+        title,
+        gender_limit,
+        age_min,
+        age_max,
+        group_date,
+        members_min,
+        members_max,
+        party_member,
+        content,
+        place_name,
+        place_category,
+        place_address,
+        naver_place_url,
+        latitude,
+        longitude,
+        created_at
+        ) VALUES (
+        #{ownerIdx},
+        #{groupCategoryMainIdx},
+        #{title},
+        #{genderLimit},
+        #{ageMin}, #{ageMax},
+        #{groupDate},
+        #{membersMin}, #{membersMax},
+        #{partyMember},
+        #{content},
+        #{placeName},
+        #{placeCategory},
+        #{placeAddress},
+        #{naverPlaceUrl},
+        #{latitude},
+        #{longitude},
+        SYSDATE
+        )
+    </insert>
+</mapper>

@@ -61,4 +61,12 @@
         update_at = SYSDATE <!--비밀번호 변경 시 업데이트 시간 기록 (Oracle)-->
         WHERE user_idx = #{userIdx}
     </update>
+
+    <update id="updateUserProfileImage" parameterType="generationgap.co.kr.domain.user.UserDTO">
+        UPDATE users
+        SET profile_name = #{profileName},
+        update_at = SYSDATE
+        WHERE user_idx = #{userIdx}
+    </update>
+
 </mapper>

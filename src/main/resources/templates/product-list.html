@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>상품 목록</title>
+  <link rel="stylesheet" th:href="@{/css/mainvars.css}"/>
+  <link rel="stylesheet" th:href="@{/css/mainstyle.css}"/>
+  <link rel="stylesheet" th:href="@{/css/product-card.css}"/>
+  <link rel="stylesheet" th:href="@{/css/payment-modal-style.css}"/>
+
+  <script src="https://js.tosspayments.com/v1/payment-widget"></script>
+
+  <style>
+    /* 3. 현재 활성화된 메뉴('상품 목록')가 더 잘 보이도록 스타일 수정 */
+    .bottom-nav .bottom-link.active {
+        font-weight: bold; /* 굵은 글씨로 변경 */
+        border-bottom: 2px solid #FFFFFF; /* 흰색 밑줄 추가 */
+        padding-bottom: 6px; /* 밑줄과 글자 사이 간격 조정 */
+    }
+
+    /* 4. 상품 목록을 스크롤바 없이 한 줄에 4개가 모두 보이도록 grid 방식으로 변경 */
+    .flex-row {
+        display: grid;
+        /* 카드의 개수인 4개에 맞춰 수정하여 꽉 차게 표시 */
+        grid-template-columns: repeat(4, 1fr);
+        gap: 30px; /* 카드 사이의 간격 */
+    }
+
+    /* --- 아래에 추가된 스타일 --- */
+
+    /* 카드 최소 높이 지정 및 내부 요소 정렬 */
+    .card {
+        display: flex;
+        flex-direction: column; /* 내부 요소를 세로로 정렬 */
+        min-height: 450px; /* 카드의 최소 높이를 늘려 전체적으로 크게 보이게 함 */
+    }
+
+    /* 카드 상단 이미지/색상 영역의 높이를 늘림 */
+    .card-thumb {
+        min-height: 180px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* 카드 하단 정보 영역이 남은 공간을 모두 채우도록 설정 */
+    .card-info {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1; /* 남은 세로 공간을 모두 차지하도록 설정 */
+        padding: 25px; /* 내부 여백 증가 */
+    }
+
+    /* 카드 상단 텍스트 크기 증가 */
+    .placeholder-title {
+        font-size: 2em; /* 기존보다 크게 */
+        font-weight: bold;
+    }
+
+    .placeholder-subtitle {
+        font-size: 1.5em; /* 기존보다 크게 */
+        margin-top: 10px;
+    }
+
+    /* 카드 하단 텍스트들의 폰트 사이즈를 키움 */
+    .card-category {
+        font-size: 1.2em;
+        font-weight: bold;
+    }
+
+    .card-title {
+        font-size: 2.2em; /* 가격 폰트 크게 */
+        font-weight: bold;
+        margin-top: 10px;
+    }
+
+    .card-features {
+        font-size: 1.1em; /* 설명 폰트 크게 */
+        margin-top: 20px;
+        margin-bottom: 20px;
+        flex-grow: 1; /* 버튼을 아래로 밀기 위해 남은 공간 차지 */
+    }
+
+    /* 버튼 스타일 수정 */
+    .card-button {
+        font-size: 1.2em; /* 버튼 폰트 크게 */
+        padding: 18px 20px; /* 버튼 크기(세로, 가로) 키움 */
+        border-radius: 8px; /* 버튼 모서리를 약간 둥글게 */
+        /* margin-top: auto; 버튼을 카드 하단에 고정시키는 역할 */
+    }
+  </style>
+</head>
+<body>
+
+<div class="_1920-w-light">
+
+  <header class="container-nav">
+    <div class="nav-left">
+      <a th:href="@{/main/MAIN}" class="logo-link">
+        <img th:src="@{/img/icons/MT5.png}" class="logo" alt="M 로고"/>
+      </a>
+    </div>
+    <div class="nav-right">
+      <a sec:authorize="!isAuthenticated()" th:href="@{/login}" class="login-link">
+        로그인ㆍ회원가입
+      </a>
+      <span sec:authorize="isAuthenticated()" class="user-name"
+            th:text="${#authentication.name} + '님'"></span>
+      <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="logout-link">
+        로그아웃
+      </a>
+    </div>
+  </header>
+
+  <section class="bottom-nav-wrapper">
+    <nav class="bottom-nav">
+      <a th:href="@{/main/meetingcreate}" class="bottom-link">모임 생성</a>
+      <a th:href="@{/main/Meeting-list}" class="bottom-link">모임 목록</a>
+      <a th:href="@{/product-list}" class="bottom-link active">상품 목록</a>
+      <a th:href="@{/main/board}" class="bottom-link">자유 게시판</a>
+    </nav>
+  </section>
+
+  <section class="container2">
+    <div class="flex-row">
+
+      <!-- 변경 후 상품 카드 -->
+      <div class="product-card free">
+        <div class="product-thumb">
+          <div class="product-text-placeholder">
+            <p class="placeholder-title">1회 이용권</p>
+            <p class="placeholder-subtitle">1,500원</p>
+          </div>
+        </div>
+        <div class="product-info">
+          <div class="product-title">1회 이용권</div>
+          <div class="product-price">1,500원</div>
+          <div class="product-desc">• 모임 방 만들기 또는 참여 1회</div>
+          <button sec:authorize="isAuthenticated()"
+                  class="product-button btn-pay"
+                  data-product-name="1회 이용권"
+                  data-amount="1500">
+            결제하기
+          </button>
+          <button sec:authorize="!isAuthenticated()"
+                  class="product-button"
+                  th:onclick="|location.href='@{/login}'|">
+            로그인 후 결제
+          </button>
+        </div>
+      </div>
+
+      <!-- 이하 상품들도 동일하게 교체 -->
+      <div class="product-card standard">
+        <div class="product-thumb">
+          <div class="product-text-placeholder">
+            <p class="placeholder-title">5회 이용권</p>
+            <p class="placeholder-subtitle">3,500원</p>
+          </div>
+        </div>
+        <div class="product-info">
+          <div class="product-title">5회 이용권</div>
+          <div class="product-price">3,500원</div>
+          <div class="product-desc">• 모임 방 만들기 또는 참여 5회</div>
+          <button sec:authorize="isAuthenticated()"
+                  class="product-button btn-pay"
+                  data-product-name="5회 이용권"
+                  data-amount="3500">
+            결제하기
+          </button>
+          <button sec:authorize="!isAuthenticated()"
+                  class="product-button"
+                  th:onclick="|location.href='@{/login}'|">
+            로그인 후 결제
+          </button>
+        </div>
+      </div>
+
+      <div class="product-card premium">
+        <div class="product-thumb">
+          <div class="product-text-placeholder">
+            <p class="placeholder-title">1달 무제한</p>
+            <p class="placeholder-subtitle">10,000원</p>
+          </div>
+        </div>
+        <div class="product-info">
+          <div class="product-title">1달 무제한</div>
+          <div class="product-price">10,000원</div>
+          <div class="product-desc">• 모임 방 만들기·참여 무제한 (1개월)</div>
+          <button sec:authorize="isAuthenticated()"
+                  class="product-button btn-pay"
+                  data-product-name="1달 무제한"
+                  data-amount="10000">
+            결제하기
+          </button>
+          <button sec:authorize="!isAuthenticated()"
+                  class="product-button"
+                  th:onclick="|location.href='@{/login}'|">
+            로그인 후 결제
+          </button>
+        </div>
+      </div>
+
+      <div class="product-card vip">
+        <div class="product-thumb">
+          <div class="product-text-placeholder">
+            <p class="placeholder-title">1년 무제한</p>
+            <p class="placeholder-subtitle">60,000원</p>
+          </div>
+        </div>
+        <div class="product-info">
+          <div class="product-title">1년 무제한</div>
+          <div class="product-price">60,000원</div>
+          <div class="product-desc">• 모임 방 만들기·참여 무제한 (1년)</div>
+          <button sec:authorize="isAuthenticated()"
+                  class="product-button btn-pay"
+                  data-product-name="1년 무제한"
+                  data-amount="60000">
+            결제하기
+          </button>
+          <button sec:authorize="!isAuthenticated()"
+                  class="product-button"
+                  th:onclick="|location.href='@{/login}'|">
+            로그인 후 결제
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div id="payment-modal-backdrop" class="payment-modal-backdrop">
+    <div id="payment-widget-container" class="payment-widget-container">
+      <h2 class="modal-title">결제 정보 입력</h2>
+      <button id="modal-close-x-button" class="modal-close-x-button">&times;</button>
+      <div id="payment-methods-div"></div>
+      <div id="agreement-div" class="agreement-div"></div>
+      <div class="modal-button-group">
+        <button id="request-payment-button" class="card-button primary-button">결제하기</button>
+        <button id="close-widget-button" class="card-button secondary-button">닫기</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script th:inline="javascript">
+  document.addEventListener('DOMContentLoaded', function () {
+
+    console.log('1. TossPayments Payment Widget SDK 로드 확인:', window.PaymentWidget);
+
+    if (typeof window.PaymentWidget === 'undefined') {
+      console.error('TossPayments Payment Widget SDK가 로드되지 않았습니다! 네트워크 탭이나 CSP 설정을 확인하세요.');
+      return;
+    }
+
+    const clientKey = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
+
+    const userIdx = /*[[${userIdx}]]*/ null;
+    const customerKey = userIdx ? String(userIdx) : 'guest_' + new Date().getTime();
+
+    console.log('[DEBUG] customerKey:', customerKey, 'typeof customerKey:', typeof customerKey);
+
+    let paymentWidget;
+    try {
+        paymentWidget = PaymentWidget(clientKey, customerKey);
+        console.log('[DEBUG] PaymentWidget 초기화 완료:', paymentWidget);
+    } catch (e) {
+        console.error('PaymentWidget 초기화 중 오류 발생:', e);
+        alert('결제 시스템 초기화에 실패했습니다. 잠시 후 다시 시도해주세요.');
+        return;
+    }
+
+
+    const paymentModalBackdrop = document.getElementById('payment-modal-backdrop');
+    const paymentMethodsDiv = document.getElementById('payment-methods-div');
+    const agreementDiv = document.getElementById('agreement-div');
+    const requestPaymentButton = document.getElementById('request-payment-button');
+    const closeWidgetButton = document.getElementById('close-widget-button');
+    const modalCloseXButton = document.getElementById('modal-close-x-button');
+
+    let currentOrderName = '';
+    let currentAmount = 0;
+
+    const productButtons = document.querySelectorAll('.btn-pay');
+    productButtons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        currentOrderName = btn.dataset.productName;
+        currentAmount = parseInt(btn.dataset.amount, 10);
+
+        if (isNaN(currentAmount)) {
+          alert('결제 금액이 올바르지 않습니다.');
+          console.error('Invalid amount:', btn.dataset.amount);
+          return;
+        }
+
+        try {
+            paymentWidget.renderPaymentMethods(
+                '#payment-methods-div',
+                { value: currentAmount }
+            );
+            paymentWidget.renderAgreement('#agreement-div');
+
+            paymentModalBackdrop.style.display = 'flex';
+
+        } catch (e) {
+            console.error('결제위젯 렌더링 중 오류 발생:', e);
+            alert('결제 화면을 불러오는 데 실패했습니다.');
+        }
+      });
+    });
+
+    requestPaymentButton.addEventListener('click', function () {
+        const orderId = 'order_' + new Date().getTime() + Math.random().toString(36).substring(2, 15);
+        const customerName = /*[[${#authentication.name}]]*/ '비회원' || '고객';
+        const customerEmail = /*[[${#authentication.principal?.email}]]*/ 'test@example.com';
+
+        // *** currentOrderName을 successUrl 및 failUrl의 쿼리 파라미터로 추가 ***
+        const successUrl = new URL(window.location.origin + '/payment/result');
+        successUrl.searchParams.append('orderName', currentOrderName);
+
+        const failUrl = new URL(window.location.origin + '/payment/fail');
+        failUrl.searchParams.append('orderName', currentOrderName);
+
+        console.log('\n--- 결제 요청 데이터 디버깅 시작 ---');
+        console.log('  amount:', currentAmount, 'typeof:', typeof currentAmount, 'isNaN:', isNaN(currentAmount));
+        console.log('  orderId:', orderId, 'typeof:', typeof orderId);
+        console.log('  orderName:', currentOrderName, 'typeof:', typeof currentOrderName);
+        console.log('  customerName:', customerName, 'typeof:', typeof customerName);
+        console.log('  customerEmail:', customerEmail, 'typeof:', typeof customerEmail);
+        console.log('  successUrl:', successUrl.toString(), 'typeof:', typeof successUrl.toString());
+        console.log('  failUrl:', failUrl.toString(), 'typeof:', typeof failUrl.toString());
+        console.log('--- 결제 요청 데이터 디버깅 끝 ---\n');
+
+        paymentWidget.requestPayment({
+            orderId: orderId,
+            orderName: currentOrderName, // 토스페이먼츠에 전달되는 orderName
+            customerName: customerName,
+            customerEmail: customerEmail,
+            successUrl: successUrl.toString(),
+            failUrl: failUrl.toString()
+        }).catch(function (error) {
+            if (error.code === 'USER_CANCEL') {
+                console.warn('결제가 취소되었습니다. (사용자 취소)');
+                alert('결제가 취소되었습니다.');
+            } else {
+                console.error('결제 요청 중 오류 발생:', error);
+                alert('결제 요청 중 오류가 발생했습니다: ' + error.message);
+            }
+        });
+    });
+
+    // 모달 닫기 함수
+    function closePaymentModal() {
+        paymentModalBackdrop.style.display = 'none';
+        paymentMethodsDiv.innerHTML = '';
+        agreementDiv.innerHTML = '';
+    }
+
+    closeWidgetButton.addEventListener('click', closePaymentModal);
+    modalCloseXButton.addEventListener('click', closePaymentModal);
+
+    paymentModalBackdrop.addEventListener('click', function(event) {
+        if (event.target === paymentModalBackdrop) {
+            closePaymentModal();
+        }
+    });
+
+  });
+</script>
+</body>
+</html>

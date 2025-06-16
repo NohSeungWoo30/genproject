@@ -1,0 +1,559 @@
+/* ────────────────────────────────────────────────────── */
+/* 공통 리셋 및 기본 설정 */
+/* ────────────────────────────────────────────────────── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  background-color: #f2f2f2;
+  font-family: 'Noto Sans KR', sans-serif;
+  color: #333;
+  overflow-x: hidden;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ────────────────────────────────────────────────────── */
+/* create.html: 메인 그리드 레이아웃 */
+/* ────────────────────────────────────────────────────── */
+.container-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 기본 2열 레이아웃 */
+  gap: 32px;
+  max-width: 1300px;
+  margin: 20px auto;
+  padding: 0 20px;
+}
+
+@media (max-width: 900px) {
+  .container-grid {
+    grid-template-columns: 1fr;
+    max-width: 600px;
+  }
+}
+
+/* ────────────────────────────────────────────────────── */
+/* create.html: 왼쪽 폼 섹션 */
+/* ────────────────────────────────────────────────────── */
+.form-section {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  padding: 32px;
+}
+
+.form-section h1 {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #222;
+}
+
+.form-group {
+  margin-bottom: 22px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.form-group input[type="text"],
+.form-group input[type="datetime-local"],
+.form-group textarea,
+.form-group input[type="file"] {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 15px;
+  background-color: #f9f9f9;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: #4285f4;
+    box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.tag-icon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 10px;
+}
+
+.tag-icon {
+  text-align: center;
+  padding: 9px 10px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: #555;
+  transition: all 0.2s;
+}
+.tag-icon:hover {
+    transform: translateY(-2px);
+    border-color: #aaa;
+}
+.tag-icon.selected {
+  background-color: #4285f4;
+  color: #fff;
+  border-color: #4285f4;
+  font-weight: 600;
+}
+
+.map-area {
+  width: 100%;
+  height: 250px;
+  background-color: #e9e9e9;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.primary-button {
+  width: 100%;
+  background: linear-gradient(135deg, #4a90e2, #4285f4);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 14px 0;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 12px;
+}
+.primary-button:hover {
+  background: linear-gradient(135deg, #3a78c2, #3367d6);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.secondary-button {
+  width: 100%;
+  background-color: #6c757d; /* 회색 계열 */
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 14px 0;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  margin-top: 12px;
+}
+.secondary-button:hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.button-group {
+    display: flex; /* 자식 요소들을 수평으로 정렬 */
+    gap: 16px; /* 버튼들 사이의 간격 (원하는 값으로 조정) */
+    margin-top: 12px; /* 상단 여백 (필요시 기존 버튼 마진과 조정) */
+}
+
+.button-group .primary-button,
+.button-group .secondary-button {
+    flex: 1; /* flex item이 사용 가능한 공간을 균등하게 분배 */
+    /* width: 100%; 는 flex: 1 때문에 필요하지 않음. */
+    /* 기존 width: 100%; 속성은 제거되거나 이 셀렉터의 특수성에 의해 덮어씌워짐 */
+    margin-top: 0; /* 개별 버튼의 상단 마진을 초기화하거나 조정 */
+}
+
+/* ────────────────────────────────────────────────────── */
+/* 카드 공통 스타일 (미리보기 & 상세 페이지) */
+/* ────────────────────────────────────────────────────── */
+.live-card {
+  width: 100%;
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.preview-header-background {
+  width: 100%;
+  background-color: #FFFBED;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background-color 0.3s;
+}
+
+.room-image-container {
+  position: relative;
+}
+.image-preview-placeholder {
+  background-color: #e0e0e0;
+  border-radius: 8px;
+}
+.room-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.profile-block {
+  display: flex;
+  align-items: center;
+}
+.profile-placeholder, .profile-image {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #d0d0d0;
+  object-fit: cover;
+  margin-right: 10px;
+}
+.profile-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.card-body .tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.tag-chip, .age-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  color: #ffffff;
+  font-weight: 700;
+  line-height: 1;
+}
+.age-chip {
+  background-color: #4a5568;
+}
+.card-body .content {
+  display: flex;
+  gap: 24px;
+}
+.card-body .description {
+  flex: 1;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #444;
+  white-space: pre-wrap;
+}
+.card-body .right-info {
+  flex-shrink: 0;
+}
+.small-map-area {
+  width: 100%;
+  height: 100%;
+}
+.card-body .info-list {
+  width: 100%;
+}
+.card-body .info-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+.card-body .info-item .label {
+  font-weight: 500;
+  color: #555;
+}
+.card-body .info-item .value {
+  font-weight: 600;
+  color: #333;
+}
+
+/* ────────────────────────────────────────────────────── */
+/* [분리] create.html 미리보기 카드 전용 스타일 */
+/* ────────────────────────────────────────────────────── */
+.preview-section {
+  padding-top: 45px;
+}
+@media (max-width: 900px) {
+  .preview-section {
+    padding-top: 0;
+  }
+}
+.preview-section h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 16px;
+}
+.preview-section .preview-header-background {
+  padding: 16px 20px;
+}
+.preview-section .room-image-container,
+.preview-section .image-preview-placeholder {
+  width: 120px;
+  height: 90px;
+}
+.preview-section .card-body {
+  padding: 20px;
+}
+.preview-section .card-body .title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.preview-section .right-info {
+    width: 200px;
+}
+.preview-section .map-preview {
+    height: 100px;
+    margin-bottom: 12px;
+}
+.preview-section .join-button {
+  margin-top: 16px;
+  width: 100%;
+  background: #4285f4;
+  padding: 10px 0;
+  font-size: 15px;
+  border-radius: 6px;
+}
+.preview-section .join-button:hover {
+    background-color: #3367d6;
+}
+
+/* ────────────────────────────────────────────────────── */
+/* [분리] detail.html 상세 페이지 전용 스타일 */
+/* ────────────────────────────────────────────────────── */
+.room-detail-section {
+  padding: 60px 20px;
+  min-height: 100vh;
+}
+.room-detail-section h2 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 40px;
+  text-align: center;
+}
+.full-card-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+.full-card-container .preview-header-background {
+  padding: 20px 24px;
+}
+.full-card-container .room-image-container,
+.full-card-container .image-preview-placeholder {
+  width: 140px;
+  height: 100px;
+}
+.full-card-container .card-body {
+  padding: 32px;
+}
+.full-card-container .card-body .title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+.full-card-container .description {
+  min-height: 120px;
+}
+.full-card-container .right-info {
+    width: 300px;
+}
+.full-card-container .map-preview {
+    height: 120px;
+    margin-bottom: 16px;
+    border-radius: 8px;
+}
+.full-card-container .join-button,
+.detail-btn:not(.delete) {
+  display: block;
+  width: 100%;
+  padding: 14px 0;
+  margin-top: 24px;
+  background: linear-gradient(135deg, #4a90e2, #4285f4);
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+.full-card-container .join-button:hover,
+.detail-btn:not(.delete):hover {
+  background: linear-gradient(135deg, #3a78c2, #3367d6);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.detail-actions {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 32px;
+}
+.detail-btn {
+  padding: 14px 28px;
+  width: auto;
+}
+.detail-btn.delete {
+  background: linear-gradient(135deg, #e64a19, #e53935);
+}
+.detail-btn.delete:hover {
+  background: linear-gradient(135deg, #d84315, #d32f2f);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================== */
+/*     슬라이더 관련만 남김       */
+/* ============================== */
+.age-slider-section {
+  margin-top: 6px;
+  margin-bottom: 10px;
+}
+.age-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 10px;
+}
+/* noUiSlider 핵심 스타일만! */
+#age-slider.noUi-target {
+  background: #e5e7eb;
+  height: 4px;
+  border-radius: 2px;
+  border: none;
+  box-shadow: none;
+  margin: 0 8px 16px 8px;
+}
+#age-slider .noUi-connect {
+  background: #6366f1 !important;
+  height: 4px;
+  border-radius: 2px;
+}
+#age-slider .noUi-horizontal .noUi-handle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2.5px solid #6366f1;
+  box-shadow: 0 3px 16px rgba(99,102,241,.13);
+  cursor: grab;
+  top: -9px;
+  transition: border 0.2s, box-shadow 0.2s, transform .18s;
+}
+#age-slider .noUi-horizontal .noUi-handle:active {
+  cursor: grabbing;
+  border: 3px solid #4F46E5;
+  transform: scale(1.09);
+}
+#age-slider .noUi-horizontal .noUi-handle:after,
+#age-slider .noUi-horizontal .noUi-handle:before {
+  display: none;
+}
+.age-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #7b8ca7;
+  margin: 0 6px 0 6px;
+}
+.age-ticks span {
+  flex: none;
+  width: 22px;
+  text-align: center;
+  user-select: none;
+  letter-spacing: -1px;
+}
+
+.person-slider-section {
+  margin-top: 6px;
+  margin-bottom: 10px;
+}
+.person-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 10px;
+}
+#person-slider {
+  margin: 0 8px 16px 8px;
+}
+.person-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #7b8ca7;
+  margin: 0 6px 0 6px;
+}
+.person-ticks span {
+  flex: none;
+  width: 22px;
+  text-align: center;
+  user-select: none;
+  letter-spacing: -1px;
+}
+
+/* 모임 생성 페이지의 성별 제한 */
+.gender-radio-group { /* 변경: .form-group > div 대신 고유 클래스 사용 */
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.gender-radio-group input[type="radio"] { /* 변경: 셀렉터에 .gender-radio-group 추가 */
+    display: none;
+}
+
+.gender-radio-group input[type="radio"] + label { /* 변경: 셀렉터에 .gender-radio-group 추가 */
+    display: inline-flex;
+    padding: 10px 16px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    background-color: #f9f9f9;
+    font-size: 14px;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.gender-radio-group input[type="radio"]:checked + label { /* 변경: 셀렉터에 .gender-radio-group 추가 */
+    background-color: #4285f4;
+    color: #fff;
+    border-color: #4285f4;
+    font-weight: 600;
+}
+
+.gender-radio-group input[type="radio"] + label:hover { /* 변경: 셀렉터에 .gender-radio-group 추가 */
+    border-color: #a0a0a0;
+    background-color: #e0e0e0;
+}
+
+.gender-radio-group input[type="radio"]:checked + label:hover { /* 변경: 셀렉터에 .gender-radio-group 추가 */
+    background-color: #3367d6;
+    border-color: #3367d6;
+}

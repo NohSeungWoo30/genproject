@@ -46,4 +46,5 @@ public class UserService {
 
         userMapper.insertUser(user);
     }
+
 }

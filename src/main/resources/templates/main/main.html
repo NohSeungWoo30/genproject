@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ===== 프로젝트 공통 스타일 ===== -->
+  <link rel="stylesheet" href="/css/mainstyle.css" />
+  <link rel="stylesheet" href="/css/dev-login.css" />
+  <link rel="stylesheet" href="/css/notify.css" />
+  <link rel="stylesheet" href="/css/filter.css" /> <!-- simple.html 스타일 분리 -->
+
+  <!-- ===== 외부 라이브러리 ===== -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <!-- ionicons: main, simple 둘 다 필요 -->
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+  <!-- noUiSlider: simple.html용 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.js"></script>
+
+  <title>메인 페이지</title>
+</head>
+
+<body>
+<div class="_1920-w-light">
+
+  <!-- ─── 상단 네비게이션 ─── -->
+  <header class="container-nav">
+    <div class="nav-left">
+      <a href="main.html"><img class="logo" src="/img/icons/Group 17.png" alt="M 로고"></a>
+    </div>
+
+    <div class="nav-center">
+      <img src="/img/my1.png" class="nav-img" alt="그림1">
+      <img src="/img/my2.png" class="nav-img" alt="그림2">
+      <img src="/img/my3.png" class="nav-img" alt="그림3">
+      <img src="/img/my4.png" class="nav-img" alt="그림4">
+    </div>
+    <div class="nav-right" id="navRight">
+      <!-- 로그인 전 기본 표시 → 스크립트에서 교체 -->
+      <a href="login.html" class="login-link">로그인ㆍ회원가입</a>
+    </div>
+  </header>
+
+  <!-- ─── 하단 고정 네비 (모바일 bottom‑nav 스타일) ─── -->
+  <section class="bottom-nav-wrapper">
+    <nav class="bottom-nav">
+      <a href="/main/meetingcreate.html"                class="bottom-link">모임 생성</a>
+      <a href="/main/meeting-list.html" class="bottom-link">모임 목록</a>
+      <a href="product-list.html"                class="bottom-link">상품 목록</a>
+      <a href="board.html"       class="bottom-link">자유 게시판</a>
+    </nav>
+  </section>
+
+  <!-- ─── 메인 배너 ─── -->
+  <section class="main-banner">
+    <img src="/img/_2025-05-30-182035-10.png" alt="예상 못한 기쁨 배너 이미지" class="banner-image" />
+  </section>
+
+  <!-- ─── 카테고리 아이콘 링크 ─── -->
+  <nav class="category-links">
+    <a href="meeting-list.html" class="cat-link"><img src="/img/icons/ball1.png"   alt="운동/액티비티" class="cat-icon"/><span class="cat-text">운동/액티비티</span></a>
+    <a href="meeting-list.html" class="cat-link"><img src="/img/icons/art1.png"    alt="문화/예술"     class="cat-icon"/><span class="cat-text">문화/예술</span></a>
+    <a href="meeting-list.html" class="cat-link"><img src="/img/icons/book1.png"   alt="지식/스터디"   class="cat-icon"/><span class="cat-text">지식/스터디</span></a>
+    <a href="meeting-list.html" class="cat-link"><img src="/img/icons/food1.png"   alt="음식/카페"     class="cat-icon"/><span class="cat-text">음식/카페</span></a>
+    <a href="meeting-list.html" class="cat-link"><img src="/img/icons/travel1.png" alt="여행/탐험"     class="cat-icon"/><span class="cat-text">여행/탐험</span></a>
+    <a href="meeting-list.html" class="cat-link"><img src="/img/icons/game1.png"  alt="게임/오락"     class="cat-icon"/><span class="cat-text">게임/오락</span></a>
+    <a href="meeting-list.html" class="cat-link"><img src="/img/icons/pet1.png"   alt="반려동물/자연" class="cat-icon"/><span class="cat-text">반려동물/자연</span></a>
+    <a href="meeting-list.html" class="cat-link"><img src="/img/icons/build1.png" alt="만들기/공예"   class="cat-icon"/><span class="cat-text">만들기/공예</span></a>
+    <a href="meeting-list.html" class="cat-link"><img src="/img/icons/social3.png" alt="소셜/친목"     class="cat-icon"/><span class="cat-text">소셜/친목</span></a>
+    <a href="meeting-list.html" class="cat-link"><img src="/img/icons/guitar1.png" alt="기타"         class="cat-icon"/><span class="cat-text">기타</span></a>
+  </nav>
+
+  <!-- ─── 최신 모임 (가로 스크롤 카드) ─── -->
+  <section class="container2">
+    <div class="flex-row">
+      <div class="card"><div class="card-thumb"><img src="/img/div4.png"  alt="망고 케이크"/></div><div class="card-info"><div class="card-category">중구 · 푸드·드링크</div><div class="card-title">🥭생망고 올라간 망고 빅토리아 케이크 만들기!</div><div class="card-date">2025.05.30(금) 10:00</div></div></div>
+      <div class="card"><div class="card-thumb"><img src="/img/div7.png"  alt="e커머스 마케팅"/></div><div class="card-info"><div class="card-category">강남구 · N잡·재테크</div><div class="card-title">e커머스 – 광고, SNS 마케팅 패키지 클래스</div><div class="card-date">2025.06.07(토) 06:00</div></div></div>
+      <div class="card"><div class="card-thumb"><img src="/img/div8.png"  alt="이어지는 글 파티"/></div><div class="card-info"><div class="card-category">마포구 · 취미</div><div class="card-title">🦩너와나&lt;이어지는 글 파티&gt;🎉🖍️모집 중!🔥</div><div class="card-date">2025.06.07(토) 08:00</div></div></div>
+      <div class="card"><div class="card-thumb"><img src="/img/div11.png" alt="비주얼파티"/></div><div class="card-info"><div class="card-category">동작구 · 파티</div><div class="card-title">🌷비주얼파티🌷토요일은 플인서💜 도파민(ep.46)</div><div class="card-date">2025.05.31(토) 10:00</div></div></div>
+    </div>
+  </section>
+
+  <!-- ─── 중간 배너 ─── -->
+  <div class="mid-banner">
+    <img src="/img/_200.png" alt="중간 배너 이미지" class="mid-banner-img"/>
+  </div>
+
+  <!-- ─── Footer ─── -->
+  <footer class="footer">
+    <div class="footer-links">
+      <a href="about.html"        class="footer-link">회사소개</a><span class="footer-divider"></span>
+      <a href="partnership.html"  class="footer-link">제휴안내</a><span class="footer-divider"></span>
+      <a href="advertising.html"  class="footer-link">광고안내</a><span class="footer-divider"></span>
+      <a href="terms.html"        class="footer-link">이용약관</a><span class="footer-divider"></span>
+      <a href="privacy.html"      class="footer-link">개인정보처리방침</a><span class="footer-divider"></span>
+      <a href="youth-policy.html" class="footer-link">청소년보호정책</a>
+    </div>
+    <div class="footer-copyright">© 1999 – 2025 dcinside. All rights reserved.</div>
+  </footer>
+</div>
+
+<!-- ============= [simple.html 전용 영역] ============= -->
+
+<!-- 1. 플로팅 간편매칭 버튼 -->
+<button id="open-filter-btn" class="fixed bottom-10 right-10 bg-white text-blue-700 border-2 border-blue-700 px-6 py-4 rounded-full font-bold shadow-xl hover:bg-blue-50 transition-all duration-300 hover:scale-105 flex items-center gap-2 z-40">
+  <ion-icon name="options-outline" class="text-xl"></ion-icon>
+  <span>간편 매칭</span>
+</button>
+<!-- 2. 필터 모달 -->
+<div id="filter-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+  <div class="filter-modal-card">
+    <!-- Screen 1: Filter Settings -->
+    <div id="filter-content" class="h-full flex flex-col">
+      <div class="px-8 pb-4 pt-6 flex justify-between items-center">
+        <h2 class="text-2xl font-bold text-gray-900">나에게 맞는 모임 찾기</h2>
+        <button id="close-filter-btn" class="w-12 h-12 rounded-full text-gray-500 hover:bg-gray-100 flex items-center justify-center">
+          <ion-icon name="close-outline" class="text-2xl"></ion-icon>
+        </button>
+      </div>
+      <div class="filter-modal-content p-8 pt-4">
+        <div class="tags-container">
+          <div class="tag-item" data-tag="운동/액티비티"><span class="label">운동/액티비티</span></div>
+          <div class="tag-item" data-tag="문화/예술"><span class="label">문화/예술</span></div>
+          <div class="tag-item" data-tag="지식/스터디"><span class="label">지식/스터디</span></div>
+          <div class="tag-item" data-tag="음식/카페"><span class="label">음식/카페</span></div>
+          <div class="tag-item" data-tag="여행/탐험"><span class="label">여행/탐험</span></div>
+          <div class="tag-item" data-tag="게임/오락"><span class="label">게임/오락</span></div>
+          <div class="tag-item" data-tag="반려동물"><span class="label">반려동물</span></div>
+          <div class="tag-item" data-tag="만들기/공예"><span class="label">만들기/공예</span></div>
+          <div class="tag-item" data-tag="소셜/친목"><span class="label">소셜/친목</span></div>
+        </div>
+        <hr class="filter-divider">
+        <div class="text-center">
+          <div class="age-value"><span id="minAgeDisplay">20</span> – <span id="maxAgeDisplay">50</span>세</div>
+          <div id="age-slider"></div>
+        </div>
+        <hr class="filter-divider">
+        <div class="segmented-control">
+          <label class="seg-label"><input type="radio" name="gender" value="누구나" checked><span class="seg-btn">누구나</span></label>
+          <label class="seg-label"><input type="radio" name="gender" value="남자만"><span class="seg-btn">남자만</span></label>
+          <label class="seg-label"><input type="radio" name="gender" value="여자만"><span class="seg-btn">여자만</span></label>
+        </div>
+      </div>
+      <div class="p-6 bg-gray-50 border-t">
+        <button id="matchButton" class="btn-match" disabled>필터 적용하기</button>
+      </div>
+    </div>
+
+    <!-- Screen 2: Filter Results (hidden by default) -->
+    <div id="results-content" class="h-full flex flex-col hidden">
+      <div class="px-8 pb-4 pt-6 flex justify-between items-center">
+        <button id="back-to-filters-btn" class="w-12 h-12 rounded-full text-gray-500 hover:bg-gray-100 flex items-center justify-center">
+          <ion-icon name="arrow-back-outline" class="text-2xl"></ion-icon>
+        </button>
+        <h2 class="text-2xl font-bold text-gray-900">매칭된 모임</h2>
+        <div class="w-12 h-12"></div>
+      </div>
+      <div class="px-8 pb-2">
+        <div id="applied-filters-display" class="flex flex-wrap items-center gap-2"></div>
+      </div>
+      <div class="filter-modal-content p-8 pt-4">
+        <div id="results-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- 3. 상세 모달 -->
+<div id="room-detail-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+  <div class="bg-white rounded-2xl w-full max-w-lg p-8 relative">
+    <button id="close-room-detail-btn" class="absolute top-4 right-4 w-10 h-10 rounded-full text-gray-500 hover:bg-gray-100 flex items-center justify-center">
+      <ion-icon name="close-outline" class="text-2xl"></ion-icon>
+    </button>
+    <h2 id="room-detail-title" class="text-2xl font-bold mb-4"></h2>
+    <p class="text-gray-600 mb-6">모임 상세 내용이 여기에 표시됩니다. (예: 장소, 시간, 소개, 참여 멤버 등)</p>
+    <div class="bg-gray-100 p-4 rounded-lg mb-6">
+      <p><strong>주최자:</strong> 김모임</p>
+      <p><strong>참여인원:</strong> 3 / 8 명</p>
+    </div>
+    <button class="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-600">참여하기</button>
+  </div>
+</div>
+
+<!-- ============= [알림/프사 템플릿, notify와 dev-login 연결] ============= -->
+<template id="template-nav-user">
+  <div class="noti-bell select-none relative mr-2 cursor-pointer">
+    <ion-icon name="notifications-outline" class="text-2xl"></ion-icon>
+    <span class="noti-bell__badge noti-badge"></span>
+  </div>
+  <div class="profile-thumb" title="마이페이지">
+    <img src="" alt="프로필 썸네일" />
+  </div>
+</template>
+<template id="template-noti-popover">
+  <div class="noti-popover flex flex-col">
+    <div class="flex justify-between items-center px-4 py-2 border-b border-gray-100 bg-white/95">
+      <h2 class="font-semibold text-gray-900 text-base">알림</h2>
+      <div class="flex items-center space-x-3 text-sm">
+        <button id="mark-all-read-btn"  class="text-blue-600 hover:text-blue-800">전체 읽음</button>
+        <button id="delete-read-btn"    class="text-gray-600 hover:text-gray-800">읽은 삭제</button>
+      </div>
+    </div>
+    <div id="noti-list" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50"></div>
+  </div>
+</template>
+<template id="template-noti-card">
+  <article class="noti-card flex gap-3 relative" data-id="" data-read="false" data-href="#">
+    <div class="noti-card__icon w-6 h-6 flex items-center justify-center">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+    </div>
+    <div class="flex-1 pr-8">
+      <p class="noti-card__message text-sm text-gray-900"></p>
+      <time class="noti-card__time text-xs text-gray-500"></time>
+    </div>
+    <button class="noti-card__dismiss-btn absolute top-2 right-2 text-gray-400 hover:text-gray-600">
+      <ion-icon name="close-outline" class="text-lg"></ion-icon>
+    </button>
+  </article>
+</template>
+
+<!-- ============= [모든 JS 연결] ============= -->
+<script src="/js/notify.js" defer></script>
+<script src="/js/dev-login.js" defer></script>
+<script src="/js/filter.js" defer></script> <!-- simple.html 기능 js 분리 -->
+</body>
+</html>
