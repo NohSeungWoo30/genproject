@@ -1,0 +1,285 @@
+
+    body {
+      background-color: #f5f7fa;
+      font-family: 'Pretendard', 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+      color: #333;
+    }
+
+    .detail-container {
+      max-width: 960px;
+      margin: 60px auto;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+      padding: 48px;
+    }
+
+    .detail-meta {
+      font-size: 14px;
+      color: #888;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 12px;
+    }
+
+    .detail-content {
+      font-size: 17px;
+      line-height: 1.75;
+      margin-bottom: 30px;
+      min-height: 200px;
+      word-break: break-word;
+    }
+
+    .detail-images-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .detail-images-list img {
+      max-width: 100%;
+      border-radius: 8px;
+      object-fit: contain;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
+
+    .detail-images-list img:hover {
+      transform: scale(1.03);
+    }
+
+    .detail-actions {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .btn-icon {
+      width: 32px;
+      height: 32px;
+      border: none;
+      border-radius: 6px;
+      background-color: var(--color-grey-96);
+      color: var(--color-mine-shaft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      padding: 0;
+    }
+
+    .btn-icon:hover {
+      background-color: var(--color-grey-89);
+    }
+
+    .btn-icon svg {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2; /* 선 두께 */
+    }
+
+    .btn-back {
+      background-color: #d8e0e9;
+      padding: 8px 16px;
+      border-radius: 6px;
+      color: #1a1a1a;
+      text-decoration: none;
+      font-weight: 500;
+      display: inline-block;
+      margin-top: 20px;
+    }
+
+    .comments-section {
+      margin-top: 40px;
+      border-top: 1px solid #ddd;
+      padding-top: 24px;
+    }
+
+    .comment {
+      padding: 16px;
+      background: #fafafa;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      border-left: 4px solid #ccc;
+    }
+
+    .comment.reply {
+      margin-left: 20px;
+      border-color: #aaa;
+    }
+
+    .comment .author {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .comment .comment-actions {
+      margin-top: 8px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-show-replies {
+      margin-top: 8px;
+      font-size: 13px;
+      background: none;
+      border: none;
+      color: #4a6cf7;
+      cursor: pointer;
+    }
+
+    .comment-form,
+    .reply-form,
+    .edit-form {
+      margin-top: 12px;
+      padding: 16px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .comment-form input,
+    .reply-form input,
+    .edit-form input,
+    .comment-form textarea,
+    .reply-form textarea,
+    .edit-form textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: var(--font-pretendard-regular);
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+
+    .comment-form button,
+    .reply-form button,
+    .edit-form button {
+      background-color: var(--color-pigment-indigo);
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      font-size: 14px;
+      border-radius: 4px;
+      font-family: var(--font-pretendard-medium);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .comment-form button:hover,
+    .reply-form button:hover,
+    .edit-form button:hover {
+      background-color: #6b38d0;
+    }
+
+
+    #report-modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      z-index: 9999;
+      width: 400px;
+    }
+
+    #report-modal textarea,
+    #report-modal select {
+      width: 100%;
+      font-size: 14px;
+      padding: 10px;
+      margin-top: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    #report-modal button {
+      margin-top: 12px;
+      margin-right: 10px;
+      padding: 8px 16px;
+      background-color: #ff4444;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    #report-modal button:last-child {
+      background-color: #999;
+    }
+
+    #report-modal .modal-button-group {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+
+    .comment-form button,
+    .reply-form button,
+    .edit-form button {
+      background-color: var(--color-pigment-indigo);
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      font-size: 14px;
+      border-radius: 4px;
+      font-family: var(--font-pretendard-medium);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .comment-form button:hover,
+    .reply-form button:hover,
+    .edit-form button:hover {
+      background-color: #6b38d0;
+    }
+
+    .post-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #222;
+    }
+
+    .post-content p {
+      font-size: 17px;
+      line-height: 1.8;
+      margin-bottom: 20px;
+      white-space: pre-line;
+    }
+
+    .detail-images-list img {
+      max-width: 100%;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .btn-text {
+      padding: 6px 12px;
+      background-color: #f1f3f5;
+      border: none;
+      border-radius: 6px;
+      color: #333;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .btn-text:hover {
+      background-color: #e0e0e0;
+    }

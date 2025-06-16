@@ -38,8 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const minPersonInput = document.getElementById('minPerson'); // 인원 최소
     const maxPersonInput = document.getElementById('maxPerson'); // 인원 최대
 
-    const roomImageInput = document.getElementById('roomImageInput');
-    const liveRoomImage = document.getElementById('liveRoomImage');
+    const roomImageInput = document.getElementById('roomImageInput'); // 첨부파일
+    const liveRoomImage = document.getElementById('liveRoomImage'); // 실시간 이미지
     const liveRoomPlaceholder = document.getElementById('liveRoomPlaceholder');
     const tagIcons = document.querySelectorAll('.tag-icon');
     const titleInput = document.getElementById('titleInput');
@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const minPersonDisplay = document.getElementById('minPersonDisplay');
     const maxPersonDisplay = document.getElementById('maxPersonDisplay');
     const placeResultList = document.getElementById('placeResultList');
+
     /* 지도 검색결과 리스트 클릭 시 아래 input으로 들어갈 UI */
     const meetingPlaceNameInput = document.getElementById('meetingPlaceName');
     const meetingPlaceCategoryInput = document.getElementById('meetingPlaceCategory');
@@ -367,7 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const maxAge = maxAgeDisplay.textContent || '50';
       const ageChip = document.createElement('div');
       ageChip.className = 'age-chip';
-      ageChip.textContent = `${minAge} ~ ${maxAge}세`;
+      ageChip.textContent = `${minAge} ~ ${maxAge}`;
       liveAgeContainer.appendChild(ageChip);
 
       // 인원 칩
@@ -376,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const maxPerson = maxPersonDisplay.textContent || '12';
       const personChip = document.createElement('div');
       personChip.className = 'age-chip';
-      personChip.textContent = `${minPerson} ~ ${maxPerson}명`;
+      personChip.textContent = `${minPerson} ~ ${maxPerson}`;
       livePersonContainer.appendChild(personChip);
 
       // info-list의 인원 표기
@@ -394,12 +395,14 @@ document.addEventListener('DOMContentLoaded', () => {
       liveMeetingTime.textContent = meetTime ? meetTime.replace('T', ' ') : '미정';
       liveRemainingTime.textContent = remaining || '미정';
       remainingTimeDisplay.value = remaining;
+
     } // 실시간 미리보기 업데이트
 
     // 이벤트 바인딩 (input)
     [titleInput, descriptionInput, meetingDatetimeInput].forEach(el => {
       el.addEventListener('input', updateLivePreview);
     });
+
     tagIcons.forEach(icon => {
        icon.addEventListener('click', () => {
        const value = icon.dataset.value;
@@ -447,7 +450,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });*/
 
-    /* 사진 업로드 막아둠
+    // 사진 업로드
     roomImageInput.addEventListener('change', (event) => {
       const file = event.target.files[0];
       if (file) {
@@ -463,13 +466,14 @@ document.addEventListener('DOMContentLoaded', () => {
         liveRoomPlaceholder.classList.remove('hidden');
         liveRoomImage.classList.add('hidden');
       }
-    });*/
+    });
 
-    // 폼 제출 시 유효성 검사 (AJAX 제출 전에 수행)
             if (createRoomButton) {
-                createRoomButton.addEventListener('click', async (e) => {
-                    e.preventDefault(); // 폼의 기본 제출 동작을 막습니다. (이제 AJAX로 직접 전송)
-
+                createRoomButton.addEventListener('submit', async (e) => {
+                    if (selectedCategoryIdInput.value.trim() === '') {
+                        alert('모임 유형을 선택해주세요.'); e.preventDefault();
+                        return;
+                    }
                     // 성별 제한 유효성 검사
                    const genderRadios = document.getElementsByName('genderLimit');
                    let isGenderSelected = false;
@@ -483,6 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                      if (!isGenderSelected) {
                      alert('성별 제한을 선택해주세요.');
+                     e.preventDefault();
                      return;
                     }
 
@@ -491,6 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const maxAge = parseInt(ageMaxInput.value);
                     if (isNaN(minAge) || isNaN(maxAge) || minAge > maxAge) {
                         alert('유효한 나이 범위를 설정해주세요.');
+                        e.preventDefault();
                         return;
                     }
 
@@ -499,10 +505,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     const maxMembers = parseInt(maxPersonInput.value);
                     if (isNaN(minMembers) || isNaN(maxMembers) || minMembers > maxMembers) {
                         alert('유효한 인원 수를 설정해주세요.');
+                        e.preventDefault();
                         return;
                     }
                     if (minMembers <= 1 || maxMembers <= 1) { // 1명 이하는 유효하지 않도록 수정
                                          alert('최소/최대 인원 수는 2명 이상이어야 합니다.');
+                                         e.preventDefault();
                                          return;
                                     }
 
@@ -511,6 +519,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const titleInput = document.getElementById('titleInput');
                     if (titleInput.value.trim() === '') {
                         alert('방 제목을 입력해주세요.');
+                        e.preventDefault();
                         return;
                     }
 
@@ -518,6 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const descriptionInput = document.getElementById('descriptionInput');
                     if (descriptionInput.value.trim() === '') {
                         alert('설명을 입력해주세요.');
+                        e.preventDefault();
                         return;
                     }
 
@@ -532,6 +542,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const meetingDatetimeInput = document.getElementById('meetingDatetimeInput');
                     if (meetingDatetimeInput.value.trim() === '') {
                         alert('모임 날짜와 시간을 선택해주세요.');
+                        e.preventDefault();
                         return;
                     }
                     // 현재 시간보다 이전 날짜/시간 선택 방지 (선택 사항)
@@ -539,66 +550,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     const now = new Date();
                     if (selectedDateTime < now) {
                         alert('모임 날짜와 시간은 현재 시간보다 이전일 수 없습니다.');
+                        e.preventDefault();
                         return;
                     }
 
-                    // 모든 유효성 검사 통과 후 데이터 수집
-                    const formData = {
-                        ownerIdx: parseInt(ownerIdxInput.value), // 반드시 숫자로 변환
-                        groupCategoryMainIdx: selectedCategoryIdInput.value, // hidden input에서 가져옴
-                        title: titleInput.value.trim(),
-                        content: descriptionInput.value.trim(), // 백엔드 필드명에 맞춰 'content'로 변경
-                        placeName: meetingPlaceNameInput.value.trim(),
-                        placeCategory: meetingPlaceCategoryInput.value,
-                        placeAddress: meetingPlaceAddressInput.value,
-                        naverPlaceUrl: meetingPlaceLinkInput.value,
-                        latitude: parseFloat(meetingPlaceLatInput.value), // 숫자로 변환
-                        longitude: parseFloat(meetingPlaceLngInput.value), // 숫자로 변환
-                        groupDate: meetingDatetimeInput.value, // 백엔드 필드명에 맞춰 'groupDate'로 변경 (ISO 8601 형식)
-                        ageMin: minAge,
-                        ageMax: maxAge,
-                        membersMin: minMembers,
-                        membersMax: maxMembers,
-                        genderLimit: selectedGender
-                    };
-
-                    console.log("전송할 데이터:", formData); // 전송할 데이터 확인
-
-                    // AJAX 요청 (Fetch API 사용)
-                    fetch('/group/group_success', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json' // 서버로 JSON 데이터 전송
-                        },
-                        body: JSON.stringify(formData) // JavaScript 객체를 JSON 문자열로 변환
-                    })
-                    .then(response => {
-                        if (!response.ok) { // HTTP 상태 코드가 200번대가 아니면 오류 처리
-                            return response.text().then(text => { throw new Error(text) });
-                        }
-                        return response.json(); // 서버에서 JSON 응답을 기대
-                    })
-                    .then(data => {
-                        console.log('서버 응답:', data);
-                        // 성공적으로 방이 생성되었다면 다음 페이지로 리다이렉트
-                        alert('방이 성공적으로 생성되었습니다!');
-                        // 예시: data.groupId가 서버 응답에 있다면 상세 페이지로 이동
-                        if (data && data.groupId) {
-                            window.location.href = `/group/group_success`;
-                        } else {
-                            // 서버 응답에 groupId가 없으면 기본 성공 페이지로 이동
-                            window.location.href = '/main';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('방 생성 중 오류 발생:', error);
-                        alert('방 생성에 실패했습니다: ' + error.message);
-                    });
                 });
             }
             /* 취소버튼 동작 */
-            if (cancleButton) {
-                cancleButton.addEventListener('click', async (e) => {
+            if (cancelButton) {
+                cancelButton.addEventListener('click', async (e) => {
                     e.preventDefault();
                     window.location.href = '/main';
                 });

@@ -1,33 +1,120 @@
+
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-  <meta charset="UTF-8">
-  <title>메인 페이지</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>환영합니다 - 메인 페이지</title>
+    <style>
+        /* 기본 스타일링 (선택 사항, 필요에 따라 CSS 파일로 분리) */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #0056b3;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #e9ecef;
+        }
+        .section p {
+            margin-bottom: 10px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px; /* 버튼 사이 간격 */
+            flex-wrap: wrap; /* 버튼이 많아지면 다음 줄로 넘어감 */
+            margin-top: 15px;
+        }
+        button, a.button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            text-decoration: none; /* <a> 태그 버튼 스타일 */
+            color: #fff;
+            transition: background-color 0.2s ease;
+        }
+        button[type="submit"] {
+            background-color: #007bff;
+        }
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        a.button.secondary {
+            background-color: #6c757d;
+        }
+        a.button.secondary:hover {
+            background-color: #5a6268;
+        }
+        /* 추가된 정보확인 버튼 스타일 */
+        a.button.info-button {
+            background-color: #28a745; /* 녹색 */
+        }
+        a.button.info-button:hover {
+            background-color: #218838;
+        }
+    </style>
 </head>
 <body>
-<h2>환영합니다!</h2>
+<div class="container">
+    <h2>환영합니다!</h2>
 
-<div sec:authorize="isAuthenticated()">
-  <p>
-    현재 로그인된 사용자: <span sec:authentication="principal.nickname"></span> 님
-  </p>
-  <form th:action="@{/logout}" method="post"> <button type="submit">로그아웃</button>
-  </form>
-  <a th:href="@{/user/my-page}">마이페이지로 이동</a>
-  <a th:href="@{/product-list.html}">상품목록으로 이동</a>
-  <a th:href="@{/mypage.html}">상품목록으로 이동</a>
+    <div sec:authorize="isAuthenticated()" class="section authenticated-section">
+        <p>
+            안녕하세요, <strong sec:authentication="principal.nickname">사용자</strong> 님
+        </p>
+        <div class="button-group">
+            <a th:href="@{/user/profile}" class="button info-button">내 정보 확인</a>
+
+            <a th:href="@{/user/my-page}" class="button secondary">마이페이지로 이동</a>
+
+            <form th:action="@{/logout}" method="post" style="display: inline;">
+                <button type="submit">로그아웃</button>
+            </form>
+        </div>
+    </div>
+    <div sec:authorize="isAnonymous()" class="section anonymous-section">
+        <p>로그인 후 더 많은 기능을 이용해보세요.</p>
+        <div class="button-group">
+            <form th:action="@{/user/login}" method="get" style="display: inline;">
+                <button type="submit">로그인</button>
+            </form>
+            <form th:action="@{/user/signup}" method="get" style="display: inline;">
+                <button type="submit">회원가입</button>
+            </form>
+            <form th:action="@{/user/find-id}" method="get" style="display: inline;">
+                <button type="submit" class="secondary">아이디 찾기</button>
+            </form>
+            <form th:action="@{/user/forgot-password}" method="get" style="display: inline;">
+                <button type="submit" class="secondary">비밀번호 찾기</button>
+            </form>
+        </div>
+    </div>
+
+    <hr style="margin: 30px 0;">
+    <div class="section general-content">
+        <p>이곳은 서비스의 주요 콘텐츠가 표시되는 메인 페이지입니다.</p>
+        <p>다양한 정보와 기능을 탐색해 보세요!</p>
+    </div>
 </div>
-
-<div sec:authorize="isAnonymous()">
-  <p>로그인 후 더 많은 기능을 이용해보세요.</p>
-  <form th:action="@{/user/login}" method="get"> <button type="submit">로그인</button>
-  </form>
-  <form th:action="@{/user/signup}" method="get"> <button type="submit">회원가입</button>
-  </form>
-  <form th:action="@{/user/forgot-password}" method="get"> <button type="submit">비밀번호 찾기</button>
-  </form>
-</div>
-
-<p>여기는 메인 페이지의 다른 내용입니다.</p>
 </body>
 </html>

@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title th:text="${post.title}">게시글 상세보기</title>
+
+  <link rel="stylesheet" href="/css/vars.css" />
+  <link rel="stylesheet" href="/css/boardstyle.css" />
+  <link rel="stylesheet" href="/css/detail.css" />
+  <link rel="stylesheet" href="/css/mainstyle.css" />
+
+  <!--토스트(우측하단 실시간 알림) 추가 모든 페이지에 꼭 추가하기-->
+  <link rel="stylesheet" href="/css/toast.css" />
+  <!--알림(종모양)기능 css추가 알림기능이 포함되는 모든 곳에 추가하기-->
+  <link rel="stylesheet" href="/css/notify.css" />
+  <!--로그인 세션관련 계속 추가하기-->
+  <th:block th:replace="fragments/user-session :: sessionScript"></th:block>
+
+  <!--알림 아이콘관련 계속 추가하기-->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+  <!-- 1. 필수 라이브러리: SockJS, STOMP -->
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+  <!-- Lucide 아이콘 라이브러리 -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+
+</head>
+<body>
+<!-- 상단 네비게이션 바 -->
+<header class="container-nav">
+  <div class="nav-left">
+    <a th:href="@{/main}"><img class="logo" src="/img/icons/Group 17.png" alt="M 로고"></a>
+  </div>
+
+  <div class="nav-right" id="navRight">
+    <a href="/user/login" class="login-link">로그인ㆍ회원가입</a>
+  </div>
+</header>
+
+<!--하단 네비게이션 바-->
+<section class="bottom-nav-wrapper">
+  <nav class="bottom-nav">
+    <a href="#" class="bottom-link">모임 생성</a>
+    <a href="meeting-list.html" class="bottom-link">모임 목록</a>
+    <a href="#" class="bottom-link">상품 목록</a>
+    <a th:href="@{/posts}" class="bottom-link">자유 게시판</a>
+  </nav>
+</section>
+
+<div class="detail-container">
+
+  <h1 class="post-title" th:text="${post.title}">제목</h1>
+
+  <div class="detail-meta">
+    <span>카테고리: <span th:text="${post.category}"></span></span>
+    <span>작성자: <span th:text="${post.authorName}"></span></span>
+
+    <span>작성일: <span th:text="${createdAtStr}"></span></span>
+
+    <span th:if="${isEdited}" style="margin-left: 12px; color: gray;">
+    (수정됨: <span th:text="${updatedAtStr}"></span>)
+    </span>
+
+    <span>조회수: <span th:text="${post.viewCount}"></span></span>
+  </div>
+
+  <div class="post-content">
+    <div class="detail-content" th:text="${post.content}">내용</div>
+
+    <!-- 첨부 이미지 섹션 -->
+    <div class="detail-images-list" th:if="${attachments != null and #lists.size(attachments) > 0}">
+      <div th:each="file : ${attachments}"
+           th:if="${#strings.endsWith(file.originalName.toLowerCase(), '.png')
+                or #strings.endsWith(file.originalName.toLowerCase(), '.jpg')
+                or #strings.endsWith(file.originalName.toLowerCase(), '.jpeg')
+                or #strings.endsWith(file.originalName.toLowerCase(), '.gif')}">
+        <img th:src="@{|/uploads/${file.fileName}|}" alt="첨부 이미지" />
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="detail-actions" style="display: flex; justify-content: space-between; align-items: center;">
+
+    <div style="display: flex; gap: 8px; align-items: center;">
+    <button type="button" class="btn-icon" title="추천" th:onclick="|likePost(${post.postIdx})|">
+      <i data-lucide="heart"></i>
+    </button>
+    <span th:attr="id='like-count-' + ${post.postIdx}"
+          th:text="${post.likeCount + '명이 추천했어요'}">0명이 추천했어요</span>
+    </div>
+
+    <div style="display: flex; gap: 8px;">
+
+    <th:block th:if="${#authentication.principal instanceof T(generationgap.co.kr.security.CustomUserDetails)
+                 and post.authorIdx == #authentication.principal.userIdx}">
+      <button class="btn-text" th:onclick="|location.href='/posts/${post.postIdx}/edit'|">수정</button>
+
+    </th:block>
+
+    <th:block th:if="${#authentication.authenticated}">
+      <button class="btn-text" th:onclick="|openReportModal('POST', ${post.postIdx}, ${post.authorIdx}, 2)|">신고</button>
+    </th:block>
+
+      <button class="btn-text" th:onclick="|deletePost(${post.postIdx})|">삭제</button>
+
+    </div>
+  </div>
+
+
+
+  <div class="comments-section">
+    <h3>💬 댓글</h3>
+    <!-- ✅ 원댓글 루프 -->
+    <div th:each="parent : ${parentComments}" class="comment">
+      <th:block th:if="${parent.isDeleted == 'Y'}">
+        <span style="color: gray;">[삭제된 댓글입니다]</span>
+      </th:block>
+
+      <th:block th:unless="${parent.isDeleted == 'Y'}">
+        <span class="author" th:text="${parent.authorNickname}">작성자</span>
+        <span th:id="'content-' + ${parent.commentIdx}" th:text="${parent.content}">내용</span>
+        <!--<span th:text="${parent.formattedDisplayTime}"></span>
+        <span th:if="${parent.isEdited}" style="font-size: 12px; color: gray;">(수정됨)</span>-->
+        <span th:id="'time-' + ${parent.commentIdx}" id="time-[[${parent.commentIdx}]]"
+              th:text="${parent.formattedDisplayTime}"></span>
+        <span th:if="${parent.isEdited}" class="edited-label" style="font-size: 12px; color: gray;"> (수정됨)</span>
+
+
+        <div class="comment-actions" style="display: flex; gap: 6px; margin-top: 6px;">
+
+        <!-- 본인만 수정/삭제 가능 -->
+        <th:block th:if="${#authentication.authenticated}">
+
+          <button class="btn-text"
+                  th:if="${#authentication.principal instanceof T(generationgap.co.kr.security.CustomUserDetails)
+                      and parent.commenterIdx == #authentication.principal.userIdx}"
+                  th:onclick="'startEdit(' + ${parent.commentIdx} + ')'">수정
+          </button>
+
+          <button class="btn-text"
+                  th:if="${#authentication.principal instanceof T(generationgap.co.kr.security.CustomUserDetails)
+                      and parent.commenterIdx == #authentication.principal.userIdx}"
+
+                  th:onclick="'deleteComment(' + ${parent.commentIdx} + ')'">삭제
+          </button>
+        </th:block>
+
+        <button class="btn-text"
+                type="button"
+                th:onclick="|openReportModal('COMMENT', ${parent.commentIdx}, ${parent.commenterIdx}, 3)|">신고
+        </button>
+
+
+          <!-- 댓글 버튼 (원댓글만) -->
+          <button class="btn-text"
+                  th:if="${#authentication.authenticated}"
+                  th:onclick="|showReplyForm(${parent.commentIdx})|">
+            답글
+          </button>
+        </div>
+
+
+        <!-- 댓글 입력폼 -->
+        <div th:id="'reply-form-' + ${parent.commentIdx}" class="reply-form" style="display:none;">
+          <input type="text" th:id="'reply-content-' + ${parent.commentIdx}" placeholder="답글 입력" />
+          <button th:onclick="|submitReply(${post.postIdx}, ${parent.commentIdx})|">등록</button>
+        </div>
+
+        <!-- 수정 입력폼 -->
+        <div th:id="'edit-box-' + ${parent.commentIdx}" class="edit-form" style="display:none;">
+          <input type="text" th:id="'edit-input-' + ${parent.commentIdx}" placeholder="수정 댓글 입력" />
+          <button th:onclick="'submitEdit(' + ${parent.commentIdx} + ')'">저장</button>
+        </div>
+
+        <button class="btn-show-replies"
+                th:if="${replyCounts != null and replyCounts[parent.commentIdx] != null and replyCounts[parent.commentIdx] > 0}"
+                th:onclick="'toggleReplies(' + ${parent.commentIdx} + ', this)'">
+          ▼ 답글 <span th:text="${replyCounts[parent.commentIdx]}">0</span>개 보기
+        </button>
+
+
+      </th:block>
+
+      <!-- ✅ 대댓글 그룹핑 렌더링 -->
+      <div th:id="'replies-' + ${parent.commentIdx}" style="display: none;">
+      <div th:each="reply : ${repliesMap[parent.commentIdx]}" class="comment reply">
+        <th:block th:if="${reply.isDeleted == 'Y'}">
+          <span style="color: gray;">[삭제된 댓글입니다]</span>
+        </th:block>
+
+        <th:block th:unless="${reply.isDeleted == 'Y'}">
+          <span class="author" th:text="${reply.authorNickname}">작성자</span>
+          <span th:id="'content-' + ${reply.commentIdx}" th:text="${reply.content}">내용</span>
+          <!--<span th:text="${reply.formattedDisplayTime}"></span>
+          <span th:if="${reply.isEdited}" style="font-size: 12px; color: gray;">(수정됨)</span>-->
+          <span th:id="'time-' + ${reply.commentIdx}"
+                th:text="${reply.formattedDisplayTime}"></span>
+          <span th:if="${reply.isEdited}" class="edited-label" style="font-size: 12px; color: gray;"> (수정됨)</span>
+
+
+
+        <div class="comment-actions" style="display: flex; gap: 6px; margin-top: 6px;">
+
+          <th:block th:if="${#authentication.authenticated}">
+            <button type="button" class="btn-text"
+                    th:if="${#authentication.principal instanceof T(generationgap.co.kr.security.CustomUserDetails) and reply.commenterIdx == #authentication.principal.userIdx}"
+                    th:onclick="'startEdit(' + ${reply.commentIdx} + ')'">수정
+            </button>
+
+            <button type="button" class="btn-text"
+                    th:if="${#authentication.principal instanceof T(generationgap.co.kr.security.CustomUserDetails) and reply.commenterIdx == #authentication.principal.userIdx}"
+                    th:onclick="'deleteComment(' + ${reply.commentIdx} + ')'">삭제
+            </button>
+          </th:block>
+
+          <button type="button" class="btn-text"
+                  th:onclick="|openReportModal('COMMENT', ${reply.commentIdx}, ${reply.commenterIdx}, 3)|">신고
+          </button>
+        </div>
+
+          <!-- 대댓글에는 댓글 버튼 X -->
+
+          <!-- 수정 폼 -->
+          <div th:id="'edit-box-' + ${reply.commentIdx}" class="edit-form" style="display:none;">
+            <input type="text" th:id="'edit-input-' + ${reply.commentIdx}" th:value="${reply.content}" />
+            <button th:onclick="'submitEdit(' + ${reply.commentIdx} + ')'">저장</button>
+          </div>
+        </th:block>
+      </div>
+      </div>
+
+    </div>
+
+    <!-- 최상위 댓글 작성 폼 -->
+    <div class="comment-form">
+      <input type="text" id="new-comment-content" placeholder="댓글을 입력하세요" />
+      <button th:onclick="|submitReply(${post.postIdx}, null)|">등록</button>
+    </div>
+  </div>
+
+
+  <div th:with="queryParams='?page=' + ${currentPage}
+  + (${category != null and category != 'null'} ? '&category=' + ${category} : '')
+  + (${sort != null and sort != 'null'} ? '&sort=' + ${sort} : '')
+  + (${keyword != null and keyword != 'null'} ? '&keyword=' + ${keyword} : '')">
+
+    <a th:href="@{'/posts' + ${queryParams}}" class="btn-back">
+      ← 목록으로
+    </a>
+
+  </div>
+
+</div>
+
+<input type="hidden" id="csrf-token" th:value="${_csrf != null ? _csrf.token : ''}" />
+<script th:inline="javascript">
+
+  const csrf = {
+   token: /*[[${_csrf != null ? _csrf.token : ''}]]*/
+ };
+
+
+   // 👍 좋아요 시작
+   function likePost(postId) {
+       if (!postId) {
+         alert("postId가 없습니다!");
+         return;
+       }
+
+       fetch(`/posts/${postId}/like`, {
+         method: 'POST'
+       })
+       .then(res => {
+         if (!res.ok) {
+           return res.text().then(html => {
+             throw new Error("서버 에러 (status " + res.status + ")");
+           });
+         }
+         return res.json();
+       })
+       .then(data => {
+         // 실패한 경우: { status:"fail", message:"로그인이 필요합니다." }
+         if (data.status === "fail") {
+           alert(data.message);
+           return;
+         }
+         // 정상: { liked: true/false, likeCount: 숫자 }
+         const span = document.getElementById(`like-count-${postId}`);
+         if (span) {
+           span.textContent = `${data.likeCount}명이 추천했어요`;
+         }
+         alert(data.liked ? "추천이 완료되었습니다!" : "추천이 취소되었습니다!");
+       })
+       .catch(err => {
+         console.error(err);
+         alert("추천 처리 중 오류 발생:\n" + err.message);
+       });
+     } // 👍 좋아요 끝
+
+     //삭제버튼
+
+     function deletePost(postId) {
+   if (!confirm("정말 삭제하시겠습니까?")) return;
+
+   fetch(`/posts/${postId}/delete`, {
+     method: 'POST'
+   })
+   .then(res => {
+     if (res.status === 403) {
+       // 작성자 권한이 없으면 403 → alert만 띄우고 끝
+       return res.json()
+         .catch(() => { throw new Error("권한이 없습니다."); })
+         .then(obj => { throw new Error(obj.message || "권한이 없습니다."); });
+     }
+     if (!res.ok) {
+       return res.text().then(html => {
+         throw new Error("서버 오류 (status: " + res.status + ")");
+       });
+     }
+     // 정상(200) → 목록으로 이동
+     window.location.href = '/posts';
+   })
+   .catch(err => {
+     alert(err.message);
+   });
+ }//삭제버튼끝
+
+   // 💬 댓글 시작
+   function showReplyForm(commentId) {
+  const replyForm = document.getElementById("reply-form-" + commentId);
+  const editBox = document.getElementById("edit-box-" + commentId);
+
+  // 수정 폼 닫기
+  if (editBox && editBox.style.display !== 'none') {
+    editBox.style.display = 'none';
+  }
+
+  // 다른 댓글폼 다 닫기
+  document.querySelectorAll('[id^="reply-form-"]').forEach(el => {
+    if (el.id !== 'reply-form-' + commentId) {
+      el.style.display = 'none';
+    }
+  });
+
+  // 현재 댓글폼만 토글
+  replyForm.style.display = (replyForm.style.display === 'none' || replyForm.style.display === '') ? 'block' : 'none';
+}
+
+   function submitReply(postIdx, parentCommentId) {
+     let content;
+     if (parentCommentId !== null) {
+       content = document.getElementById("reply-content-" + parentCommentId).value;
+     } else {
+       content = document.getElementById("new-comment-content").value;
+     }
+
+
+
+
+     if (!content.trim()) {
+       alert("내용을 입력하세요.");
+       return;
+     }
+
+     fetch(`/posts/${postIdx}/comments`, {
+   method: "POST",
+   headers: { "Content-Type": "application/x-www-form-urlencoded" },
+   body: `content=${encodeURIComponent(content)}&parentCommentId=${parentCommentId ?? ''}`
+ })
+ .then(res => res.text())  // 여기 추가
+ .then(text => {
+   if (text === "ok") {
+     alert("댓글이 등록되었습니다.");
+     location.reload();
+   } else {
+     alert("댓글 등록 실패: " + text);
+   }
+ })
+ .catch(err => {
+   console.error("에러:", err);
+   alert("요청 중 오류 발생");
+ });
+   } // 💬 댓글 끝
+
+   //댓글 삭제
+   function deleteComment(commentIdx) {
+     if (!confirm("댓글을 삭제하시겠습니까?")) return;
+
+     fetch(`/posts/comments/${commentIdx}/delete`, {
+       method: 'POST'
+     })
+     .then(res => {
+       if (res.status === 403) {
+         // 서버에서 403 Forbidden 응답 시 → Front에서 alert만 띄우고 종료
+         return res.json()
+           .catch(() => { throw new Error("댓글 삭제 권한이 없습니다."); })
+           .then(obj => { throw new Error(obj.message || "댓글 삭제 권한이 없습니다."); });
+       }
+       if (!res.ok) {
+         // 400/500 등의 다른 오류
+         return res.text().then(html => {
+           throw new Error("댓글 삭제 중 서버 오류 (status: " + res.status + ")");
+         });
+       }
+       // 정상 삭제(200) → 페이지 리로드
+       location.reload();
+     })
+     .catch(err => {
+       alert(err.message);
+     });
+   }//댓글 삭제 끝
+
+   function startEdit(commentIdx) {
+  // 수정 폼 element
+  const editBox = document.getElementById('edit-box-' + commentIdx);
+  const replyForm = document.getElementById('reply-form-' + commentIdx);
+
+  // 댓글 폼이 열려있다면 닫기
+  if (replyForm && replyForm.style.display !== 'none') {
+    replyForm.style.display = 'none';
+  }
+
+  // 다른 수정폼 다 닫기
+  document.querySelectorAll('[id^="edit-box-"]').forEach(el => {
+    if (el.id !== 'edit-box-' + commentIdx) {
+      el.style.display = 'none';
+    }
+  });
+
+  // 현재 수정폼 토글
+  editBox.style.display = (editBox.style.display === 'none' || editBox.style.display === '') ? 'block' : 'none';
+}
+
+   function submitEdit(commentIdx) {
+     const content = document.getElementById('edit-input-' + commentIdx).value;
+
+     fetch(`/posts/comments/${commentIdx}/edit`, {
+       method: 'POST',
+       headers: {
+         'Content-Type': 'application/json',
+         'X-CSRF-TOKEN': csrf.token
+
+       },
+       body: JSON.stringify({ content: content })
+     })
+     .then(res => {
+       if (!res.ok) throw new Error("수정 실패");
+       return res.json();
+     })
+     .then(data => {
+       // 화면에 댓글 내용 갱신
+       document.getElementById('content-' + commentIdx).textContent = data.updatedContent;
+
+       // 시간 갱신
+        const timeSpan = document.getElementById('time-' + commentIdx);
+        if (timeSpan) {
+          // 시간 업데이트
+          timeSpan.textContent = data.formattedDisplayTime;
+
+          // 기존 (수정됨) span 제거
+          const existingEdited = timeSpan.parentNode.querySelector('.edited-label');
+          if (existingEdited) existingEdited.remove();
+
+          // (수정됨) 바로 뒤에 새로 붙이기
+          if (data.isEdited) {
+            const editedSpan = document.createElement('span');
+            editedSpan.classList.add('edited-label');
+            editedSpan.textContent = ' (수정됨)';
+            editedSpan.style.fontSize = '12px';
+            editedSpan.style.color = 'gray';
+            timeSpan.insertAdjacentElement('afterend', editedSpan);
+          }
+        }
+
+       // 수정 폼 닫기
+       document.getElementById('edit-box-' + commentIdx).style.display = 'none';
+     })
+     .catch(err => alert(err.message));
+   }
+
+
+  //게시글 신고 시작
+ function submitReport() {
+  const reasonId = document.getElementById('report-reason').value;
+  const comment = document.getElementById('report-comment').value;
+
+console.log("🚨 신고 데이터 확인:", {
+    entityType: currentTargetType,
+    entityId: currentTargetId,
+    reportCategoryId: Number(currentReportCategoryId),
+    reportReasonId: Number(reasonId),
+    reportedUserId: currentReportedUserId,
+    reportComment: comment
+  });
+
+  fetch("/api/reports", {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json',
+      //'X-CSRF-TOKEN' : csrf.token
+    },
+    body: JSON.stringify({
+      entityType: currentTargetType,
+      entityId: currentTargetId,
+      reportCategoryId: Number(currentReportCategoryId),
+      reportReasonId: Number(reasonId),
+      reportedUserId: currentReportedUserId,
+      reportComment: comment
+    })
+  })
+  .then(async res => {
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || "신고 실패");
+    }
+    return res.json();
+  })
+  .then(() => {
+    alert("신고가 접수되었습니다.");
+    closeReportModal();
+  })
+  .catch(err => alert("신고 중 오류 발생: " + err.message));
+}
+
+  //모달
+
+ let currentTargetType = null;
+let currentTargetId = null;
+let currentReportedUserId = null;
+let currentReportCategoryId = null;
+
+function openReportModal(type, id, userId, categoryId) {
+  currentTargetType = type;
+  currentTargetId = id;
+  currentReportedUserId = userId;
+  currentReportCategoryId = categoryId;
+  document.getElementById('report-modal').style.display = 'block';
+}
+
+function closeReportModal() {
+  document.getElementById('report-modal').style.display = 'none';
+}
+
+
+  function toggleReplies(parentId, btn) {
+  const repliesDiv = document.getElementById('replies-' + parentId);
+  if (repliesDiv.style.display === 'none') {
+    repliesDiv.style.display = 'block';
+    btn.textContent = '▲ 답글 숨기기';
+  } else {
+    repliesDiv.style.display = 'none';
+    const count = repliesDiv.querySelectorAll('.comment.reply').length;
+    btn.textContent = `▼ 답글 ${count}개 보기`;
+  }
+}
+</script>
+
+<!-- ✅ 여기에 신고 모달 UI 넣기 -->
+<div id="report-modal">
+  <h3>🚨 신고하기</h3>
+  <br>
+
+  <label>
+    <select id="report-reason">
+      <option value="1">욕설/비방/혐오 표현</option>
+      <option value="2">음란/선정적인 콘텐츠</option>
+      <option value="3">도배/스팸/광고</option>
+      <option value="4">개인 정보 노출</option>
+      <option value="5">사칭/허위 정보</option>
+      <option value="6">부적절한 모임/게시글 내용</option>
+      <option value="8">기타</option>
+    </select>
+  </label><br/><br/>
+
+  <textarea id="report-comment" placeholder="신고 내용을 입력하세요" rows="4" cols="40"></textarea><br/><br/>
+
+
+  <div class="modal-button-group">
+    <button onclick="submitReport()">신고 제출</button>
+    <button onclick="closeReportModal()">❌ 닫기</button>
+  </div>
+
+</div>
+
+<script>
+  lucide.createIcons();
+</script>
+
+
+<!--꼭 notify.js나 notification.js 보다 위에-->
+<th:block th:replace="fragments/notification-templates :: notiTemplates"></th:block>
+
+<script src="/js/notify.js" defer></script>
+<script src="/js/notification.js" defer></script>
+</body>
+</html>

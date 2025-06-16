@@ -66,7 +66,7 @@ public class PasswordResetService {
         passwordResetMapper.insertToken(passwordReset); // 토큰 저장
         log.info("비밀번호 재설정 토큰 생성 완료: userIdx={}, token={}", userIdx, token);
 
-        // 3. 이메일 발송
+        // 3. 이메일 발송 (HTML 로 하려면 수정 필요함)
         String resetLink = appBaseUrl + "/user/reset-password?token=" + token;
         String subject = "[GenerationGap] 비밀번호 재설정 안내";
         String content = String.format(
@@ -110,8 +110,8 @@ public class PasswordResetService {
         }
 
         // 3. 새 비밀번호 해싱 및 사용자 비밀번호 업데이트
-        user.setPasswordHash(passwordEncoder.encode(newPassword));
-        userMapper.updateUserPassword(user); // user_idx로 업데이트하도록 UserMapper의 updateUserPassword도 확인
+        String newHashedPassword = passwordEncoder.encode(newPassword);
+        userMapper.updateUserPassword(user.getUserIdx(), newHashedPassword); // UserMapper의 updateUserPassword 시그니처에 맞춰 호출
 
         // 4. 토큰 사용 시간 기록 (used_at 업데이트)
         passwordResetMapper.updateTokenUsedAt(token, LocalDateTime.now());

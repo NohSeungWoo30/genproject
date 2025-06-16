@@ -1,297 +1,393 @@
 // script.js
 
 // ──────────────────────────────────────────────────────
-// 태그별 상단 배경색 맵 (공통)
-const tagColorMap = {
+    // --- 전역 변수 선언 ---
+    let map = null; // 지도 객체
+    let markers = []; // 마커 배열
+    let placeResultList = null; // placeResultList 요소를 저장할 변수
 
-  '운동/액티비티': '#FFDCE0',
-  '문화/예술':     '#D0E8FF',
-  '지식/스터디':   '#D0E8FF',
-  '음식/카페':     '#FFF5D7',
-  '여행/탐험':     '#E1FDD8',
-  '게임/오락':     '#F0DBFF',
-  '반려동물/자연':  '#CCEFFF',
-  '만들기/공예':   '#FFE1F5',
-  '소셜/친목':     '#E6E6FA',
-  '기타':          '#E0E0E0'
-};
+    // 폼 필드 참조 (initMap에서 할당)
+    let meetingPlaceNameInput = null; <!-- 장소명 -->
+    let meetingPlaceLinkDisplay = null; <!-- 연결 링크 -->
+    let meetingPlaceLinkInput = null; <!-- 히든 링크 -->
+    let meetingPlaceCategoryInput = null; <!-- 분류 -->
+    let meetingPlaceContentInput = null; <!-- 설명 -->
+    let meetingPlaceAddressInput = null; <!-- 주소(도로명) -->
+    let meetingPlaceLatInput = null;
+    let meetingPlaceLngInput = null;
+    let searchPlaceInput = null;
+    let searchPlaceButton = null;
 
-// ──────────────────────────────────────────────────────
-// mypage.html 전용 로직
-if (window.location.pathname.endsWith('mypage.html') || window.location.pathname.endsWith('/')) {
-  // 요소 참조
-  const roomImageInput       = document.getElementById('roomImageInput');
-  const liveRoomImage        = document.getElementById('liveRoomImage');
-  const liveRoomPlaceholder  = document.getElementById('liveRoomPlaceholder');
-  const tagIcons             = document.querySelectorAll('.tag-icon');
-  let   selectedCategories   = [];
-  const titleInput           = document.getElementById('titleInput');
-  const descriptionInput     = document.getElementById('descriptionInput');
-  const locationInput        = document.getElementById('locationInput');
-  const meetingDatetimeInput = document.getElementById('meetingDatetimeInput');
-  const remainingTimeDisplay = document.getElementById('remainingTimeDisplay');
-  const liveMeetingTime      = document.getElementById('liveMeetingTime');
-  const liveRemainingTime    = document.getElementById('liveRemainingTime');
+    // --- 헬퍼 함수 ---
 
-  // 나이 슬라이더
-  const ageRange             = document.getElementById('ageRange');
-  const selectedAgeDisplay   = document.getElementById('selectedAgeDisplay');
-  const ageLabelRight        = document.getElementById('ageLabelRight');
-  let   selectedAge          = ageRange.value;
-
-  // 최대 인원 및 기존 카운트 입력(legacy)
-  const maxCountInputElem    = document.getElementById('maxCountInput');
-  const countRangeInputElem  = document.getElementById('currentCountInput');
-
-  // 미리보기 요소
-  const liveTagsContainer    = document.getElementById('liveTagsContainer');
-  const liveAgeContainer     = document.getElementById('liveAgeContainer');
-  const liveTitle            = document.getElementById('liveTitle');
-  const liveDescription      = document.getElementById('liveDescription');
-  const createRoomButton     = document.getElementById('createRoomButton');
-  const liveHeaderBackground = document.getElementById('liveHeaderBackground');
-  let   liveMap, liveGeocoder, liveMarker, liveCoords = null;
-
-  // 태그 선택
-  tagIcons.forEach(icon => {
-    icon.style.backgroundColor = '#e0e0e0';
-    icon.style.color = '#555';
-    icon.addEventListener('click', () => {
-      const value = icon.dataset.value;
-      if (selectedCategories.includes(value)) {
-        selectedCategories = selectedCategories.filter(v => v !== value);
-        icon.classList.remove('selected');
-        icon.style.backgroundColor = '#e0e0e0';
-        icon.style.color = '#555';
-      } else {
-        selectedCategories.push(value);
-        icon.classList.add('selected');
-        icon.style.backgroundColor = '#4285f4';
-        icon.style.color = '#fff';
-      }
-      updateLivePreview();
-    });
-  });
-
-  // 이미지 업로드 처리
-  roomImageInput.addEventListener('change', () => {
-    const file = roomImageInput.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = e => {
-        liveRoomImage.src = e.target.result;
-        liveRoomPlaceholder.classList.add('hidden');
-        liveRoomImage.classList.remove('hidden');
-      };
-      reader.readAsDataURL(file);
-    }
-    updateLivePreview();
-  });
-
-  // 네이버 지도 초기화
-  function initNaverMap() {
-    liveGeocoder = new naver.maps.Service.Geocoder();
-    liveMap       = new naver.maps.Map('map', { center: new naver.maps.LatLng(37.5563, 126.9723), zoom: 10 });
-    liveMarker    = new naver.maps.Marker({ position: liveMap.getCenter(), map: liveMap });
-    const smallMap = new naver.maps.Map('liveSmallMap', { center: liveMap.getCenter(), zoom: 10 });
-    new naver.maps.Marker({ position: smallMap.getCenter(), map: smallMap });
-  }
-  window.addEventListener('DOMContentLoaded', () => { initNaverMap(); updateLivePreview(); });
-
-  // 주소 → 지오코딩
-  function geocodeAndUpdateMap(address) {
-    if (!address) return;
-    liveGeocoder.geocode({ address }, (status, response) => {
-      if (status === naver.maps.Service.Status.OK) {
-        const item   = response.v2.addresses[0];
-        const coords = new naver.maps.LatLng(item.y, item.x);
-        liveMap.setCenter(coords);
-        liveMarker.setPosition(coords);
-        liveCoords = { lat: item.y, lng: item.x };
-        const smallMap = new naver.maps.Map('liveSmallMap', { center: coords, zoom: 10 });
-        new naver.maps.Marker({ position: coords, map: smallMap });
-        updateLivePreview();
-      }
-    });
-  }
-  locationInput.addEventListener('keydown', e => { if (e.key === 'Enter') geocodeAndUpdateMap(locationInput.value.trim()); });
-  locationInput.addEventListener('blur', () => geocodeAndUpdateMap(locationInput.value.trim()));
-
-  // 남은 시간 계산
-  function calculateRemainingTime(dt) {
-    const diff = new Date(dt) - new Date();
-    if (diff <= 0) return '시간 지남';
-    const day    = Math.floor(diff / (1000*60*60*24));
-    const hour   = Math.floor((diff / (1000*60*60)) % 24);
-    const minute = Math.floor((diff / (1000*60)) % 60);
-    return `${day}일 ${hour}시간 ${minute}분 남음`;
-  }
-
-  // 나이 슬라이더 변화
-  ageRange.addEventListener('input', () => {
-    selectedAge = ageRange.value;
-    selectedAgeDisplay.textContent = `선택 나이: ${selectedAge}`;
-    ageLabelRight.textContent = (selectedAge === ageRange.max) ? '누구나' : `${selectedAge}세`;
-    updateLivePreview();
-  });
-
-  // 실시간 미리보기 업데이트
-  function updateLivePreview() {
-    liveHeaderBackground.style.backgroundColor =
-      selectedCategories.length ? tagColorMap[selectedCategories[0]] : '#FFFBED';
-    if (liveRoomImage.src && !liveRoomImage.classList.contains('hidden')) {
-      liveRoomPlaceholder.classList.add('hidden');
-      liveRoomImage.classList.remove('hidden');
-    }
-    liveTagsContainer.innerHTML = '';
-    selectedCategories.forEach(val => {
-      const chip = document.createElement('div');
-      chip.className = 'tag-chip';
-      chip.textContent = val;
-      chip.style.backgroundColor = tagColorMap[val] || '#ccc';
-      chip.style.color = '#fff';
-      liveTagsContainer.appendChild(chip);
-    });
-    liveAgeContainer.innerHTML = '';
-    if (selectedAge) {
-      const ageChip = document.createElement('div');
-      ageChip.className = 'age-chip';
-      ageChip.textContent = `${selectedAge}세`;
-      liveAgeContainer.appendChild(ageChip);
-    }
-    liveTitle.textContent       = titleInput.value || '방 제목';
-    liveDescription.textContent = descriptionInput.value || '설명 내용이 여기에 표시됩니다.';
-    if (meetingDatetimeInput.value) {
-      liveMeetingTime.textContent   = meetingDatetimeInput.value.replace('T', ' ');
-      liveRemainingTime.textContent = calculateRemainingTime(meetingDatetimeInput.value);
-      remainingTimeDisplay.value    = liveRemainingTime.textContent;
-    }
-  }
-  [titleInput, descriptionInput, meetingDatetimeInput].forEach(el => el.addEventListener('input', updateLivePreview));
-
-  // 방 생성 버튼 클릭 이벤트
-  createRoomButton.addEventListener('click', () => {
-    if (!titleInput.value.trim()) {
-      alert('방 제목은 반드시 입력해야 합니다.');
-      return;
-    }
-    let currentCount, maxCount;
-    if (maxCountInputElem) {
-      maxCount = parseInt(maxCountInputElem.value);
-      if (isNaN(maxCount) || maxCount < 1) {
-        alert('최대 인원을 1명 이상으로 설정해주세요.');
-        return;
-      }
-      currentCount = 1;
-    } else if (countRangeInputElem) {
-      const parts = (countRangeInputElem.value || '').split('/').map(s => s.trim());
-      if (parts.length >= 2) {
-        currentCount = parseInt(parts[0]) || 1;
-        maxCount     = parseInt(parts[1]) || currentCount;
-      } else {
-        currentCount = 1;
-        maxCount     = parseInt(parts[0]) || 1;
-      }
-    } else {
-      currentCount = 1;
-      maxCount     = 1;
+    // 마커 지우는 함수
+    function clearMarkers() {
+        for (let i = 0; i < markers.length; i++) {
+            markers[i].setMap(null);
+        }
+        markers = [];
     }
 
-    const newRoom = {
-      id: Date.now(),
-      image: liveRoomImage.src || '',
-      categoryTags: [...selectedCategories],
-      age: selectedAge,
-      title: titleInput.value.trim(),
-      description: descriptionInput.value.trim(),
-      location: locationInput.value.trim(),
-      coords: liveCoords,
-      meetingTime: meetingDatetimeInput.value,
-      remainingTime: calculateRemainingTime(meetingDatetimeInput.value),
-      maxCount,
-      currentCount
-    };
+    // 장소 선택 시 폼 필드 업데이트 함수
+    function selectPlaceFromSearch(title, link, category, description, address, lat, lng) {
+        console.log("선택된 장소:", title, address, lat, lng);
+        meetingPlaceNameInput.value = title; // 'name' 대신 'title' 사용
 
-    const rooms = JSON.parse(localStorage.getItem('rooms') || '[]');
-    rooms.push(newRoom);
-    localStorage.setItem('rooms', JSON.stringify(rooms));
-    localStorage.setItem('latestRoom', JSON.stringify(newRoom));
-    window.location.href = 'Meeting-list.html';
-  });
-}
+        // ===== 링크 필드 업데이트 로직 (링크값 저장하는 A, Input 업데이트) =====
+        if (link) {
+            meetingPlaceLinkDisplay.href = link;
+            meetingPlaceLinkDisplay.textContent = link;
+            meetingPlaceLinkDisplay.style.display = 'inline-block'; // <a> 태그 표시
+            meetingPlaceLinkInput.style.display = 'none'; // input 태그 숨김
+        } else {
+            // 링크가 없을 경우 <a>는 숨기고 input을 보여줌 (비어있는 input 상태)
+            meetingPlaceLinkDisplay.href = '#'; // 링크가 없을 때 #으로 설정 (클릭해도 이동 안 함)
+            meetingPlaceLinkDisplay.textContent = ''; // <a> 태그 텍스트 초기화
+            meetingPlaceLinkDisplay.style.display = 'none'; // <a> 태그 숨김
 
-// ──────────────────────────────────────────────────────
-// list.html 전용: 목록 렌더링
-if (window.location.pathname.endsWith('Meeting-list.html')) {
-  document.addEventListener('DOMContentLoaded', () => {
-    const listContainer = document.getElementById('roomsListContainer');
-    const rooms = JSON.parse(localStorage.getItem('rooms') || '[]');
-    listContainer.innerHTML = rooms.length
-      ? rooms.map(room => `
-          <div class="live-card" onclick="(function(){ localStorage.setItem('latestRoom', JSON.stringify(${JSON.stringify({id:room.id})})); window.location.href='detail.html';})()">
-            <div class="preview-header-background" style="background:${tagColorMap[room.categoryTags[0]] || '#FFFBED'}">
-              <div class="room-image-container">${room.image
-                ? `<img class="room-image" src="${room.image}" />`
-                : `<div class="image-preview-placeholder"></div>`}
-              </div>
-            </div>
-            <h2 class="title">${room.title}</h2>
-            <p>${room.currentCount} / ${room.maxCount}명</p>
-          </div>`
-        ).join('')
-      : '<p>등록된 모임이 없습니다.</p>';
-  });
-}
+            meetingPlaceLinkInput.style.display = 'inline-block'; // input 태그 표시
+            meetingPlaceLinkInput.value = '링크 없음'; // input에 "링크 없음" 표시
+        }
 
-// ──────────────────────────────────────────────────────
-// detail.html 전용: 상세 + 참여/나가기
-if (window.location.pathname.endsWith('detail.html')) {
-  document.addEventListener('DOMContentLoaded', () => {
-    let room = JSON.parse(localStorage.getItem('latestRoom') || '{}');
-    const cardContainer = document.getElementById('roomDetailCard');
-    cardContainer.innerHTML = `
-      <div class="preview-header-background" style="background:${tagColorMap[room.categoryTags[0]] || '#FFFBED'}">
-        <div class="room-image-container">
-          ${room.image
-            ? `<img class="room-image" src="${room.image}" />`
-            : `<div class="image-preview-placeholder"></div>`}
-        </div>
-      </div>
-      <div class="detail-info">
-        <h2>${room.title}</h2>
-        <p>${room.description}</p>
-        <p>${room.categoryTags.join(', ')}</p>
-        <p>${room.age}세</p>
-        <p>${room.meetingTime.replace('T',' ')}</p>
-        <p>${room.remainingTime}</p>
-        <p id="countInfo">${room.currentCount} / ${room.maxCount}명</p>
-      </div>
-      <div id="detailMap" class="map-area"></div>
-      <button id="joinDetailButton">방 참여</button>
-    `;
+        meetingPlaceLinkInput.value = link;
+        meetingPlaceCategoryInput.value = category;
+        meetingPlaceContentInput.value = description;
+        meetingPlaceAddressInput.value = address;
+        meetingPlaceLatInput.value = lat;
+        meetingPlaceLngInput.value = lng;
+        alert(`선택된 장소: ${title}\n주소: ${address}\n위도: ${lat}, 경도: ${lng}`);
+        map.setCenter(new naver.maps.LatLng(lat, lng)); // 선택된 장소로 지도 중심 이동
+    }
 
-    const detailMap = new naver.maps.Map('detailMap', { center: new naver.maps.LatLng(room.coords.lat, room.coords.lng), zoom: 14 });
-    new naver.maps.Marker({ position: detailMap.getCenter(), map: detailMap });
+    // --- 지도 및 UI 초기화 함수 (네이버 API callback으로 호출) ---
+    function initMap() {
+        // DOM 요소 참조 가져오기
+        placeResultList = document.getElementById('placeResultList');
+        meetingPlaceNameInput = document.getElementById('meetingPlaceName');
+        meetingPlaceLinkDisplay = document.getElementById('meetingPlaceLinkDisplay');
+        meetingPlaceLinkInput = document.getElementById('meetingPlaceLink');
+        meetingPlaceCategoryInput = document.getElementById('meetingPlaceCategory');
+        meetingPlaceContentInput = document.getElementById('meetingPlaceContent');
+        meetingPlaceAddressInput = document.getElementById('meetingPlaceAddress');
+        meetingPlaceLatInput = document.getElementById('meetingPlaceLat');
+        meetingPlaceLngInput = document.getElementById('meetingPlaceLng');
+        searchPlaceInput = document.getElementById('searchPlaceInput'); <!--지도 장소 검색용 필드-->
+        searchPlaceButton = document.getElementById('searchPlaceButton'); <!--지도 장소 검색버튼-->
 
-    const joinBtn = document.getElementById('joinDetailButton');
-    let hasJoined = false;
-    joinBtn.addEventListener('click', () => {
-      const rooms = JSON.parse(localStorage.getItem('rooms') || '[]');
-      const idx = rooms.findIndex(r => r.id === room.id);
-      if (!hasJoined && rooms[idx].currentCount < rooms[idx].maxCount) {
-        rooms[idx].currentCount++;
-        hasJoined = true;
-        joinBtn.textContent = '나가기';
-      } else if (hasJoined) {
-        rooms[idx].currentCount--;
-        hasJoined = false;
-        joinBtn.textContent = '방 참여';
-      } else {
-        return alert('참가 인원이 가득 찼습니다.');
-      }
-      localStorage.setItem('rooms', JSON.stringify(rooms));
-      room = rooms[idx];
-      document.getElementById('countInfo').textContent = `${room.currentCount} / ${room.maxCount}명`;
-    });
-  });
-}
+        // 지도 초기화
+        map = new naver.maps.Map('map', {
+            center: new naver.maps.LatLng(37.5665, 126.9780), // 서울 시청으로 초기화
+            zoom: 15,
+            zoomControl: true,
+            zoomControlOptions: {
+                position: naver.maps.Position.TOP_RIGHT
+            }
+        });
+
+        // --- 이벤트 리스너 설정 ---
+
+        // 검색 버튼 클릭 이벤트 리스너
+        if (searchPlaceButton) {
+            searchPlaceButton.addEventListener('click', function() {
+                const query = searchPlaceInput.value; // 올바른 변수 사용
+                if (query) {
+                    searchPlace(query);
+                } else {
+                    alert('검색어를 입력해주세요.');
+                }
+            });
+        }
+
+        // 검색 결과 목록 (placeResultList) 클릭 이벤트 위임 리스너
+        if (placeResultList) {
+            placeResultList.addEventListener('click', function(event) {
+                const clickedLi = event.target.closest('li.place-result-item'); // 가장 가까운 li.place-result-item 찾기
+                if (clickedLi) {
+                // data-* 속성에서 값을 가져올 때, 없을 경우 빈 문자열로 초기화하여 안전성 확보
+                    const title = clickedLi.dataset.title || '';
+                    const link = clickedLi.dataset.link || '';
+                    const category = clickedLi.dataset.category || '';
+                    const description = clickedLi.dataset.description || '';
+                    const address = clickedLi.dataset.address || '';
+                    const lat = parseFloat(clickedLi.dataset.lat);
+                    const lng = parseFloat(clickedLi.dataset.lng);
+                    selectPlaceFromSearch(title, link, category, description, address, lat, lng);
+                }
+            });
+        }
+
+        // --- 기타 UI 초기화 (DOMContentLoaded에 있던 내용들을 initMap으로 이동) ---
+
+        // 카테고리 스크립트
+        const mainCategorySelect = document.getElementById('groupCategoryMainIdx');
+        const subCategorySelect = document.getElementById('groupCategorySubIdx');
+
+        mainCategorySelect.addEventListener('change', function() {
+            const selectedMainCategoryIdx = this.value;
+            subCategorySelect.innerHTML = '<option value="">-- 소분류 선택 --</option>';
+            subCategorySelect.disabled = true;
+
+            if (selectedMainCategoryIdx) {
+                fetch(`/group/api/sub-categories?mainCategoryIdx=${selectedMainCategoryIdx}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok ' + response.statusText);
+                        }
+                        return response.json();
+                    })
+                    .then(subCategories => {
+                        subCategories.forEach(category => {
+                            const option = document.createElement('option');
+                            option.value = category.categorySubIdx;
+                            option.textContent = category.categorySubName;
+                            subCategorySelect.appendChild(option);
+                        });
+                        subCategorySelect.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error('Error fetching sub categories:', error);
+                        alert('서브 카테고리를 불러오는 데 실패했습니다.');
+                        subCategorySelect.disabled = true;
+                    });
+            } else {
+                subCategorySelect.disabled = true;
+            }
+        });
+
+        // 폼 제출 시 유효성 검사
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const genderRadios = document.getElementsByName('genderLimit');
+                let isGenderSelected = false;
+                for (const radio of genderRadios) {
+                    if (radio.checked) {
+                        isGenderSelected = true;
+                        break;
+                    }
+                }
+
+                if (!isGenderSelected) {
+                    e.preventDefault();
+                    alert('성별 제한을 선택해주세요.');
+                    return;
+                }
+
+                const minMembersSelect = document.getElementById('membersMin');
+                const maxMembersSelect = document.getElementById('membersMax');
+
+                const minMembers = parseInt(minMembersSelect.value);
+                const maxMembers = parseInt(maxMembersSelect.value);
+
+                if (minMembersSelect.value === "" || maxMembersSelect.value === "") {
+                    e.preventDefault();
+                    alert('최소/최대 멤버 수를 선택해주세요.');
+                    return;
+                }
+
+                if (minMembers > maxMembers) {
+                    e.preventDefault();
+                    alert('최소 멤버 수는 최대 멤버 수보다 클 수 없습니다.');
+                    return;
+                }
+            });
+        }
+
+
+        // 나이 슬라이더 스크립트
+        const ageSlider = document.getElementById('age-slider');
+        const ageMinInput = document.getElementById('ageMin');
+        const ageMaxInput = document.getElementById('ageMax');
+        const ageMinDisplay = document.getElementById('ageMinDisplay');
+        const ageMaxDisplay = document.getElementById('ageMaxDisplay');
+
+        if (ageSlider && ageMinInput && ageMaxInput && ageMinDisplay && ageMaxDisplay) {
+            noUiSlider.create(ageSlider, {
+                start: [parseInt(ageMinInput.value), parseInt(ageMaxInput.value)],
+                connect: true,
+                range: {
+                    'min': 0,
+                    'max': 100
+                },
+                step: 1,
+                format: {
+                    to: function (value) {
+                        return parseInt(value);
+                    },
+                    from: function (value) {
+                        return parseInt(value);
+                    }
+                }
+            });
+
+            ageSlider.noUiSlider.on('update', function (values, handle) {
+                const minAge = values[0];
+                const maxAge = values[1];
+                ageMinInput.value = minAge;
+                ageMaxInput.value = maxAge;
+                ageMinDisplay.textContent = `${minAge}세`;
+                ageMaxDisplay.textContent = `${maxAge}세`;
+            });
+
+            // 폼 로드 시 숨겨진 input 값과 화면 표시 동기화 (초기화)
+            ageMinDisplay.textContent = `${ageMinInput.value}세`;
+            ageMaxDisplay.textContent = `${ageMaxInput.value}세`;
+        }
+
+
+        // 최소/최대 멤버 수 옵션 동적 생성
+        const minMembersSelect = document.getElementById('membersMin');
+        const maxMembersSelect = document.getElementById('membersMax');
+
+        if (minMembersSelect && maxMembersSelect) {
+            const membersCountOptions = [2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 30];
+
+            function populateSelectOptions(selectElement) {
+                membersCountOptions.forEach(count => {
+                    const option = document.createElement('option');
+                    option.value = count;
+                    option.textContent = `${count}명`;
+                    selectElement.appendChild(option);
+                });
+            }
+
+            populateSelectOptions(minMembersSelect);
+            populateSelectOptions(maxMembersSelect);
+        }
+    } // --- initMap 함수 끝 ---
+
+
+    // --- 키워드를 이용해 장소 검색 (백엔드 프록시 경유) ---
+    async function searchPlace(query) {
+        clearMarkers();
+        placeResultList.innerHTML = ''; // 기존 검색 결과 초기화
+
+        // 1. 현재 지도 화면의 영역(Bounds) 정보 가져오기
+        const bounds = map.getBounds();
+        console.log("bounds값 ", bounds);
+        const southWest = bounds.getSW(); // 남서쪽 좌표
+        const northEast = bounds.getNE(); // 북동쪽 좌표
+
+        const southWestLat = southWest.lat();
+        const southWestLng = southWest.lng();
+        const northEastLat = northEast.lat();
+        const northEastLng = northEast.lng();
+
+        const displayCount = 100; // 더 많은 결과를 받아온 후 프론트에서 필터링합니다.
+
+        // 2. 백엔드 API 호출 시 지도 영역 정보를 쿼리 파라미터로 전달
+        const apiUrl = `/api/naver/places/by-coords?query=${encodeURIComponent(query)}&southwest_lat=${southWestLat}&southwest_lng=${southWestLng}&northeast_lat=${northEastLat}&northeast_lng=${northEastLng}&display=${displayCount}`;
+        console.log("백엔드 프록시 API 요청 URL:", apiUrl);
+
+        try {
+            const response = await fetch(apiUrl);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+            }
+            const data = await response.json();
+            const items = data.items;
+
+            if (items && items.length > 0) {
+                // 지도화면이동
+                const firstItemLat = parseFloat(items[0].mapy) / 1e7;
+                const firstItemLng = parseFloat(items[0].mapx) / 1e7;
+                const firstItemPoint = new naver.maps.LatLng(firstItemLat, firstItemLng);
+                map.setCenter(firstItemPoint);
+
+                const currentBounds = map.getBounds(); // 현재 지도의 가시 영역 (Bounds) 가져오기
+                console.log("현재 지도의 범위:", currentBounds);
+
+                let resultsInView = 0; // 화면 내에 표시된 결과 수 카운트
+
+                items.forEach((item) => {
+                    const title = item.title.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&');
+                    const link = item.link || '';
+                    const category = item.category || '';
+                    const description = item.description || '';
+                    const address = item.roadAddress || item.address || ''; <!--도로명주소 우선 없으면 지번 없으면 빈문자-->
+                    const lat = parseFloat(item.mapy) / 1e7;
+                    const lng = parseFloat(item.mapx) / 1e7;
+                    const point = new naver.maps.LatLng(lat, lng);
+
+                    // 현재 지도 화면 범위 내에 있는지 필터링
+                    if (currentBounds.hasLatLng(point)) {
+                        const marker = new naver.maps.Marker({
+                            position: point,
+                            map: map,
+                            title: title
+                        });
+                        markers.push(marker);
+
+                        const li = document.createElement('li');
+                        li.innerHTML = `<strong>${title}</strong><br>${address}`;
+                        li.setAttribute('data-title', title);
+                        li.setAttribute('data-link', link);
+                        li.setAttribute('data-category', category);
+                        li.setAttribute('data-description', description);
+                        li.setAttribute('data-address', address);
+                        li.setAttribute('data-lat', lat);
+                        li.setAttribute('data-lng', lng);
+                        li.classList.add('place-result-item');
+
+                        placeResultList.appendChild(li);
+                        resultsInView++;
+                    } else {
+                        console.log(`[화면 밖] ${title} - ${lat}, ${lng}`);
+                    }
+                });
+
+                if (resultsInView === 0) {
+                    placeResultList.innerHTML = '<li>현재 지도 화면 내에 검색 결과가 없습니다.</li>';
+                }
+
+            } else {
+                placeResultList.innerHTML = '<li>검색 결과가 없습니다.</li>';
+            }
+        } catch (error) {
+            console.error('검색 중 오류 발생:', error);
+            alert('장소 검색에 실패했습니다.');
+        }
+    } // async function searchPlace 끝
+
+    // --- 좌표를 이용해 장소 검색 (역지오코딩) ---
+    // 이 함수는 현재 HTML에서 직접 호출되지 않지만, 유지해 두었습니다.
+    function searchPlaceByCoordinates(lat, lng) {
+        if (typeof naver.maps.Service === 'undefined' || typeof naver.maps.Service.reverseGeocode === 'undefined') {
+            console.error("네이버 지도 Geocoder 서비스 또는 요청 상수가 아직 완전히 로드되지 않았습니다.");
+            return;
+        }
+
+        const coordinate = new naver.maps.LatLng(lat, lng);
+        naver.maps.Service.reverseGeocode({
+            coords: coordinate,
+            orders: [
+                naver.maps.Service.Order.ROAD_ADDR,
+                naver.maps.Service.Order.ADDR
+            ]
+        }, function(status, response) {
+            if (status === naver.maps.Service.Status.OK) {
+                let address = response.v2.address.roadAddress || response.v2.address.jibunAddress;
+                let placeName = `선택된 위치 (${address})`;
+
+                clearMarkers(); // 기존 마커 제거
+                let newMarker = new naver.maps.Marker({
+                    position: coordinate,
+                    map: map
+                });
+                markers.push(newMarker);
+
+                meetingPlaceNameInput.value = placeName;
+                meetingPlaceAddressInput.value = address;
+                meetingPlaceLatInput.value = lat;
+                meetingPlaceLngInput.value = lng;
+
+                alert(`선택된 장소: ${address}\n위도: ${lat}, 경도: ${lng}`);
+
+            } else {
+                alert('역지오코딩 실패: ' + response.status);
+                console.error('역지오코딩 실패:', status, response);
+            }
+        });
+    }
+

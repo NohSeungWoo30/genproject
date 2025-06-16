@@ -10,11 +10,15 @@ import java.time.LocalDateTime;
 public class ChatMessage {
     private Long messagesIdx;
     private Long groupChatIdx;
-    private Integer senderIdx;
+    private Long senderIdx;
     private String nickname;
     private String content;
     private LocalDateTime sentAt;
     private String isDeleted; // 'Y' 또는 'N'
     private LocalDateTime deletedAt;
+    private String type; // system / self / other
+    private String isEdited; // 'Y' 또는 'N'
+
+
 
 }

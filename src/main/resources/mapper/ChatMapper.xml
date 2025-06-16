@@ -13,6 +13,8 @@
     <result property="sentAt" column="sent_at" />
     <result property="isDeleted" column="is_deleted" />
     <result property="deletedAt" column="deleted_at" />
+    <result property="isEdited" column="is_edited"/>
+
     </resultMap>
 
     <insert id="insertMessage" parameterType="generationgap.co.kr.domain.chat.ChatMessage">
@@ -22,16 +24,26 @@
         </selectKey>
 
         INSERT INTO chat_messages (
-            messages_idx, group_chat_idx, sender_idx, nickname, content, sent_at, is_deleted
+            messages_idx, group_chat_idx, sender_idx, nickname, content, sent_at, is_deleted, is_edited
         )
         VALUES (
-        #{messagesIdx} ,#{groupChatIdx}, #{senderIdx}, #{nickname}, #{content}, SYSDATE, 'N'
+        #{messagesIdx} ,#{groupChatIdx}, #{senderIdx}, #{nickname}, #{content}, SYSDATE, 'N','N'
         )
     </insert>
 
     <select id="getMessagesByGroup" resultMap="chatMessageMap">
-        SELECT * FROM chat_messages
-        WHERE group_chat_idx = #{groupChatIdx} AND is_deleted = 'N'
+        SELECT
+        messages_idx,
+        group_chat_idx,
+        sender_idx,
+        nickname,
+        content,
+        sent_at,
+        is_deleted,
+        deleted_at,
+        is_edited
+        FROM chat_messages
+        WHERE group_chat_idx = #{groupChatIdx}
         ORDER BY sent_at ASC
     </select>
 

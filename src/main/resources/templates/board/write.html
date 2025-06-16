@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>게시글 작성</title>
+  <link rel="stylesheet" th:href="@{/css/vars.css}" />
+  <link rel="stylesheet" th:href="@{/css/boardstyle.css}" />
+  <link rel="stylesheet" th:href="@{/css/mainstyle.css}" />
+  <link rel="stylesheet" href="/css/toast.css" />
+
+
+  <style>
+    .write-container {
+      max-width: 600px;
+      margin: 60px auto;
+      background: var(--color-white-solid);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      padding: 24px 20px 40px;
+    }
+    .write-container h2 {
+      font-family: var(--font-pretendard-medium);
+      font-size: 22px;
+      margin-bottom: 20px;
+      color: var(--color-mine-shaft);
+      text-align: center;
+    }
+    .write-container .form-group {
+      margin-bottom: 16px;
+    }
+    .write-container label {
+      display: block;
+      font-family: var(--font-pretendard-medium);
+      font-size: 14px;
+      margin-bottom: 6px;
+      color: var(--color-mine-shaft);
+    }
+    .write-container input[type="text"],
+    .write-container select,
+    .write-container textarea {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 14px;
+      border: 1px solid var(--color-grey-80);
+      border-radius: 4px;
+      background: var(--color-white-solid);
+      font-family: var(--font-pretendard-regular);
+      color: var(--color-mine-shaft);
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .write-container input:focus,
+    .write-container textarea:focus,
+    .write-container select:focus {
+      outline: none;
+      border-color: var(--color-pigment-indigo);
+      background: var(--color-white-solid);
+    }
+    .write-container textarea {
+      resize: vertical;
+      min-height: 150px;
+    }
+    .write-container .btn-submit,
+    .write-container .btn-cancel {
+      padding: 10px 16px;
+      font-size: 14px;
+      font-family: var(--font-pretendard-medium);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .write-container .btn-submit {
+      background: var(--color-pigment-indigo);
+      color: var(--color-white-solid);
+      margin-right: 8px;
+    }
+    .write-container .btn-submit:hover {
+      background: #9a4ed6;
+    }
+    .write-container .btn-cancel {
+      background: var(--color-grey-89);
+      color: var(--color-white-solid);
+    }
+    .write-container .btn-cancel:hover {
+      background: var(--color-grey-80);
+    }
+    .image-preview-list {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .image-preview-list img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      background: #fafafa;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s;
+    }
+
+    .image-preview-list img:hover {
+      transform: scale(1.05);
+    }
+
+
+
+
+
+  </style>
+</head>
+<body>
+
+<!-- 상단 네비게이션 바 -->
+<nav class="container-nav">
+  <div class="nav-left">
+    <a th:href="@{/}">
+      <img class="logo" src="/img/icons/MT5.png" alt="M 로고" />
+    </a>
+  </div>
+  <div class="nav-right">
+    <a th:href="@{/login}">로그인·회원가입</a>
+  </div>
+</nav>
+
+<!-- 하단 서브 네비게이션 바 -->
+<nav class="sub-nav">
+  <a th:href="@{/meeting-create}">모임생성</a>
+  <a th:href="@{/meeting-list}">모임목록</a>
+  <a th:href="@{/product-list}">상품목록</a>
+  <a th:href="@{/posts}">자유 게시판</a>
+</nav>
+
+<!-- 글 작성 폼 -->
+<section class="write-container">
+  <h2>글 작성하기</h2>
+  <form th:action="@{/posts/write}" method="post" th:object="${post}" enctype="multipart/form-data">
+
+    <!-- 카테고리 -->
+    <div class="form-group">
+      <label for="category">카테고리<span>*</span></label>
+      <select th:field="*{category}" id="category" required>
+        <option value="">– 선택 –</option>
+        <option value="공지">공지</option>
+        <option value="자유">자유</option>
+        <option value="질문">질문</option>
+        <option value="정보">정보</option>
+      </select>
+    </div>
+
+    <!-- 제목 -->
+    <div class="form-group">
+      <label for="title">제목<span>*</span></label>
+      <input type="text" th:field="*{title}" id="title" placeholder="제목을 입력하세요" required />
+    </div>
+
+    <!-- 내용 -->
+    <div class="form-group">
+      <label for="content">본문<span>*</span></label>
+      <textarea th:field="*{content}" id="content" placeholder="내용을 입력하세요" required rows="8"></textarea>
+    </div>
+
+    <!-- 이미지 업로드 -->
+    <div class="form-group">
+      <label for="files">이미지 첨부 (여러장 가능)</label>
+      <input type="file" id="files" name="files" multiple accept="image/*" />
+      <div class="image-preview-list" id="imagePreviewList"></div>
+    </div>
+
+    <!-- 버튼 -->
+    <div class="btn-group" style="text-align: right; margin-top: 24px;">
+      <button type="button" class="btn-cancel" onclick="window.location.href='/posts'">취소</button>
+      <button type="submit" class="btn-submit">등록</button>
+    </div>
+  </form>
+</section>
+
+<script>
+  // 이미지 미리보기
+  const fileInput = document.getElementById('files');
+  const previewContainer = document.getElementById('imagePreviewList');
+
+  fileInput.addEventListener('change', function () {
+    previewContainer.innerHTML = '';
+    const files = Array.from(fileInput.files);
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        previewContainer.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  //비로그인 시 알러트
+  document.querySelector("form").addEventListener("submit", async function (e) {
+    e.preventDefault(); // 기본 제출 막기
+
+    const formData = new FormData(this);
+
+    const response = await fetch(this.action, {
+      method: "POST",
+      body: formData
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      alert(data.message || "로그인이 필요합니다.");
+      location.href = "/login"; // 로그인 페이지로 이동
+      return;
+    }
+
+    // 성공 시 리디렉션
+    location.href = "/posts";
+  });
+
+</script>
+
+
+
+<script src="/js/notify.js" defer></script>
+<script src="/js/notification.js" defer></script>
+</body>
+</html>

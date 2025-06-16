@@ -4,13 +4,11 @@ import generationgap.co.kr.domain.user.UserDTO;
 import generationgap.co.kr.mapper.user.UserMapper; // UserMapper 임포트
 import generationgap.co.kr.security.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections; // Collection.emptyList()를 위해 임포트
 import org.slf4j.Logger; // Logger 추가
 import org.slf4j.LoggerFactory; // LoggerFactory 추가
 

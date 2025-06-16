@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원 정보</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body { padding: 20px; }
+        .info-section { margin-bottom: 40px; border: 1px solid #eee; padding: 20px; border-radius: 5px; background-color: #f9f9f9;}
+        .info-section h3 { margin-bottom: 20px; color: #0056b3; }
+        .info-item { margin-bottom: 15px; }
+        .info-item label { font-weight: bold; display: block; margin-bottom: 5px; color: #555; }
+        .info-item p { margin: 0; padding: 8px 12px; background-color: #fff; border: 1px solid #ddd; border-radius: 4px; }
+        .btn-edit { background-color: #28a745; color: white; }
+        .btn-edit:hover { background-color: #218838; color: white; }
+        .btn-delete { background-color: #dc3545; color: white; margin-top: 10px; } /* 회원 탈퇴 버튼 스타일 */
+        .btn-delete:hover { background-color: #c82333; color: white; }
+        .user-actions { margin-top: 40px; } /* 회원 탈퇴 섹션 상단 여백 */
+
+        /* --- Custom Modal Styles (for Vanilla JS) --- */
+        .custom-modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1050; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+            align-items: center; /* Center vertically */
+            justify-content: center; /* Center horizontally */
+        }
+
+        .custom-modal.show {
+            display: flex; /* Show the modal */
+        }
+
+        .custom-modal-content {
+            background-color: #fefefe;
+            margin: auto; /* Centered */
+            padding: 20px;
+            border: 1px solid #888;
+            border-radius: 0.3rem; /* Match Bootstrap's modal-content border-radius */
+            width: 90%; /* Could be adjusted */
+            max-width: 500px; /* Max width for larger screens */
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15); /* Match Bootstrap's modal-content shadow */
+            position: relative; /* For close button positioning */
+        }
+
+        .custom-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #dee2e6; /* Match Bootstrap's modal-header border */
+            margin-bottom: 15px;
+        }
+
+        .custom-modal-header h5 {
+            margin-bottom: 0;
+        }
+
+        .custom-close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            line-height: 1;
+            color: #000;
+            opacity: .5;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .custom-close-btn:hover {
+            opacity: .75;
+        }
+
+        .custom-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6; /* Match Bootstrap's modal-footer border */
+            margin-top: 15px;
+        }
+
+        .custom-modal-footer button + button {
+            margin-left: 0.5rem; /* Space between buttons */
+        }
+        /* --- End Custom Modal Styles --- */
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="my-4">내 회원 정보</h1>
+
+    <div class="info-section">
+        <h3>회원 상세 정보</h3>
+        <div class="info-item">
+            <label>아이디</label>
+            <p th:text="${user.userId}">user123</p>
+        </div>
+        <div class="info-item">
+            <label>이름</label>
+            <p th:text="${user.userName}">홍길동</p>
+        </div>
+        <div class="info-item">
+            <label>닉네임</label>
+            <p th:text="${user.nickname}">홍길동</p>
+        </div>
+        <div class="info-item">
+            <label>생년월일</label>
+            <p th:text="${user.birthDate} ? ${#temporals.format(user.birthDate, 'yyyy-MM-dd')} : '미입력'">1990-01-01</p>
+        </div>
+        <div class="info-item">
+            <label>성별</label>
+            <p>
+                <span th:if="${user.gender != null and user.gender.toString().equals('M')}">남성</span>
+                <span th:if="${user.gender != null and user.gender.toString().equals('F')}">여성</span>
+                <span th:if="${user.gender != null and user.gender.toString().equals('O')}">기타</span>
+                <span th:if="${user.gender == null or (user.gender != null and !(user.gender.toString().equals('M') or user.gender.toString().equals('F') or user.gender.toString().equals('O')))}">미입력</span>
+            </p>
+        </div>
+        <div class="info-item">
+            <label>이메일</label>
+            <p th:text="${user.email}">user@example.com</p>
+        </div>
+        <div class="info-item">
+            <label>전화번호</label>
+            <p th:text="${user.phone} ? ${user.phone} : '미입력'">010-1234-5678</p>
+        </div>
+        <div class="info-item">
+            <label>프로필 사진 이름</label>
+            <p th:text="${user.profileName} ? ${user.profileName} : '없음'">profile.jpg</p>
+        </div>
+        <div class="info-item">
+            <label>소개</label>
+            <p th:text="${user.introduction} ? ${user.introduction} : '자기소개가 없습니다.'">안녕하세요!</p>
+        </div>
+
+        <a th:href="@{/user/profile-edit}" class="btn btn-edit mt-3">정보 수정</a>
+    </div>
+
+    <div class="user-actions">
+        <hr>
+        <h3>계정 삭제</h3>
+        <p>계정을 삭제하면 모든 정보가 삭제되며, 계정은 복구할 수 없습니다.</p>
+        <button type="button" id="openDeleteModalBtn" class="btn btn-delete">계정 삭제</button>
+    </div>
+
+    <a th:href="@{/main}" class="btn btn-secondary mt-3">메인으로 돌아가기</a>
+</div>
+
+<div id="deleteAccountModal" class="custom-modal">
+    <div class="custom-modal-content">
+        <div class="custom-modal-header">
+            <h5 class="modal-title" id="deleteAccountModalLabel">계정 삭제 확인</h5>
+            <button type="button" class="custom-close-btn" id="closeDeleteModalBtn" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div id="passwordConfirmSection" style="display:none;">
+                <p>계정을 삭제하시려면 현재 비밀번호를 입력해 주세요. 계정 삭제 후에는 복구할 수 없습니다.</p>
+                <div class="mb-3">
+                    <label for="currentPasswordConfirm" class="form-label">현재 비밀번호</label>
+                    <input type="password" class="form-control" id="currentPasswordConfirm">
+                </div>
+            </div>
+
+            <div id="googleDeleteConfirmSection" style="display:none;">
+                <p><strong>정말 계정을 삭제하시겠습니까?</strong></p>
+                <p>계정 삭제 후에는 모든 정보가 삭제되며, 계정은 복구할 수 없습니다.</p>
+                <p class="text-danger">⚠️ 이 작업은 되돌릴 수 없습니다. 신중하게 결정해 주세요.</p>
+            </div>
+
+            <div id="deleteErrorMsg" class="text-danger mt-2" style="display:none;"></div>
+        </div>
+        <div class="custom-modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">취소</button>
+            <button type="button" id="confirmDeleteBtn" class="btn btn-danger">삭제</button>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    // CSRF 토큰 값을 Thymeleaf에서 JavaScript 변수로 가져옵니다.
+    const csrfParameterName = /*[[${_csrf != null ? _csrf.parameterName : ''}]]*/ '';
+    const csrfToken = /*[[${_csrf != null ? _csrf.token : ''}]]*/ '';
+
+    // ⭐ 중요: 서버에서 이 값을 Thymeleaf 모델에 추가하여 전달해야 합니다. ⭐
+    // 예: model.addAttribute("isGoogleUser", "google".equalsIgnoreCase(currentUser.getUserDTO().getProvider()));
+    const isGoogleUser = /*[[${isGoogleUser}]]*/ false;
+    /*]]>*/
+
+    // 모달 요소 가져오기
+    const deleteAccountModal = document.getElementById('deleteAccountModal');
+    const openDeleteModalBtn = document.getElementById('openDeleteModalBtn');
+    const closeDeleteModalBtn = document.getElementById('closeDeleteModalBtn');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const currentPasswordConfirmInput = document.getElementById('currentPasswordConfirm');
+    const deleteErrorMsg = document.getElementById('deleteErrorMsg');
+
+    // ⭐ 새로 추가된 요소들 ⭐
+    const passwordConfirmSection = document.getElementById('passwordConfirmSection');
+    const googleDeleteConfirmSection = document.getElementById('googleDeleteConfirmSection');
+
+    // 모달 열기 함수
+    function openModal() {
+        deleteAccountModal.classList.add('show');
+        currentPasswordConfirmInput.value = ''; // 비밀번호 입력 필드 초기화
+        deleteErrorMsg.style.display = 'none'; // 에러 메시지 숨김
+
+        // ⭐ 사용자 유형에 따라 모달 내용 변경 ⭐
+        if (isGoogleUser) {
+            passwordConfirmSection.style.display = 'none'; // 비밀번호 입력 숨김
+            googleDeleteConfirmSection.style.display = 'block'; // 구글용 확인 메시지 표시
+        } else {
+            passwordConfirmSection.style.display = 'block'; // 비밀번호 입력 표시
+            googleDeleteConfirmSection.style.display = 'none'; // 구글용 확인 메시지 숨김
+        }
+    }
+
+    // 모달 닫기 함수
+    function closeModal() {
+        deleteAccountModal.classList.remove('show');
+    }
+
+    // '계정 삭제' 버튼 클릭 시 모달 열기
+    openDeleteModalBtn.addEventListener('click', openModal);
+
+    // 모달 닫기 버튼 (X) 클릭 시 모달 닫기
+    closeDeleteModalBtn.addEventListener('click', closeModal);
+
+    // 모달 내 '취소' 버튼 클릭 시 모달 닫기
+    cancelDeleteBtn.addEventListener('click', closeModal);
+
+    // 모달 외부 클릭 시 모달 닫기 (선택 사항)
+    deleteAccountModal.addEventListener('click', function(event) {
+        if (event.target === deleteAccountModal) {
+            closeModal();
+        }
+    });
+
+    // 모달 내 '삭제' 버튼 클릭 시
+    confirmDeleteBtn.addEventListener('click', function() {
+        deleteErrorMsg.style.display = 'none'; // 기존 에러 메시지 초기화
+
+        const formData = new URLSearchParams();
+
+        // ⭐ 사용자 유형에 따라 비밀번호 확인 로직 분기 ⭐
+        if (!isGoogleUser) { // 로컬 유저인 경우에만 비밀번호 확인
+            const passwordConfirm = currentPasswordConfirmInput.value;
+            if (!passwordConfirm) {
+                deleteErrorMsg.textContent = '비밀번호를 입력해주세요.';
+                deleteErrorMsg.style.display = 'block';
+                return;
+            }
+            formData.append('passwordConfirm', passwordConfirm);
+        }
+        // 구글 유저는 passwordConfirm을 보내지 않아도 됩니다.
+        // 서버에서 AuthenticationPrincipal을 통해 provider를 확인하므로, 클라이언트에서 굳이 isGoogleUser 플래그를 보낼 필요는 없습니다.
+
+        if (csrfParameterName && csrfToken) {
+            formData.append(csrfParameterName, csrfToken);
+        }
+
+        fetch('/user/delete', { // 이 경로는 컨트롤러의 @PostMapping("/delete")와 일치해야 합니다.
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: formData.toString(),
+            credentials: 'include'
+        })
+        .then(response => {
+            if (response.redirected) {
+                console.warn('Redirect detected. Navigating to:', response.url);
+                window.location.href = response.url;
+                return null;
+            }
+            if (response.ok) {
+                return response.json();
+            } else {
+                return response.json().then(errorData => {
+                    throw new Error(errorData.message || '계정 삭제 실패');
+                });
+            }
+        })
+        .then(data => {
+            if (data === null) return;
+
+            if (data.success) {
+                alert(data.message || '계정이 성공적으로 삭제되었습니다.');
+                window.location.href = '/user/login?logout'; // 삭제 성공 시 로그아웃 페이지로 이동
+            } else {
+                deleteErrorMsg.textContent = data.message || '계정 삭제에 실패했습니다.';
+                deleteErrorMsg.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error during fetch:', error);
+            deleteErrorMsg.textContent = error.message || '알 수 없는 오류가 발생했습니다.';
+            deleteErrorMsg.style.display = 'block';
+        });
+    });
+</script>
+
+</body>
+</html>

@@ -7,8 +7,10 @@
 
     <resultMap id="postMap" type="generationgap.co.kr.domain.board.Post">
         <id property="postIdx" column="post_idx"/>
+        <result property="authorIdx"  column="author_idx"/>
         <result property="title" column="title"/>
         <result property="content" column="content"/>
+        <result property="category" column="category"/>
         <result property="authorName" column="nickname"/> <!-- 사용자 닉네임 JOIN -->
         <result property="viewCount" column="view_count"/>
         <result property="likeCount" column="like_count"/>
@@ -16,14 +18,270 @@
         <result property="updateAt" column="update_at"/>
         <result property="deletedBy" column="deleted_by"/>
         <result property="deletedAt" column="deleted_at"/>
+        <result property="commentCount" column="comment_count"/>
+        <result property="isDeleted" column="is_deleted"/>
+
     </resultMap>
 
-    <select id="getAllPosts" resultMap="postMap">
-        SELECT p.*, u.nickname
-        FROM board_posts p
-        JOIN users u ON p.author_idx = u.user_idx
+    <select id="getPostsPaged" resultMap="postMap">
+        SELECT
+        bp.*,
+        u.nickname AS nickname,
+        COUNT(c.comment_idx) AS comment_count
+        FROM board_posts bp
+        JOIN users u ON bp.author_idx = u.user_idx
+        LEFT JOIN post_comments c
+        ON bp.post_idx = c.post_idx AND c.is_deleted = 'N'
+        WHERE bp.is_deleted = 'N'
+        GROUP BY bp.post_idx, bp.author_idx, bp.category, bp.title, bp.content,
+        bp.view_count, bp.like_count, bp.deleted_by, bp.is_deleted,
+        bp.created_at, bp.deleted_at, bp.update_at,
+        u.nickname
+        ORDER BY bp.created_at DESC, bp.post_idx DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
+    </select>
+
+    <select id="getPostCount" resultType="int">
+        SELECT COUNT(*) FROM board_posts WHERE is_deleted = 'N'
+    </select>
+
+    <insert id="insertPost" parameterType="generationgap.co.kr.domain.board.Post">
+        <selectKey keyProperty="postIdx" resultType="Long" order="BEFORE">
+            SELECT board_posts_seq.NEXTVAL FROM dual
+        </selectKey>
+
+        INSERT INTO board_posts(
+        post_idx, author_idx, category, title, content, view_count, like_count, is_deleted, created_at)
+        VALUES(
+        #{postIdx}, #{authorIdx}, #{category}, #{title}, #{content}, 0,0, 'N', SYSDATE)
+    </insert>
+
+    <select id="getPostById" resultMap="postMap">
+        SELECT
+            bp.*,
+            u.nickname AS nickname
+        FROM board_posts bp
+        JOIN users u ON bp.author_idx = u.user_idx
+        WHERE bp.post_idx = #{postIdx} AND bp.is_deleted = 'N'
+    </select>
+
+    <update id="updateViewCount">
+        UPDATE board_posts
+        SET view_count = view_count+1
+        WHERE post_idx = #{postIdx}
+    </update>
+
+    <insert id ="insertPostLikeCheck">
+        INSERT INTO post_like_ck(user_idx, post_idx)
+        VALUES (#{userIdx}, #{postIdx})
+    </insert>
+
+    <update id="updateLikeCount">
+        UPDATE board_posts
+        SET like_count = like_count+1
+        WHERE post_idx = #{postIdx}
+    </update>
+
+    <select id="hasUserLikedPost" resultType="int">
+        SELECT COUNT(*)
+        FROM post_like_ck
+        WHERE user_idx = #{userIdx} AND post_idx = #{postIdx}
+    </select>
+
+    <delete id = "deletePostLike">
+        DELETE FROM post_like_ck
+        WHERE user_idx= #{userIdx} AND post_idx =#{postIdx}
+    </delete>
+
+    <update id="decrementLikeCount">
+        UPDATE board_posts
+        SET like_count= like_count-1
+        WHERE post_idx = #{postIdx}
+    </update>
+
+    <update id="softDeletePost">
+        UPDATE board_posts
+        SET is_deleted = 'Y',
+        deleted_by = #{userIdx},
+        deleted_at = SYSDATE
+        WHERE post_idx = #{postIdx}
+    </update>
+
+    <insert id="insertAttachmentWithOriginal">
+        INSERT INTO attachments (
+        post_idx,
+        uploader_idx,
+        file_name,
+        original_name,
+        upload_at
+        )
+        VALUES (
+        #{postIdx},
+        #{uploaderIdx},
+        #{fileName},
+        #{originalName},
+        SYSDATE
+        )
+    </insert>
+
+
+    <select id="getAttachmentsByPostId" parameterType="long" resultType="generationgap.co.kr.dto.post.Attachment">
+        SELECT
+        attachment_idx AS attachmentIdx,
+        post_idx       AS postIdx,
+        uploader_idx   AS uploaderIdx,
+        file_name      AS fileName,
+        original_name  AS originalName,
+        upload_at      AS uploadAt
+        FROM attachments
+        WHERE post_idx = #{postIdx}
+    </select>
+
+    <update id="updatePost" parameterType="generationgap.co.kr.domain.board.Post">
+        UPDATE board_posts
+        SET
+        category = #{category},
+        title = #{title},
+        content = #{content},
+        update_at = SYSTIMESTAMP
+        WHERE post_idx = #{postIdx}
+    </update>
+
+    <delete id="deleteAttachmentsByPostId" parameterType="long">
+        DELETE FROM attachments
+        WHERE post_idx = #{postIdx}
+    </delete>
+
+
+    <insert id="insertPostEditHistory">
+        INSERT INTO post_edits (
+        post_idx, title_before, content_before, edited_by
+        ) VALUES (
+        #{postIdx}, #{titleBefore}, #{contentBefore}, #{editedBy}
+        )
+    </insert>
+
+    <select id="getVisibleCommentCountByPost" resultType="int" parameterType="int">
+        SELECT COUNT(*) FROM post_comments c
+        WHERE c.post_idx = #{postIdx}
+        AND c.is_deleted = 'N'
+        AND (
+        c.parent_comment_id IS NULL
+        OR EXISTS (
+        SELECT 1 FROM post_comments p
+        WHERE p.comment_idx = c.parent_comment_id AND p.is_deleted = 'N'
+        )
+        )
+    </select>
+
+
+
+    <!--
+    getPostsPagedFiltered 원코드
+    <select id="getPostsPagedFiltered" resultMap="postMap">
+        SELECT
+        bp.*, u.nickname AS nickname, COUNT(c.comment_idx) AS comment_count
+        FROM board_posts bp
+        JOIN users u ON bp.author_idx = u.user_idx
+        LEFT JOIN post_comments c ON bp.post_idx = c.post_idx AND c.is_deleted = 'N'
+        WHERE bp.is_deleted = 'N'
+        <if test="category != null and category != ''">
+            AND bp.category = #{category}
+        </if>
+        GROUP BY bp.post_idx, bp.author_idx, bp.category, bp.title, bp.content,
+        bp.view_count, bp.like_count, bp.deleted_by, bp.is_deleted,
+        bp.created_at, bp.deleted_at, bp.update_at, u.nickname
+        <choose>
+            <when test="sort == 'views'">
+                ORDER BY bp.view_count DESC, bp.created_at DESC, bp.post_idx DESC
+            </when>
+            <when test="sort == 'likes'">
+                ORDER BY bp.like_count DESC, bp.created_at DESC, bp.post_idx DESC
+            </when>
+            <otherwise>
+                ORDER BY bp.created_at DESC, bp.post_idx DESC
+            </otherwise>
+        </choose>
+        OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
+    </select>-->
+
+    <select id="getPostsPagedFiltered" resultMap="postMap">
+        SELECT
+        bp.post_idx,
+        bp.author_idx,
+        bp.title,
+        bp.content,
+        bp.category,
+        bp.view_count,
+        bp.like_count,
+        bp.created_at,
+        bp.update_at,
+        bp.deleted_by,
+        bp.deleted_at,
+        bp.is_deleted,
+        u.nickname AS nickname,
+        COUNT(c.comment_idx) AS comment_count
+        FROM board_posts bp
+        JOIN users u ON bp.author_idx = u.user_idx
+        LEFT JOIN post_comments c ON bp.post_idx = c.post_idx AND c.is_deleted = 'N'
+        WHERE bp.is_deleted = 'N'
+        <if test="category != null and category != ''">
+            AND bp.category = #{category}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (bp.title LIKE '%' || #{keyword} || '%'
+            OR bp.content LIKE '%' || #{keyword} || '%')
+        </if>
+        GROUP BY
+        bp.post_idx,
+        bp.author_idx,
+        bp.title,
+        bp.content,
+        bp.category,
+        bp.view_count,
+        bp.like_count,
+        bp.created_at,
+        bp.update_at,
+        bp.deleted_by,
+        bp.deleted_at,
+        bp.is_deleted,
+        u.nickname
+        <choose>
+            <when test="sort == 'views'">
+                ORDER BY bp.view_count DESC
+            </when>
+            <when test="sort == 'likes'">
+                ORDER BY bp.like_count DESC
+            </when>
+            <otherwise>
+                ORDER BY bp.created_at DESC
+            </otherwise>
+        </choose>
+        OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
+    </select>
+
+
+    <!-- getPostCountFiltered 원코드
+    <select id="getPostCountFiltered" resultType="int">
+        SELECT COUNT(*) FROM board_posts
         WHERE is_deleted = 'N'
-        ORDER BY created_at DESC
+        <if test="category != null and category != ''">
+            AND category = #{category}
+        </if>
+    </select>-->
+
+    <select id="getPostCountFiltered" resultType="int">
+        SELECT COUNT(*) FROM board_posts
+        WHERE is_deleted = 'N'
+        <if test="category != null and category != ''">
+            AND category = #{category}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (
+            title LIKE '%' || #{keyword} || '%'
+            OR content LIKE '%' || #{keyword} || '%'
+            )
+        </if>
     </select>
 
 </mapper>

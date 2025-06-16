@@ -1,6 +1,7 @@
 package generationgap.co.kr.domain.group;
 
 import generationgap.co.kr.domain.user.UserDTO;
+import generationgap.co.kr.domain.user.UserData;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -37,9 +38,12 @@ public class Groups {
     private String createdAt;
     private String deletedAt;
 
+    private String district; // 장소 주소에서 지역구만 빼서 저장
+
     // 조인용 객체 선언
     private UserDTO owner;                     // 호스트
     private CategoryMain categoryMain;     // 대분류
     private CategorySub categorySub;       // 소분류
-
+    private UserData userData;
+    private GroupMembers groupMembers;
 }

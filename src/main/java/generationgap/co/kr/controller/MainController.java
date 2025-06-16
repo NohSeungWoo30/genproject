@@ -1,94 +1,48 @@
 package generationgap.co.kr.controller;
 
+import generationgap.co.kr.domain.group.CategoryMain;
+import generationgap.co.kr.domain.group.Groups;
+import generationgap.co.kr.security.CustomUserDetails;
+import generationgap.co.kr.service.group.GroupService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+
+import java.util.List;
 
 @Controller
 public class MainController {
 
+    private final GroupService groupService;
+
+    public MainController(GroupService groupService) {
+        this.groupService = groupService;
+    }
+
     @GetMapping("/main")
-    public String mainPage() {
-        return "main"; // main.html2 템플릿 반환
+    public String mainPage(Model model,
+                           @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails != null) {
+            model.addAttribute("user", userDetails);
+        }
+        // 카테고리 전체 리스트
+        List<CategoryMain> categoryMainList = groupService.getAllMainCategory();
+        model.addAttribute("categoryMainList",categoryMainList);
+
+        // 그룹 전체 리스트
+        List<Groups> groupsList = groupService.getAllGroups();
+        model.addAttribute("groupsList", groupsList);
+
+        // 인기소셜링 좋아요 그룹방
+        List<Groups> recommendGroupsList = groupService.getRecommendGroup();
+        model.addAttribute("recommendGroupsList", recommendGroupsList);
+
+        return "main/main";
     }
 
-    @GetMapping("/main/MAIN.html")
+    @GetMapping("/main/MAIN")
     public String mainPage2() {
-        return "main/MAIN.html"; // src/main/resources/templates/main/main.html을 찾음
+        return "main/MAIN"; // main.html 템플릿 반환
     }
-
-    @GetMapping("/main/Meeting-list.html")
-    public String meetinglist() {
-        return "main/Meeting-list.html"; // src/main/resources/templates/main/main.html을 찾음
-    }
-
-    @GetMapping("/main/board.html")
-    public String board() {
-        return "main/board.html"; // src/main/resources/templates/main/main.html을 찾음
-    }
-
-    @GetMapping("/main/detailboard.html")
-    public String detail() {
-        return "main/detailboard.html"; // src/main/resources/templates/main/main.html을 찾음
-    }
-
-    @GetMapping("/main/login.html")
-    public String login() {
-        return "main/login.html"; // src/main/resources/templates/main/main.html을 찾음
-    }
-
-    @GetMapping("/main/signup.html")
-    public String signup() {
-        return "main/signup.html"; // src/main/resources/templates/main/main.html을 찾음
-    }
-
-    @GetMapping("/main/write.html")
-    public String write() {
-        return "main/write.html"; // src/main/resources/templates/main/main.html을 찾음
-    }
-
-    @GetMapping("/templates/meetingcreate.html")
-    public String meetingcreate() {
-        return "/templates/meetingcreate.html"; // src/main/resources/templates/main/main.html을 찾음
-    }
-
-    @GetMapping("/main/meetingdetail.html")
-    public String meetingdetail() {
-        return "/main/meetingdetail.html"; // src/main/resources/templates/main/main.html을 찾음
-    }
-
-    @GetMapping("/templates/product-list.html")
-    public String product() {
-        return "/templates/product-list.html"; // src/main/resources/templates/main/main.html을 찾음
-    }
-
-    @GetMapping("/api/payments/confirml")
-    public String payments() {
-        return "/api/payments/confirml"; // src/main/resources/templates/main/main.html을 찾음
-    }
-
-    @GetMapping("/templates/payment_success.html")
-    public String payment_success() {
-        return "/templates/mpayment_success.html"; // src/main/resources/templates/main/main.html을 찾음
-    }
-
-    @GetMapping("/templates/payment_fail.html")
-    public String payment_fail() {
-        return "/templates/payment_fail.html"; // src/main/resources/templates/main/main.html을 찾음
-    }
-
-    @GetMapping("/templates/mypage.html")
-    public String mypage() {
-        return "/templates/mypage.html"; // src/main/resources/templates/main/main.html을 찾음
-    }
-
-    @GetMapping("/main/Id_Passwordfind.html")
-    public String Id_Passwordfind() {
-        return "/main/Id_Passwordfind.html"; // src/main/resources/templates/main/main.html을 찾음
-    }
-
-    @GetMapping("/main/user-profile.html")
-    public String userprofile() {
-        return "/main/user-profile.html"; // src/main/resources/templates/main/main.html을 찾음
-    }
-
 }
