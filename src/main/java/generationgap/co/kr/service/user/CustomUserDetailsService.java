@@ -1,15 +1,16 @@
 package generationgap.co.kr.service.user;
 
 import generationgap.co.kr.domain.user.UserDTO;
-import generationgap.co.kr.mapper.user.UserMapper;
+import generationgap.co.kr.mapper.user.UserMapper; // UserMapper 임포트
 import generationgap.co.kr.security.CustomUserDetails;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import org.slf4j.Logger; // Logger 추가
+import org.slf4j.LoggerFactory; // LoggerFactory 추가
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {

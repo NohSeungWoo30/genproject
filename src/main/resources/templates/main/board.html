@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>자유 게시판</title>
+
+    <!-- CSS 파일 불러오기 -->
+    <link rel="stylesheet" th:href="@{/css/boardstyle.css}" />
+    <link rel="stylesheet" th:href="@{/css/vars.css}" />
+    <link rel="stylesheet" th:href="@{/css/mainstyle.css}" />
+
+    <style>
+        /* (기존 스타일 유지) */
+        .sort-buttons {
+          margin-bottom: 16px;
+          display: flex;
+          gap: 8px;
+        }
+        .sort-buttons button {
+          padding: 6px 12px;
+          font-family: var(--font-pretendard-medium);
+          font-size: 14px;
+          border: 1px solid var(--color-grey-80);
+          border-radius: 4px;
+          background: var(--color-white-solid);
+          cursor: pointer;
+          transition: background 0.2s;
+        }
+        .sort-buttons button.active {
+          background: var(--color-pigment-indigo);
+          color: var(--color-white-solid);
+          border-color: var(--color-pigment-indigo);
+        }
+        .sort-buttons button:hover {
+          background: var(--color-grey-96);
+        }
+        .btn-new-post {
+          display: inline-block;
+          padding: 6px 14px;
+          background: var(--color-pigment-indigo);
+          color: var(--color-white-solid);
+          border-radius: 4px;
+          text-decoration: none;
+          font-family: var(--font-pretendard-medium);
+          transition: background 0.2s;
+        }
+        .btn-new-post:hover {
+          background: #9a4ed6;
+        }
+        .thumb {
+          width: 60px;
+          height: 60px;
+          object-fit: cover;
+          border-radius: 4px;
+        }
+        .pagination {
+          margin-top: 16px;
+          display: flex;
+          gap: 8px;
+          justify-content: center;
+          font-family: var(--font-pretendard-medium);
+        }
+        .pagination a {
+          padding: 6px 10px;
+          border: 1px solid var(--color-grey-80);
+          border-radius: 4px;
+          text-decoration: none;
+          color: var(--color-mine-shaft);
+          background: var(--color-white-solid);
+          cursor: pointer;
+          transition: background 0.2s;
+        }
+        .pagination a.active {
+          background: var(--color-pigment-indigo);
+          color: var(--color-white-solid);
+          border-color: var(--color-pigment-indigo);
+        }
+        .pagination a:hover {
+          background: var(--color-grey-96);
+        }
+    </style>
+</head>
+<body>
+<!-- 상단 네비게이션 바 -->
+<nav class="container-nav">
+    <div class="nav-left">
+        <a href="MAIN.html">
+            <img class="logo" src="/img/icons/MT5.png" alt="M 로고" />
+        </a>
+    </div>
+    <div class="nav-right">
+        <a href="login.html">로그인·회원가입</a>
+    </div>
+</nav>
+<!-- 하단 서브 네비게이션 바 -->
+<nav class="sub-nav">
+    <a href="meetingcreate.html">모임생성</a>
+    <a href="Meeting-list.html">모임목록</a>
+    <a href="product-list.html">상품목록</a>
+    <a href="board.html">자유 게시판</a>
+</nav>
+
+<section class="board-wrapper">
+    <div class="board-header">
+        <h2>자유 게시판</h2>
+        <a href="write.html" class="btn-new-post">✚ 새 글 작성</a>
+    </div>
+
+    <!-- 정렬 버튼 -->
+    <div class="sort-buttons">
+        <button id="sort-new" class="active">최신순</button>
+        <button id="sort-views">조회순</button>
+        <button id="sort-likes">추천순</button>
+    </div>
+
+    <!-- 게시판 테이블 -->
+    <table class="board-table">
+        <thead>
+        <tr>
+            <th>번호</th>
+            <th>이미지</th>
+            <th>카테고리</th>
+            <th>제목</th>
+            <th>작성자</th>
+            <th>조회수</th>
+            <th>추천수</th>
+            <th>작성일</th>
+        </tr>
+        </thead>
+        <tbody id="boardBody"></tbody>
+    </table>
+    <div class="pagination" id="pagination"></div>
+</section>
+
+<script>
+
+    // --------------------------------------------------------
+    // 5) 정렬 버튼 클릭 시 fetchPosts 재호출
+    // --------------------------------------------------------
+    function setActiveSortButton(activeId) {
+      document.querySelectorAll(".sort-buttons button").forEach(btn => {
+        btn.classList.toggle("active", btn.id === activeId);
+      });
+    }
+    document.getElementById("sort-new").addEventListener("click", () => {
+      setActiveSortButton("sort-new");
+      fetchPosts('new');
+    });
+    document.getElementById("sort-views").addEventListener("click", () => {
+      setActiveSortButton("sort-views");
+      fetchPosts('views');
+    });
+    document.getElementById("sort-likes").addEventListener("click", () => {
+      setActiveSortButton("sort-likes");
+      fetchPosts('likes');
+    });
+
+
+</script>
+</body>
+</html>
