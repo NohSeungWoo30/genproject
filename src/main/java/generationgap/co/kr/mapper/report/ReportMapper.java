@@ -32,6 +32,9 @@ public interface ReportMapper {
 
     List<ReportCategoryDTO> selectReportCategories();
     List<ReportReasonDTO> selectReportReasons();
+
+    int countRecentReports(@Param("userId") Long userId);
+
 }
 
 

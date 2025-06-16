@@ -8,11 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 public interface PostService {
-    List<Post> getPostListPaged(int offset, int limit, String sort);
+    List<Post> getPostListPagedFiltered(int offset, int limit, String category, String sort, String keyword);
 
-    List<Post> getPostListPagedFiltered(int offset, int limit, String category, String sort);
-
-    int getTotalPostCountFiltered(String category);
+    int getTotalPostCountFiltered(String category, String keyword);
 
     void writePostWithAttachments(Post post, List<MultipartFile> files);
 

@@ -74,4 +74,10 @@
         ORDER BY report_reason_idx
     </select>
 
+    <!--신고 제재-->
+    <select id="countRecentReports" resultType="int">
+        SELECT COUNT(*) FROM reports
+        WHERE reported_user_idx = #{userId}
+    </select>
+
 </mapper>

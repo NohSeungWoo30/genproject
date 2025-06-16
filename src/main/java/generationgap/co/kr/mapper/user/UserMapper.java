@@ -5,6 +5,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
+
 
 @Mapper
 public interface UserMapper {
@@ -22,5 +24,22 @@ public interface UserMapper {
 
     @Select("SELECT user_id FROM users WHERE user_idx = #{userIdx}")
     String getUserIdByUserIdx(long userIdx);
+
+
+    // 신고된 유저 설정을 위해 추가 ksm
+    void suspendUser(@Param("userId") Long userId);
+
+    // 신고된 유저 자동 해제 ksm
+    int releaseExpiredSuspensions();
+
+
+    //테스트용 ksm
+    List<UserDTO> findSuspendCandidates();
+
+    //user_idx로 조회하는 매서드 추가 ksm
+    UserDTO findByUserIdx(@Param("userIdx") Long userIdx);
+
+
+
 
 }

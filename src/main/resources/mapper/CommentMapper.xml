@@ -84,4 +84,13 @@
     </insert>
 
 
+    <select id="getPostWriterByPostIdx" resultType="int">
+        SELECT author_idx FROM board_posts WHERE post_idx = #{postIdx}
+    </select>
+
+
+    <select id="getPostIdxByCommentId" resultType="int">
+        SELECT post_idx FROM post_comments WHERE comment_idx = #{commentId}
+    </select>
+
 </mapper>

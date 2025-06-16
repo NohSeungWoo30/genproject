@@ -75,7 +75,7 @@
             ws.close();
           }
 
-        const url = "ws://localhost:8080/ws/chat?groupId=" + encodeURIComponent(groupId);
+        const url = "ws://" + location.hostname + ":8080/ws/chat?groupId=" + encodeURIComponent(groupId);
           ws = new WebSocket(url);
 
           ws.onopen = () => console.log("✅ 연결됨");

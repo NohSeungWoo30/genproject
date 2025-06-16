@@ -22,6 +22,8 @@ public class ReportController {
     @PostMapping
     public ResponseEntity<?> reportContent(@RequestBody ReportRequestDto dto,
                                            @AuthenticationPrincipal CustomUserDetails user){
+
+        System.out.println("📥 신고 요청 수신됨: " + dto);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("message", "로그인이 필요합니다."));

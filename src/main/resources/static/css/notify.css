@@ -1,0 +1,127 @@
+ /* ───── 프로필 썸네일 ───── */
+
+.profile-thumb img{
+
+width:28px;height:28px;border-radius:50%;object-fit:cover;cursor:pointer;
+
+}
+
+
+
+/* ───── 알림 버튼 & 뱃지 ───── */
+
+.noti-bell-btn{position:relative;display:inline-flex;align-items:center;cursor:pointer;margin-right:12px;}
+
+.noti-bell-btn ion-icon{font-size:24px;color:#555;transition:.2s;}
+
+.noti-bell-btn:hover ion-icon{color:#000;}
+
+
+
+.noti-badge{
+
+position:absolute;top:-5px;right:-5px;
+
+min-width:18px;height:18px;padding:0 4px;
+
+border-radius:9999px;background:#ef4444;
+
+display:none;box-shadow:0 0 0 2px #fff;
+
+color:#fff;font-size:11px;font-weight:600;
+
+line-height:18px;text-align:center;
+
+}
+
+
+
+/* ───── 팝오버 ───── */
+
+.noti-popover{
+
+position:absolute;top:40px;right:0;
+
+width:320px;max-height:calc(100vh - 80px);
+
+background:#fff;border:1px solid #e5e7eb;border-radius:12px;
+
+box-shadow:0 8px 24px rgba(0,0,0,.15);
+
+display:none;overflow:hidden;z-index:1000;
+
+animation:fadeScale .15s ease-out;
+
+}
+
+@keyframes fadeScale{
+
+from{opacity:0;transform:translateY(-6px) scale(.95);}
+
+to {opacity:1;transform:translateY(0) scale(1);}
+
+}
+
+
+
+/* ───── 알림 카드 ───── */
+
+.noti-card{
+
+position:relative;
+
+display:flex;align-items:flex-start;gap:12px;
+
+background:#fff;border:1px solid #f3f4f6;
+
+border-radius:12px;padding:14px 16px;
+
+box-shadow:0 1px 4px rgba(0,0,0,.06);
+
+transition:.25s;
+
+}
+
+.noti-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.1);transform:translateY(-2px);}
+
+.noti-card.read{opacity:.55;}
+
+.noti-card:focus{outline:2px solid #2563eb;outline-offset:2px;}
+
+
+
+/* 아이콘 원형 */
+
+.noti-icon{
+
+flex-shrink:0;width:42px;height:42px;border-radius:50%;
+
+display:flex;align-items:center;justify-content:center;
+
+background:#e0f2fe;
+
+}
+
+.noti-icon.msg {background:#e0f2fe;color:#0284c7;}
+
+.noti-icon.like {background:#fef9c3;color:#ca8a04;}
+
+.noti-icon.alert{background:#fee2e2;color:#b91c1c;}
+
+
+
+.noti-icon ion-icon{font-size:22px;}
+
+
+
+/* 본문 */
+
+.noti-body p{font-size:14px;color:#111;}
+
+.noti-body time{font-size:12px;color:#6b7280;}
+
+
+
+/* dismiss 버튼 */
+
+.dismiss-btn ion-icon{pointer-events:none;}

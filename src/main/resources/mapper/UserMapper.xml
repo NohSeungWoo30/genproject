@@ -25,6 +25,10 @@
         <result property="lastLoginAt" column="last_login_at"/>
         <result property="updateAt" column="update_at"/>
         <result property="ghost" column="ghost"/>
+
+        <!--신고위해 추가한 컬럼 추가 ksm-->
+        <result property="isSuspended" column="is_suspended"/>
+        <result property="suspendUntil" column="suspend_until"/>
     </resultMap>
 
 
@@ -57,4 +61,39 @@
         update_at = SYSDATE <!--비밀번호 변경 시 업데이트 시간 기록 (Oracle)-->
         WHERE user_idx = #{userIdx}
     </update>
+
+
+    <!-- 3일 정지 설정 ksm -->
+    <update id="suspendUser">
+        UPDATE users
+        SET is_suspended = 1,
+        suspend_until = SYSTIMESTAMP + NUMTODSINTERVAL(3, 'DAY')
+        WHERE user_idx = #{userId}
+    </update>
+
+    <!--시간 지나면 자동으로 정지 해제 ksm-->
+    <update id="releaseExpiredSuspensions">
+        <![CDATA[
+        UPDATE users
+            SET is_suspended = 0,
+            suspend_until = NULL
+        WHERE is_suspended = 1
+            AND suspend_until <= SYSTIMESTAMP
+        ]]>
+    </update>
+
+    <!--확인용 ksm-->
+    <select id="findSuspendCandidates" resultMap="userResultMap">
+        <![CDATA[
+        SELECT user_idx, user_id, is_suspended, suspend_until
+        FROM users
+        WHERE is_suspended = 1
+        AND suspend_until <= SYSTIMESTAMP
+        ]]>
+    </select>
+
+    <!-- idx로 정보가져오기 ksm-->
+    <select id="findByUserIdx" resultMap="userResultMap">
+        SELECT * FROM users WHERE user_idx = #{userIdx}
+    </select>
 </mapper>

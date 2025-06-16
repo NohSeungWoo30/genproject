@@ -1,8 +1,10 @@
 package generationgap.co.kr.service.board;
 
 import generationgap.co.kr.domain.board.Post;
+import generationgap.co.kr.dto.notification.NotificationDto;
 import generationgap.co.kr.dto.post.Attachment;
 import generationgap.co.kr.mapper.board.PostMapper;
+import generationgap.co.kr.service.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,14 +24,15 @@ import java.util.UUID;
 public class PostServiceImpl implements PostService{
 
     private final PostMapper postMapper;
+    private final NotificationService notificationService;
 
 
 
 
     @Override
-    public int getTotalPostCountFiltered(String category){
+    public int getTotalPostCountFiltered(String category, String keyword){
 
-        return postMapper.getPostCountFiltered(category);
+        return postMapper.getPostCountFiltered(category, keyword);
     }
 
     @Override
@@ -91,7 +94,20 @@ public class PostServiceImpl implements PostService{
         }else{
             postMapper.insertPostLikeCheck(userIdx, postIdx);
             postMapper.updateLikeCount(postIdx);
+
+            //알림 보내기 추가
+            Post post = postMapper.getPostById(postIdx);
+            if (post != null && post.getAuthorIdx() != userIdx) {
+                NotificationDto dto = new NotificationDto();
+                dto.setRecipientId((long) post.getAuthorIdx()); // 게시글 작성자에게
+                dto.setNotiTypeIdx(3L); // 추천 알림용 유형 ID
+                dto.setNotiUrl("/posts/" + postIdx);
+                dto.setVariables(Map.of("title", post.getTitle())); // 게시글 제목 전달
+
+                notificationService.sendNotification(dto);
+            }
             return true; //추천하기
+
         }
     }
 
@@ -202,15 +218,10 @@ public class PostServiceImpl implements PostService{
         return result;
     }
 
-    @Override
-    public List<Post> getPostListPaged(int offset, int limit, String sort) {
-        return postMapper.getPostsPagedFiltered(offset, limit, null, sort);
-
-    }
 
     @Override
-    public List<Post> getPostListPagedFiltered(int offset, int limit, String category, String sort) {
-        return postMapper.getPostsPagedFiltered(offset, limit, category, sort);
+    public List<Post> getPostListPagedFiltered(int offset, int limit, String category, String sort, String keyword) {
+        return postMapper.getPostsPagedFiltered(offset, limit, category, sort, keyword);
     }
 
 

@@ -87,6 +87,7 @@ public class ChatHandler extends TextWebSocketHandler {
         List<ChatMessage> history = chatService.getMessagesByGroup(groupId);
         for (ChatMessage msg : history){
             JSONObject json = new JSONObject();
+            json.put("type", "INIT");
             json.put("from", msg.getNickname());
             json.put("msg", msg.getContent());
             String msgUserId = userMapper.getUserIdByUserIdx(msg.getSenderIdx());
@@ -94,6 +95,9 @@ public class ChatHandler extends TextWebSocketHandler {
             json.put("userIdx", msg.getSenderIdx()); // ✅ 숫자형 고유 ID 추가
             json.put("messageId", msg.getMessagesIdx());
             json.put("sentAt", msg.getSentAt().toString());
+            json.put("isDeleted", msg.getIsDeleted());
+            json.put("isEdited", msg.getIsEdited());
+
             session.sendMessage(new TextMessage(json.toString()));
         }
 
@@ -148,6 +152,8 @@ public class ChatHandler extends TextWebSocketHandler {
                 response.put("msg", newContent); // 수정된 내용
                 response.put("userId", userId); // 클라이언트 비교용
                 response.put("userIdx", userIdx);     // IDX 추가
+                response.put("isEdited", "Y");
+
 
 
 
@@ -221,6 +227,8 @@ public class ChatHandler extends TextWebSocketHandler {
         response.put("userIdx", userIdx);     // IDX 추가
         response.put("messageId", id);
         response.put("sentAt", chatMessage.getSentAt().toString());
+        response.put("isDeleted", chatMessage.getIsDeleted()); // 'Y' 또는 'N'
+
 
         for(WebSocketSession s : groupSessions.getOrDefault(groupId, Set.of())){
             if(s.isOpen()){
@@ -267,12 +275,21 @@ public class ChatHandler extends TextWebSocketHandler {
         systemMsg.setContent(content);
         systemMsg.setSentAt(LocalDateTime.now());
         systemMsg.setIsDeleted("N");
+        systemMsg.setType("system");
 
         chatService.saveMessage(systemMsg);
 
         JSONObject json = new JSONObject();
         json.put("from", "시스템");
         json.put("msg", content);
+        json.put("type", "system");
+        json.put("messageId", systemMsg.getMessagesIdx());
+        json.put("sentAt", systemMsg.getSentAt().toString());
+        json.put("userId", "system");
+        json.put("userIdx", 1);  // 시스템 user idx
+        json.put("isDeleted", "N");
+
+
 
         for(WebSocketSession s : groupSessions.getOrDefault(groupId, Set.of())){
             if(s.isOpen()){
@@ -284,8 +301,5 @@ public class ChatHandler extends TextWebSocketHandler {
             }
         }
     }
-
-
-
 
 }

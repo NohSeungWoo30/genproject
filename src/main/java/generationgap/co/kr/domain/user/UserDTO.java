@@ -3,6 +3,7 @@ package generationgap.co.kr.domain.user;
 import lombok.*;
 
 import java.time.LocalDate; // 추가
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -30,4 +31,8 @@ public class UserDTO {
     private LocalDate lastLoginAt;
     private LocalDate updateAt;
     private LocalDate ghost;
+
+    // ✅ 신고 정지 관련 필드 추가 ksm 06-11
+    private int isSuspended;
+    private LocalDateTime suspendUntil;
 }

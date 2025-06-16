@@ -1,10 +1,16 @@
 package generationgap.co.kr.controller.board;
 
 import generationgap.co.kr.domain.board.Comment;
+import generationgap.co.kr.domain.board.Post;
+import generationgap.co.kr.dto.notification.NotificationDto;
 import generationgap.co.kr.mapper.board.CommentMapper;
+import generationgap.co.kr.mapper.board.PostMapper;
 import generationgap.co.kr.security.CustomUserDetails;
+import generationgap.co.kr.service.board.CommentService;
+import generationgap.co.kr.service.notification.NotificationService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,9 +24,13 @@ import java.util.Map;
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/posts")
+@Slf4j
 public class CommentController {
 
     private final CommentMapper commentMapper;
+    private final PostMapper postMapper;
+    private final NotificationService notificationService;
+    private final CommentService commentService;
 
 
     //댓글 등록
@@ -46,7 +56,26 @@ public class CommentController {
         comment.setContent(content);
         comment.setParentCommentId(parentCommentId);
 
-        commentMapper.insertComment(comment);
+        commentService.addComment(comment, userIdx);
+
+        // 2. 알림 전송
+        try {
+
+            System.out.println("컨트롤러에서 sendNotification 진입");
+
+            Post post = postMapper.getPostById(postIdx);
+            if (post != null && post.getAuthorIdx() != userIdx) {
+                NotificationDto dto = new NotificationDto();
+                dto.setRecipientId(post.getAuthorIdx().longValue());
+                dto.setNotiTypeIdx(1L);
+                dto.setVariables(Map.of("title", post.getTitle()));
+                dto.setNotiUrl("/posts/" + postIdx);
+
+                notificationService.sendNotification(dto);
+            }
+        } catch (Exception e) {
+            log.error("❗ 댓글 알림 처리 중 오류 발생", e);
+        }
         return "ok";
     }
 

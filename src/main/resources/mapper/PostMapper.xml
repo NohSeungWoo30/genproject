@@ -141,6 +141,7 @@
     <update id="updatePost" parameterType="generationgap.co.kr.domain.board.Post">
         UPDATE board_posts
         SET
+        category = #{category},
         title = #{title},
         content = #{content},
         update_at = SYSTIMESTAMP
@@ -176,6 +177,8 @@
 
 
 
+    <!--
+    getPostsPagedFiltered 원코드
     <select id="getPostsPagedFiltered" resultMap="postMap">
         SELECT
         bp.*, u.nickname AS nickname, COUNT(c.comment_idx) AS comment_count
@@ -201,13 +204,84 @@
             </otherwise>
         </choose>
         OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
+    </select>-->
+
+    <select id="getPostsPagedFiltered" resultMap="postMap">
+        SELECT
+        bp.post_idx,
+        bp.author_idx,
+        bp.title,
+        bp.content,
+        bp.category,
+        bp.view_count,
+        bp.like_count,
+        bp.created_at,
+        bp.update_at,
+        bp.deleted_by,
+        bp.deleted_at,
+        bp.is_deleted,
+        u.nickname AS nickname,
+        COUNT(c.comment_idx) AS comment_count
+        FROM board_posts bp
+        JOIN users u ON bp.author_idx = u.user_idx
+        LEFT JOIN post_comments c ON bp.post_idx = c.post_idx AND c.is_deleted = 'N'
+        WHERE bp.is_deleted = 'N'
+        <if test="category != null and category != ''">
+            AND bp.category = #{category}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (bp.title LIKE '%' || #{keyword} || '%'
+            OR bp.content LIKE '%' || #{keyword} || '%')
+        </if>
+        GROUP BY
+        bp.post_idx,
+        bp.author_idx,
+        bp.title,
+        bp.content,
+        bp.category,
+        bp.view_count,
+        bp.like_count,
+        bp.created_at,
+        bp.update_at,
+        bp.deleted_by,
+        bp.deleted_at,
+        bp.is_deleted,
+        u.nickname
+        <choose>
+            <when test="sort == 'views'">
+                ORDER BY bp.view_count DESC
+            </when>
+            <when test="sort == 'likes'">
+                ORDER BY bp.like_count DESC
+            </when>
+            <otherwise>
+                ORDER BY bp.created_at DESC
+            </otherwise>
+        </choose>
+        OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
     </select>
+
+
+    <!-- getPostCountFiltered 원코드
+    <select id="getPostCountFiltered" resultType="int">
+        SELECT COUNT(*) FROM board_posts
+        WHERE is_deleted = 'N'
+        <if test="category != null and category != ''">
+            AND category = #{category}
+        </if>
+    </select>-->
 
     <select id="getPostCountFiltered" resultType="int">
         SELECT COUNT(*) FROM board_posts
         WHERE is_deleted = 'N'
         <if test="category != null and category != ''">
             AND category = #{category}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (
+            title LIKE '%' || #{keyword} || '%'
+            OR content LIKE '%' || #{keyword} || '%'
+            )
         </if>
     </select>
 

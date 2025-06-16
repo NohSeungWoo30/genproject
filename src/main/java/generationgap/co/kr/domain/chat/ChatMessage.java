@@ -16,5 +16,9 @@ public class ChatMessage {
     private LocalDateTime sentAt;
     private String isDeleted; // 'Y' 또는 'N'
     private LocalDateTime deletedAt;
+    private String type; // system / self / other
+    private String isEdited; // 'Y' 또는 'N'
+
+
 
 }
