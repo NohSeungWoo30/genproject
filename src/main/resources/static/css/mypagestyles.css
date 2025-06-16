@@ -1,0 +1,527 @@
+/* styles.css */
+
+/* ────────────────────────────────────────────────────── */
+/* 공통 리셋 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html, body {
+  width: 100%;
+  height: 100%;
+  background-color: #f2f2f2;
+  font-family: 'Noto Sans KR', sans-serif;
+  color: #333;
+  overflow-x: hidden;
+}
+
+/* ────────────────────────────────────────────────────── */
+/* 기본 숨김 처리 클래스 */
+.hidden {
+  display: none;
+}
+
+/* ────────────────────────────────────────────────────── */
+/* 전체 레이아웃: index.html 전용 그리드 */
+/* (detail.html에서는 별도로 사용하지 않습니다) */
+.container-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 좌: 폼, 우: 미리보기 */
+  gap: 24px;
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 0 12px;
+}
+@media (max-width: 800px) {
+  .container-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ────────────────────────────────────────────────────── */
+/* index.html 전용: 왼쪽 폼 섹션 */
+.form-section {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 24px;
+}
+.form-section h1 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #222;
+}
+.form-group {
+  margin-bottom: 16px;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.form-group input[type="text"],
+.form-group input[type="datetime-local"],
+.form-group textarea,
+.form-group input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: #fafafa;
+}
+.form-group textarea {
+  resize: vertical;
+}
+
+/* ────────────────────────────────────────────────────── */
+/* 1-2) 카테고리 태그 그리드 */
+.tag-icon-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+@media (max-width: 600px) {
+  .tag-icon-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.tag-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 16px;
+  background-color: #e0e0e0; /* 기본 회색 */
+  cursor: pointer;
+  user-select: none;
+  font-size: 12px;
+  color: #555;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+.tag-icon.selected {
+  background-color: #4285f4; /* 파란색 강조 */
+  color: #fff;
+  border-color: #4285f4;
+}
+
+/* 1-2-a) 선택된 태그 칩 (미리보기 상단 아래) */
+.selected-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.tag-chip {
+  display: flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  background-color: #4285f4;
+  color: #fff;
+}
+
+/* ────────────────────────────────────────────────────── */
+/* 1-7) 나이 슬라이더 (index.html 미리보기용) */
+.age-slider input[type="range"] {
+  width: 100%;
+  margin: 8px 0;
+}
+.age-label-left,
+.age-label-right {
+  font-size: 12px;
+  color: #555;
+  margin: 0 6px;
+}
+.selected-age-display {
+  font-size: 14px;
+  color: #333;
+  margin-top: 4px;
+}
+
+/* ────────────────────────────────────────────────────── */
+/* 1-9) 방 생성 버튼 (index.html) */
+.primary-button {
+  width: 100%;
+  background-color: #4285f4;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 14px 0;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 12px;
+}
+.primary-button:hover {
+  background-color: #3367d6;
+}
+
+/* ────────────────────────────────────────────────────── */
+/* 오른쪽: 실시간 미리보기 (index.html) */
+.preview-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.preview-section h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #222;
+}
+
+/* 2-1) 미리보기 카드 전체 (index.html) */
+.live-card {
+  width: 100%;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* 2-1) 상단 배경 영역 (index.html) */
+.preview-header-background {
+  width: 100%;
+  background-color: #FFFBED; /* 기본 연한 베이지 */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+}
+
+/* 2-1-a) 방 이미지 (회색 박스 + 실제 이미지) */
+.room-image-container {
+  position: relative; /* ← 추가: .room-image를 이 내부 기준으로 배치 */
+  width: 120px;
+  height: 100px;
+}
+.image-preview-placeholder {
+  width: 120px;
+  height: 100px;
+  background-color: #e0e0e0;
+  border-radius: 8px;
+}
+.room-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 120px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* 2-1-b) 프로필 블록 (index.html) */
+.profile-block {
+  display: flex;
+  align-items: center;
+}
+.profile-placeholder {
+  width: 48px;
+  height: 48px;
+  background-color: #e0e0e0;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+.profile-image {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 8px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.profile-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* ────────────────────────────────────────────────────── */
+/* 2-2) 카드 본문 (index.html) */
+.card-body {
+  padding: 16px;
+}
+
+/* 2-2-a) 카테고리 태그 칩 (index.html) */
+.card-body .tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+/* 2-2-b) 선택된 나이 표시 (index.html) */
+#liveAgeContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.age-chip {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  background-color: #4285f4;
+  color: #fff;
+}
+
+/* 2-2-c) 방 제목 (index.html) */
+.card-body .title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 14px;
+}
+
+/* 2-2-d) 설명 및 작은 지도/정보 (index.html) */
+.card-body .content {
+  display: flex;
+  gap: 16px;
+}
+.card-body .description {
+  flex: 2;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #444;
+  white-space: pre-wrap;
+}
+.card-body .right-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.card-body .map-preview {
+  width: 100%;
+  height: 100px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #eaeaea;
+  margin-bottom: 12px;
+}
+.small-map-area {
+  width: 100%;
+  height: 100%;
+}
+.card-body .info-list {
+  width: 100%;
+}
+.card-body .info-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: #555;
+}
+.card-body .info-item .label {
+  font-weight: 500;
+}
+.card-body .info-item .value {
+  font-weight: 600;
+  color: #333;
+}
+
+/* 2-2-e) 방 참여 버튼 (index.html) */
+.card-body .join-button {
+  margin-top: 12px;
+  width: 100%;
+  background-color: #4285f4;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 0;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.card-body .join-button:hover {
+  background-color: #3367d6;
+}
+
+/* ────────────────────────────────────────────────────── */
+/* 3) 방 상세 페이지(detail.html) 전용 스타일 시작 */
+
+/* detail.html 전체 백그라운드 */
+.room-detail-section {
+  padding: 40px 20px;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+}
+/* 제목 “방 상세 페이지” */
+.room-detail-section h2 {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  text-align: center;
+  color: #333;
+}
+
+/* 3-1) 방 상세 페이지 상단: 이중 나이 슬라이더 컨테이너 */
+.age-range-container {
+  max-width: 600px;
+  margin: 0 auto 32px auto;
+  padding: 0 16px;
+}
+.age-range-container .age-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.age-range-container .age-title .age-min, 
+.age-range-container .age-title .age-max {
+  font-size: 14px;
+  color: #555;
+}
+/* 이중 슬라이더 트랙 */
+.age-slider-wrapper {
+  position: relative;
+  height: 28px;
+  display: flex;
+  align-items: center;
+}
+.age-slider-wrapper input[type="range"] {
+  position: absolute;
+  width: 100%;
+  margin: 0;
+  pointer-events: none; /* 하단 트랙 방해 방지 */
+  -webkit-appearance: none;
+  background: transparent;
+  height: 28px;
+}
+.age-slider-wrapper input[type="range"]::-webkit-slider-thumb {
+  pointer-events: all;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #d32f2f; /* 빨간색 손잡이 */
+  border: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+.age-slider-wrapper input[type="range"]::-moz-range-thumb {
+  pointer-events: all;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #d32f2f;
+  border: none;
+  cursor: pointer;
+}
+/* 슬라이더 트랙: 회색 */
+.age-slider-wrapper .slider-track {
+  position: absolute;
+  width: 100%;
+  height: 6px;
+  background-color: #e0e0e0;
+  border-radius: 3px;
+  z-index: 1;
+}
+/* 슬라이더 트랙: 빨간색 범위 */
+.age-slider-wrapper .slider-range {
+  position: absolute;
+  height: 6px;
+  background-color: #d32f2f;
+  border-radius: 3px;
+  z-index: 2;
+}
+
+/* 3-2) 방 상세 카드 컨테이너: 화면 가득 채우기 */
+.full-card-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+/* 상세 카드 내부는 index.html의 .live-card 스타일을 대부분 재사용 */
+.full-card-container .live-card {
+  width: 100%;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+}
+/* 상단 배경 영역 높이 좀 늘림 */
+.full-card-container .preview-header-background {
+  padding: 16px 24px;
+}
+/* 방 이미지 크기 조정 (더 크게) */
+.full-card-container .room-image-container {
+  width: 160px;
+  height: 120px;
+}
+.full-card-container .room-image {
+  width: 160px;
+  height: 120px;
+}
+/* 프로필 크기(상단 우측) 그대로 유지 */
+.full-card-container .profile-placeholder {
+  width: 48px;
+  height: 48px;
+}
+.full-card-container .profile-image {
+  width: 48px;
+  height: 48px;
+}
+
+/* 카드 본문 안 요소들(대체로 동일) */
+.full-card-container .card-body {
+  padding: 24px;
+}
+.full-card-container .card-body .title {
+  font-size: 22px;
+  margin-bottom: 18px;
+}
+.full-card-container .card-body .description {
+  font-size: 15px;
+  margin-bottom: 20px;
+}
+.full-card-container .card-body .map-preview {
+  height: 120px;
+}
+/* 정보 리스트 폰트 강조 */
+.full-card-container .card-body .info-item .value {
+  font-weight: 700;
+}
+
+/* 3-3) 상세 페이지 하단: 참여/삭제 버튼 */
+.detail-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 24px;
+}
+.detail-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.detail-btn.delete {
+  background-color: #e53935;
+  color: #fff;
+}
+.detail-btn.delete:hover {
+  background-color: #d32f2f;
+}
+.detail-btn:not(.delete) {
+  background-color: #4285f4;
+  color: #fff;
+}
+.detail-btn:not(.delete):hover {
+  background-color: #3367d6;
+}
+

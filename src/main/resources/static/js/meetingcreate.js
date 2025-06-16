@@ -1,201 +1,18 @@
-<!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.w3.org/1999/xhtml">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>그룹 생성</title>
-    <style>
-        /* 간략한 스타일은 가독성을 위해 추가했습니다. 디자인 목적은 아닙니다. */
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        form { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
-        div { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="text"],
-        input[type="number"],
-        input[type="date"],
-        textarea,
-        select {
-            width: calc(100% - 10px); /* 패딩 고려 */
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
-        }
-        input[type="radio"] { margin-right: 5px; }
-        button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
+// script.js
 
-        /* 성별 라디오 버튼 한 줄 정렬 */
-        .gender-options {
-            display: flex;
-            align-items: center;
-            gap: 15px; /* 라디오 버튼 사이 간격 */
-        }
-        .gender-options label {
-            display: inline-block; /* 라디오 버튼 라벨을 인라인으로 */
-            margin-bottom: 0;
-            font-weight: normal; /* 라벨 볼드 해제 */
-        }
-
-        /* 슬라이더 컨테이너 스타일 */
-        .age-slider-container {
-            margin-top: 25px; /* 슬라이더와 위쪽 요소 간격 */
-            margin-bottom: 30px; /* 슬라이더와 아래쪽 요소 간격 */
-            padding: 0 10px; /* 슬라이더가 폼 경계에 붙지 않도록 좌우 패딩 */
-        }
-        #age-slider-values {
-            text-align: center;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-        /* 최소/최대 인원수 드롭다운을 한 줄로 정렬 */
-        .member-count-options {
-            display: flex;
-            align-items: center;
-            gap: 20px; /* 드롭다운 사이 간격 */
-        }
-        .member-count-options > div {
-            flex: 1; /* 각 드롭다운이 공간을 균등하게 차지하도록 */
-        }
-        .member-count-options label {
-            margin-bottom: 5px;
-        }
-        .member-count-options select {
-            width: 100%; /* 부모 div에 맞춰 100% 너비 */
-        }
-
-    </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css">
-</head>
-<body>
-<a href="/group/group_main" class="nav-button">그룹 목록 보기</a>
-<h1>새 그룹 생성</h1>
-
-<form action="/group/group_success" method="post">
-    <div>
-        <label for="ownerIdx">닉네임(nickname) :</label>
-        <input type="number" id="ownerIdx" name="ownerIdx" required th:value="${group.ownerIdx}" readonly>
-        <input type="text" id="nickname" name="nickname" required th:value="${nickname}" readonly>
-    </div>
-
-    <div>
-        <label for="groupCategoryMainIdx">카테고리 (필수):</label>
-        <select id="groupCategoryMainIdx" name="groupCategoryMainIdx">
-            <option value="">-- 대분류 선택 --</option>
-            <option th:each="maincategory : ${categoryMainList}"
-                    th:value="${maincategory.cmCategoryMainIdx}"
-                    th:text="${maincategory.cmCategoryMainIdx}+', '+${maincategory.categoryMainName}">
-            </option>
-        </select>
-    </div>
-
-    <div>
-        <label for="groupCategorySubIdx">상세내용 (필수):</label>
-        <select id="groupCategorySubIdx" name="groupCategorySubIdx">
-            <option value="">-- 카테고리부터 선택 해주세요 --</option>
-        </select>
-    </div>
-
-    <div>
-        <label for="title">그룹 제목 (title):</label>
-        <input type="text" id="title" name="title" maxlength="100" required>
-    </div>
-
-    <div>
-        <label>성별 제한 (gender_limit):</label><br>
-        <div class="gender-options">
-            <input type="radio" id="genderM" name="genderLimit" value="M">
-            <label for="genderM">남성</label>
-            <input type="radio" id="genderF" name="genderLimit" value="F">
-            <label for="genderF">여성</label>
-            <input type="radio" id="genderNone" name="genderLimit" value="A" checked> <label for="genderNone">제한
-            없음</label>
-        </div>
-    </div>
-
-    <div>
-        <label for="age-slider">나이 제한 (age_min ~ age_max):</label>
-        <div class="age-slider-container">
-            <div id="age-slider"></div>
-            <div id="age-slider-values">
-                <span id="ageMinDisplay">0</span> ~ <span id="ageMaxDisplay">100</span>
-            </div>
-        </div>
-        <input type="hidden" id="ageMin" name="ageMin" value="0">
-        <input type="hidden" id="ageMax" name="ageMax" value="100">
-    </div>
-
-    <div>
-        <label for="groupDate">그룹 날짜 (group_date):</label>
-        <input type="date" id="groupDate" name="groupDate">
-    </div>
-
-    <div class="member-count-options">
-        <div>
-            <label for="membersMin">최소 멤버 수:</label>
-            <select id="membersMin" name="membersMin" required>
-                <option value="">-- 최소 선택 --</option>
-            </select>
-        </div>
-        <div>
-            <label for="membersMax">최대 멤버 수:</label>
-            <select id="membersMax" name="membersMax" required>
-                <option value="">-- 최대 선택 --</option>
-            </select>
-        </div>
-    </div>
-
-    <div>
-        <label for="content">내용 (content):</label>
-        <textarea id="content" name="content" rows="5" maxlength="1000"></textarea>
-    </div>
-
-    <h3>모임 장소 지정</h3>
-    <div id="map" style="width:100%;height:400px;"></div>
-    <div>
-        <input type="text" id="searchPlaceInput" placeholder="장소 검색">
-        <button type="button" id="searchPlaceButton">검색</button>
-        <ul id="placeResultList"></ul>
-    </div>
-    <div>
-        <label for="meetingPlaceName">선택된 장소명:</label>
-        <input type="text" id="meetingPlaceName" name="meetingPlaceName" readonly>
-    </div>
-    <div>
-        <label for="meetingPlaceAddress">선택된 주소:</label>
-        <input type="text" id="meetingPlaceAddress" name="meetingPlaceAddress" readonly>
-    </div>
-    <input type="hidden" id="meetingPlaceLat" name="meetingPlaceLat">
-    <input type="hidden" id="meetingPlaceLng" name="meetingPlaceLng">
-
-    <div>
-        <button type="submit">그룹 생성</button>
-    </div>
-
-</form>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>
-<!--<script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=s2hofoc0b5&submodules=geocoder&callback=initMap"></script>-->
-<script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=s2hofoc0b5&submodules=geocoder&callback=initMap"></script>
-<script th:inline="javascript">
+// ──────────────────────────────────────────────────────
     // --- 전역 변수 선언 ---
     let map = null; // 지도 객체
     let markers = []; // 마커 배열
     let placeResultList = null; // placeResultList 요소를 저장할 변수
 
     // 폼 필드 참조 (initMap에서 할당)
-    let meetingPlaceNameInput = null;
-    let meetingPlaceAddressInput = null;
+    let meetingPlaceNameInput = null; <!-- 장소명 -->
+    let meetingPlaceLinkDisplay = null; <!-- 연결 링크 -->
+    let meetingPlaceLinkInput = null; <!-- 히든 링크 -->
+    let meetingPlaceCategoryInput = null; <!-- 분류 -->
+    let meetingPlaceContentInput = null; <!-- 설명 -->
+    let meetingPlaceAddressInput = null; <!-- 주소(도로명) -->
     let meetingPlaceLatInput = null;
     let meetingPlaceLngInput = null;
     let searchPlaceInput = null;
@@ -212,9 +29,29 @@
     }
 
     // 장소 선택 시 폼 필드 업데이트 함수
-    function selectPlaceFromSearch(title, address, lat, lng) {
+    function selectPlaceFromSearch(title, link, category, description, address, lat, lng) {
         console.log("선택된 장소:", title, address, lat, lng);
         meetingPlaceNameInput.value = title; // 'name' 대신 'title' 사용
+
+        // ===== 링크 필드 업데이트 로직 (링크값 저장하는 A, Input 업데이트) =====
+        if (link) {
+            meetingPlaceLinkDisplay.href = link;
+            meetingPlaceLinkDisplay.textContent = link;
+            meetingPlaceLinkDisplay.style.display = 'inline-block'; // <a> 태그 표시
+            meetingPlaceLinkInput.style.display = 'none'; // input 태그 숨김
+        } else {
+            // 링크가 없을 경우 <a>는 숨기고 input을 보여줌 (비어있는 input 상태)
+            meetingPlaceLinkDisplay.href = '#'; // 링크가 없을 때 #으로 설정 (클릭해도 이동 안 함)
+            meetingPlaceLinkDisplay.textContent = ''; // <a> 태그 텍스트 초기화
+            meetingPlaceLinkDisplay.style.display = 'none'; // <a> 태그 숨김
+
+            meetingPlaceLinkInput.style.display = 'inline-block'; // input 태그 표시
+            meetingPlaceLinkInput.value = '링크 없음'; // input에 "링크 없음" 표시
+        }
+
+        meetingPlaceLinkInput.value = link;
+        meetingPlaceCategoryInput.value = category;
+        meetingPlaceContentInput.value = description;
         meetingPlaceAddressInput.value = address;
         meetingPlaceLatInput.value = lat;
         meetingPlaceLngInput.value = lng;
@@ -227,11 +64,15 @@
         // DOM 요소 참조 가져오기
         placeResultList = document.getElementById('placeResultList');
         meetingPlaceNameInput = document.getElementById('meetingPlaceName');
+        meetingPlaceLinkDisplay = document.getElementById('meetingPlaceLinkDisplay');
+        meetingPlaceLinkInput = document.getElementById('meetingPlaceLink');
+        meetingPlaceCategoryInput = document.getElementById('meetingPlaceCategory');
+        meetingPlaceContentInput = document.getElementById('meetingPlaceContent');
         meetingPlaceAddressInput = document.getElementById('meetingPlaceAddress');
         meetingPlaceLatInput = document.getElementById('meetingPlaceLat');
         meetingPlaceLngInput = document.getElementById('meetingPlaceLng');
-        searchPlaceInput = document.getElementById('searchPlaceInput'); // 올바른 ID 사용
-        searchPlaceButton = document.getElementById('searchPlaceButton');
+        searchPlaceInput = document.getElementById('searchPlaceInput'); <!--지도 장소 검색용 필드-->
+        searchPlaceButton = document.getElementById('searchPlaceButton'); <!--지도 장소 검색버튼-->
 
         // 지도 초기화
         map = new naver.maps.Map('map', {
@@ -262,11 +103,15 @@
             placeResultList.addEventListener('click', function(event) {
                 const clickedLi = event.target.closest('li.place-result-item'); // 가장 가까운 li.place-result-item 찾기
                 if (clickedLi) {
-                    const title = clickedLi.dataset.title;
-                    const address = clickedLi.dataset.address;
+                // data-* 속성에서 값을 가져올 때, 없을 경우 빈 문자열로 초기화하여 안전성 확보
+                    const title = clickedLi.dataset.title || '';
+                    const link = clickedLi.dataset.link || '';
+                    const category = clickedLi.dataset.category || '';
+                    const description = clickedLi.dataset.description || '';
+                    const address = clickedLi.dataset.address || '';
                     const lat = parseFloat(clickedLi.dataset.lat);
                     const lng = parseFloat(clickedLi.dataset.lng);
-                    selectPlaceFromSearch(title, address, lat, lng);
+                    selectPlaceFromSearch(title, link, category, description, address, lat, lng);
                 }
             });
         }
@@ -431,7 +276,6 @@
         const displayCount = 100; // 더 많은 결과를 받아온 후 프론트에서 필터링합니다.
 
         // 2. 백엔드 API 호출 시 지도 영역 정보를 쿼리 파라미터로 전달
-        // const apiUrl = `/api/naver/places/by-coords?query=${encodeURIComponent(query)}&lat=${currentLat}&lng=${currentLng}&display=${displayCount}`;
         const apiUrl = `/api/naver/places/by-coords?query=${encodeURIComponent(query)}&southwest_lat=${southWestLat}&southwest_lng=${southWestLng}&northeast_lat=${northEastLat}&northeast_lng=${northEastLng}&display=${displayCount}`;
         console.log("백엔드 프록시 API 요청 URL:", apiUrl);
 
@@ -458,7 +302,10 @@
 
                 items.forEach((item) => {
                     const title = item.title.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&');
-                    const address = item.roadAddress || item.address;
+                    const link = item.link || '';
+                    const category = item.category || '';
+                    const description = item.description || '';
+                    const address = item.roadAddress || item.address || ''; <!--도로명주소 우선 없으면 지번 없으면 빈문자-->
                     const lat = parseFloat(item.mapy) / 1e7;
                     const lng = parseFloat(item.mapx) / 1e7;
                     const point = new naver.maps.LatLng(lat, lng);
@@ -475,6 +322,9 @@
                         const li = document.createElement('li');
                         li.innerHTML = `<strong>${title}</strong><br>${address}`;
                         li.setAttribute('data-title', title);
+                        li.setAttribute('data-link', link);
+                        li.setAttribute('data-category', category);
+                        li.setAttribute('data-description', description);
                         li.setAttribute('data-address', address);
                         li.setAttribute('data-lat', lat);
                         li.setAttribute('data-lng', lng);
@@ -498,7 +348,7 @@
             console.error('검색 중 오류 발생:', error);
             alert('장소 검색에 실패했습니다.');
         }
-    }
+    } // async function searchPlace 끝
 
     // --- 좌표를 이용해 장소 검색 (역지오코딩) ---
     // 이 함수는 현재 HTML에서 직접 호출되지 않지만, 유지해 두었습니다.
@@ -541,7 +391,3 @@
         });
     }
 
-</script>
-
-</body>
-</html>

@@ -48,6 +48,22 @@
             <result property="csCategoryMainIdx" column="category_main_idx"/>
             <result property="categorySubName" column="category_sub_name"/>
         </association>
+
+        <association property="userData" javaType="generationgap.co.kr.domain.user.UserData">
+            <result property="DataUserIdx" column="user_idx"/>
+            <result property="DataSuccessMeet" column="success_meet"/>
+            <result property="DataRecommend" column="recommend"/>
+            <result property="DataNoshowCount" column="no_show_count"/>
+        </association>
+
+        <association property="groupMembers" javaType="generationgap.co.kr.domain.group.GroupMembers">
+            <result property="membersIdx" column="members_idx"/>
+            <result property="groupIdx" column="group_idx"/>
+            <result property="userIdx" column="user_idx"/>
+            <result property="nickName" column="nickname"/>
+            <result property="isConfirmed" column="is_confirmed"/>
+            <result property="joinedAt" column="joined_at"/>
+        </association>
     </resultMap>
 
     <!-- 카테고리 대 -->
@@ -68,7 +84,7 @@
 
     </resultMap>
 
-    <!-- 그룹 생성 페이지 카테고리 선택용 -->
+    <!-- 메인 카테고리 전체 가져오기 -->
     <select id="getAllMainCategory" resultMap="categoryMain">
         select * from group_category_main
     </select>
@@ -122,13 +138,129 @@
         JOIN group_category_sub cs ON g.category_sub_idx = cs.category_sub_idx
     </select>
 
-    <!-- 단순 select문 같은 하나의 객체에 필드명/컬럼명이 동일하면 쓰기 좋음-->
-    <!--<select id="getAllGroups" resultType="generationgap.co.kr.domain.group.Groups">
-        SELECT * FROM Groups
-    </select>-->
+    <!-- 방 생성 -->
+    <insert id="insertGroup" parameterType="generationgap.co.kr.domain.group.Groups"
+            useGeneratedKeys="true"
+            keyProperty="groupIdx"
+            keyColumn="group_idx">
+        INSERT INTO groups (
+        owner_idx,
+        category_main_idx,
+        title,
+        gender_limit,
+        age_min,
+        age_max,
+        group_date,
+        members_min,
+        members_max,
+        party_member,
+        content,
+        place_name,
+        place_category,
+        place_address,
+        naver_place_url,
+        latitude,
+        longitude,
+        group_img_url,
+        created_at
+        ) VALUES (
+        #{ownerIdx},
+        #{groupCategoryMainIdx},
+        #{title},
+        #{genderLimit},
+        #{ageMin}, #{ageMax},
+        #{groupDate},
+        #{membersMin}, #{membersMax},
+        #{partyMember},
+        #{content},
+        #{placeName},
+        #{placeCategory},
+        #{placeAddress},
+        #{naverPlaceUrl},
+        #{latitude},
+        #{longitude},
+        #{groupImgUrl},
+        SYSDATE
+        )
+    </insert>
 
-    <!--<insert id="insertGroup" parameterType="generationgap.co.kr.domain.Group.Groups">
-        INSERT INTO users (user_id, nickname)
-        VALUES (#{userId}, #{userName})
-    </insert>-->
+    <!-- 갓 생성된 그룹방의 멤버 호스트 추가  -->
+    <insert id="insertHostMember" parameterType="generationgap.co.kr.domain.group.GroupMembers">
+        INSERT INTO group_members (
+        group_idx,
+        user_idx,
+        nickname,
+        is_confirmed,
+        joined_at
+        ) VALUES (
+        #{groupIdx},
+        #{userIdx},
+        #{nickName},
+        'N',
+        SYSDATE
+        )
+    </insert>
+
+    <!-- 메인 인기소셜링용 필터링(좋아요 받은 호스트 기준) -->
+    <select id="getRecommendGroup" resultMap="Groups">
+        SELECT
+        g.group_idx,
+        g.owner_idx,
+        g.title,
+        cm.category_main_name,
+        g.group_date,
+        g.place_address,
+        g.group_img_url,
+        ud.recommend
+        FROM
+        groups g
+        JOIN
+        users u ON g.owner_idx = u.user_idx
+        JOIN
+        user_data ud ON u.user_idx = ud.user_idx
+        LEFT JOIN
+        group_category_main cm ON g.category_main_idx = cm.category_main_idx
+        WHERE
+        ud.recommend > 0
+        ORDER BY
+        ud.recommend DESC,
+        g.group_date DESC
+        FETCH FIRST 10 ROWS ONLY
+    </select>
+
+    <!-- 해당 그룹번호에 맞는 그룹방 정보 전달 -->
+    <select id="getGroupById" resultMap="Groups">
+    <!--모임이미지 프로필이미지 닉네임 카테고리 나이제한 인원수제한
+    제목 내용 지도 모임시간 남은시간 현재인원3/4
+    히든 그룹번호 호스트(혹은 참여자)번호 -->
+        SELECT
+        GROUP_IDX,
+        OWNER_IDX,
+        CATEGORY_MAIN_IDX,
+        TITLE,
+        GENDER_LIMIT,
+        AGE_MIN,
+        AGE_MAX,
+        GROUP_DATE,
+        MEMBERS_MIN,
+        MEMBERS_MAX,
+        PARTY_MEMBER,
+        CONTENT,
+        PLACE_NAME,
+        PLACE_CATEGORY,
+        PLACE_ADDRESS,
+        NAVER_PLACE_URL,
+        LATITUDE,
+        LONGITUDE,
+        GROUP_IMG_URL,
+        GROUPS_STATUS,
+        CREATED_AT,
+        DELETED_AT
+        FROM
+        GROUPS
+        WHERE
+        GROUP_IDX = #{groupIdx}
+    </select>
+
+
 </mapper>

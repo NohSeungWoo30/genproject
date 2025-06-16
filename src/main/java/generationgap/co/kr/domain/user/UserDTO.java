@@ -30,4 +30,5 @@ public class UserDTO {
     private LocalDate lastLoginAt;
     private LocalDate updateAt;
     private LocalDate ghost;
+
 }

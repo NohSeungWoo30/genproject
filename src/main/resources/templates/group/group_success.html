@@ -7,10 +7,11 @@
 
 <body>
 <script>
+    <!-- 이페이지 필요 없음-->
     document.addEventListener('DOMContentLoaded', function () {
       setTimeout(function () {
-      alert('저장되었습니다');
-        location.href = '/group/group_main';
+      alert('모임방 개설이 되었습니다');
+        window.location.href = `/group/detail/{groupId}`;
         }, 300);
     });
 </script>
