@@ -21,7 +21,6 @@
         <result property="commentCount" column="comment_count"/>
         <result property="isDeleted" column="is_deleted"/>
 
-
     </resultMap>
 
     <select id="getPostsPaged" resultMap="postMap">

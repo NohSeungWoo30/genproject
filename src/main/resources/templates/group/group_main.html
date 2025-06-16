@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>그룹 목록(전체리스트)</title>
+</head>
+<body>
+<!-- 임의로 호스트에 대한 값을 고정으로 넘김 user_idx=1&nickname=행복한현수 -->
+<a href="/group/group_create?user_idx=23&nickname=길도_로컬" class="nav-button">새 그룹 생성</a>
+<h1>그룹 목록</h1>
+<p th:text="${#lists.isEmpty(groupsList)}"></p>빈 리스트 여부
+<p th:text="${groupsList.size()}"></p>리스트 크기
+<table border="1" width="100px">
+    <thead>
+    <tr>
+        <th>그룹 ID</th>
+        <th>닉네임</th>
+        <th>카테고리 (대) ID</th>
+        <th>카테고리 (대) 이름</th>
+        <th>카테고리 (소) ID</th>
+        <th>카테고리 (소) 이름</th>
+        <th>제목</th>
+        <th>성별 제한</th>
+        <th>최소 나이</th>
+        <th>최대 나이</th>
+        <th>그룹 날짜</th>
+        <th>최소 멤버 수</th>
+        <th>최대 멤버 수</th>
+        <th>현재 멤버 수</th>
+        <th>내용</th>
+        <th>장소명</th>
+        <th>장소 카테고리</th>
+        <th>장소 주소</th>
+        <th>네이버 플레이스 ID</th>
+        <th>네이버 플레이스 URL</th>
+        <th>위도</th>
+        <th>경도</th>
+        <th>그룹 이미지 URL</th>
+        <th>그룹 상태</th>
+        <th>생성일</th>
+        <th>삭제일</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="group : ${groupsList}">
+        <td th:text="${group.groupIdx}"></td>
+        <td th:text="${group.owner.nickname}"></td>
+        <td th:text="${group.categoryMain.cmCategoryMainIdx}"></td>
+        <td th:text="${group.categoryMain.categoryMainName}"></td>
+        <td th:text="${group.categorySub.categorySubIdx}"></td>
+        <td th:text="${group.categorySub.categorySubName}"></td>
+        <td th:text="${group.title}"></td>
+        <td th:text="${group.genderLimit}"></td>
+        <td th:text="${group.ageMin}"></td>
+        <td th:text="${group.ageMax}"></td>
+        <td th:text="${group.groupDate}"></td>
+        <td th:text="${group.membersMin}"></td>
+        <td th:text="${group.membersMax}"></td>
+        <td th:text="${group.partyMember}"></td>
+        <td th:text="${group.content}"></td>
+        <td th:text="${group.placeName}"></td>
+        <td th:text="${group.placeCategory}"></td>
+        <td th:text="${group.placeAddress}"></td>
+        <td th:text="${group.naverPlaceId}"></td>
+        <td th:text="${group.naverPlaceUrl}"></td>
+        <td th:text="${group.latitude}"></td>
+        <td th:text="${group.longitude}"></td>
+        <td th:text="${group.groupImgUrl}"></td>
+        <td th:text="${group.groupsStatus}"></td>
+        <td th:text="${group.createdAt}"></td>
+        <td th:text="${group.deletedAt}"></td>
+    </tr>
+    </tbody>
+
+</table>
+
+</body>
+</html>

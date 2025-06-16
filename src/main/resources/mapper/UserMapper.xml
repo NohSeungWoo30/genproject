@@ -6,7 +6,7 @@
 
 <!-- 예시 유저 맵퍼 -->
 <mapper namespace="generationgap.co.kr.mapper.user.UserMapper">
-     <resultMap id="userResultMap" type="generationgap.co.kr.domain.user.UserDTO">
+    <resultMap id="userResultMap" type="generationgap.co.kr.domain.user.UserDTO">
         <id property="userIdx" column="user_idx"/>
         <result property="userId" column="user_id"/>
         <result property="provider" column="provider"/>
@@ -43,9 +43,9 @@
         )
     </insert>
 
-<!--
-    <select id="findByUserId" parameterType="string" resultType="generationgap.co.kr.domain.user.UserDTO">
--->
+    <!--
+        <select id="findByUserId" parameterType="string" resultType="generationgap.co.kr.domain.user.UserDTO">
+    -->
     <select id="findByUserId" parameterType="string" resultMap="userResultMap">
         SELECT
         user_idx, user_id, provider, user_name, nickname, birth_date, gender,
