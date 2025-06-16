@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="generationgap.co.kr.mapper.report.ReportMapper">
+
+    <select id="checkDuplicateReport" resultType="boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+        FROM reports r
+        JOIN report_details d ON r.report_detail_idx = d.report_detail_idx
+        WHERE r.reporting_user_idx = #{reporterId}
+        AND d.entity_type = #{entityType}
+        AND d.entity_idx = #{entityId}
+    </select>
+
+    <select id="getPostContent" resultType="java.lang.String">
+        SELECT content FROM board_posts WHERE post_idx = #{entityId} AND is_deleted = 'N'
+    </select>
+
+    <select id="getCommentContent" resultType="java.lang.String">
+        SELECT content FROM post_comments WHERE comment_idx = #{entityId} AND is_deleted = 'N'
+    </select>
+
+    <select id="getUserIntro" resultType="java.lang.String">
+        SELECT introduction FROM users WHERE user_idx = #{entityId}
+    </select>
+
+    <select id="getChatContent" resultType="java.lang.String">
+        SELECT content FROM chat_messages WHERE messages_idx = #{entityId} AND is_deleted = 'N'
+    </select>
+
+    <insert id="insertReportDetail" parameterType="map">
+        INSERT INTO report_details (entity_type, entity_idx, report_content)
+        VALUES (#{entityType}, #{entityId}, #{content})
+    </insert>
+
+    <select id="findReportDetailId" resultType="java.lang.Long">
+        SELECT report_detail_idx
+        FROM report_details
+        WHERE entity_type = #{entityType}
+        AND entity_idx = #{entityId}
+        ORDER BY report_detail_idx DESC
+        FETCH FIRST 1 ROWS ONLY
+    </select>
+
+    <insert id="insertReport" parameterType="map">
+        INSERT INTO reports (
+        report_category_idx,
+        report_reason_idx,
+        reporting_user_idx,
+        reported_user_idx,
+        report_detail_idx,
+        report_comment
+        ) VALUES (
+        #{categoryId},
+        #{reasonId},
+        #{reporterId},
+        #{reportedUserId},
+        #{detailId},
+        #{comment}
+        )
+    </insert>
+
+    <select id="selectReportCategories" resultType="generationgap.co.kr.dto.report.ReportCategoryDTO">
+        SELECT report_category_idx AS categoryId, category_name AS categoryName
+        FROM report_categories
+        ORDER BY report_category_idx
+    </select>
+
+    <select id="selectReportReasons" resultType="generationgap.co.kr.dto.report.ReportReasonDTO">
+        SELECT report_reason_idx AS reasonId, reason_name AS reasonName
+        FROM report_reasons
+        ORDER BY report_reason_idx
+    </select>
+
+    <!--신고 제재-->
+    <select id="countRecentReports" resultType="int">
+        SELECT COUNT(*) FROM reports
+        WHERE reported_user_idx = #{userId}
+    </select>
+
+</mapper>

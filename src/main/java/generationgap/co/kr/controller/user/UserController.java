@@ -1,24 +1,36 @@
 package generationgap.co.kr.controller.user;
 
 import generationgap.co.kr.domain.user.UserDTO;
+import generationgap.co.kr.security.CustomUserDetails;
 import generationgap.co.kr.service.user.UserService;
-import generationgap.co.kr.security.CustomUserDetails; // CustomUserDetails 임포트
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal; // @AuthenticationPrincipal 임포트
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes; // RedirectAttributes 임포트
-import org.slf4j.Logger; // Logger 임포트
-import org.slf4j.LoggerFactory; // LoggerFactory 임포트
-import org.springframework.security.core.Authentication;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.io.IOException;
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
 @RequestMapping("/user")
 public class UserController {
 
-    private static final Logger log = LoggerFactory.getLogger(UserController.class); // Slf4j Logger 사용
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     private UserService userService;
@@ -30,192 +42,288 @@ public class UserController {
         return "user/signup";
     }
 
-    // 회원가입 폼 제출 처리
+    // 회원가입 처리
     @PostMapping("/signup")
-    public String registerUser(@ModelAttribute("user") UserDTO user, RedirectAttributes redirectAttributes) { // ✅ RedirectAttributes 추가
+    public String registerUser(@ModelAttribute UserDTO user, // @ModelAttribute 사용 시 UserDTO가 폼 데이터를 받음
+                               @RequestParam(value = "profileImageFile", required = false) MultipartFile profileImageFile, // ⭐ 추가
+                               RedirectAttributes redirectAttributes) {
+
         try {
-            userService.registerUser(user);
-            redirectAttributes.addFlashAttribute("message", "회원가입이 성공적으로 완료되었습니다. 로그인해주세요!"); // ✅ 성공 메시지 추가
-            return "redirect:/user/login";
-        } catch (Exception e) {
-            log.error("회원가입 실패: userId={}, Error: {}", user.getUserId(), e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "회원가입 중 오류가 발생했습니다: " + e.getMessage()); // ✅ 실패 메시지 추가
-            // 회원가입 실패 시 다시 폼으로 돌아가되, 입력값 유지를 위해 UserDTO도 함께 넘길 수 있음
-            // model.addAttribute("user", user); // 이 방법은 redirectAttributes와 함께 사용하기 어려움
-            // return "user/signup";
-            return "redirect:/user/signup"; // 간단하게 다시 폼으로 리다이렉트
+            userService.registerUser(user, profileImageFile); // ⭐ MultipartFile도 함께 전달
+            redirectAttributes.addFlashAttribute("successMessage", "회원가입이 성공적으로 완료되었습니다. 로그인해주세요.");
+            return "redirect:/user/login"; // 로그인 페이지로 리다이렉트
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            // 에러 발생 시 회원가입 폼으로 다시 리다이렉트하고 기존 입력값 유지 (필요 시 Model에 user 객체 추가)
+            // redirectAttributes.addFlashAttribute("user", user); // 이 경우 폼에서 th:object="${user}"로 받아야 함
+            return "redirect:/user/signup"; // 회원가입 폼 URL로 리다이렉트
+        } catch (RuntimeException e) {
+            log.error("회원가입 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "회원가입 중 시스템 오류가 발생했습니다.");
+            return "redirect:/user/signup";
         }
     }
 
-    // 로그인 페이지 표시
+    // --- 중복 확인 API ---
+    @GetMapping("/check/userId")
+    @ResponseBody
+    public ResponseEntity<Map<String, Boolean>> checkUserIdDuplication(@RequestParam String userId) {
+        return createDuplicationResponse("아이디", userId, userService.isUserIdDuplicated(userId));
+    }
+
+    @GetMapping("/check/nickname")
+    @ResponseBody
+    public ResponseEntity<Map<String, Boolean>> checkNicknameDuplication(@RequestParam String nickname) {
+        return createDuplicationResponse("닉네임", nickname, userService.isNicknameDuplicated(nickname));
+    }
+
+    @GetMapping("/check/email")
+    @ResponseBody
+    public ResponseEntity<Map<String, Boolean>> checkEmailDuplication(@RequestParam String email) {
+        return createDuplicationResponse("이메일", email, userService.isEmailDuplicated(email));
+    }
+
+    @GetMapping("/check/phone")
+    @ResponseBody
+    public ResponseEntity<Map<String, Boolean>> checkPhoneDuplication(@RequestParam String phone) {
+        return createDuplicationResponse("전화번호", phone, userService.isPhoneDuplicated(phone));
+    }
+
+    @GetMapping("/check/userCi")
+    @ResponseBody
+    public ResponseEntity<Map<String, Boolean>> checkUserCiDuplication(@RequestParam String userCi) {
+        return createDuplicationResponse("CI", userCi, userService.isUserCiDuplicated(userCi));
+    }
+
+    private ResponseEntity<Map<String, Boolean>> createDuplicationResponse(String type, String value, boolean duplicated) {
+        log.info("{} 중복 확인 요청: {}", type, value);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("duplicated", duplicated);
+        return ResponseEntity.ok(response);
+    }
+
+    // 로그인 폼 표시
     @GetMapping("/login")
     public String loginPage() {
         return "user/login";
     }
 
-    // 추가: 아이디 찾기 페이지를 표시하는 GET 요청 핸들러
+    // 아이디 찾기 폼
     @GetMapping("/find-id")
     public String showFindIdForm(@RequestParam(value = "success", required = false) String success,
                                  @RequestParam(value = "error", required = false) String error,
                                  Model model) {
-        if (success != null) {
-            model.addAttribute("foundUserId", success); // 성공적으로 찾은 아이디를 모델에 추가
-        }
-        if (error != null) {
-            model.addAttribute("errorMessage", error); // 오류 메시지를 모델에 추가
-        }
-        log.info("아이디 찾기 폼 로드."); // 로깅 추가
-        return "user/find-id"; // find-id.html 템플릿 반환
+        if (success != null) model.addAttribute("foundUserId", success);
+        if (error != null) model.addAttribute("errorMessage", error);
+        log.info("아이디 찾기 폼 로드.");
+        return "user/find-id";
     }
 
-    // 추가: 이름과 전화번호로 아이디를 찾기 요청을 처리하는 POST 요청 핸들러
+    // 아이디 찾기 처리
     @PostMapping("/find-id")
     public String findIdProcess(@RequestParam("userName") String userName,
                                 @RequestParam("phone") String phone,
                                 RedirectAttributes rttr) {
-        log.info("아이디 찾기 POST 요청 수신: 이름={}, 전화번호={}", userName, phone);
+        log.info("아이디 찾기 요청: 이름={}, 전화번호={}", userName, phone);
+        Optional<String> result = userService.findUserIdByUserNameAndPhone(userName, phone);
 
-        // UserService의 findUserIdByUserNameAndPhone 메서드를 호출
-        Optional<String> maskedUserIdOptional = userService.findUserIdByUserNameAndPhone(userName, phone);
-
-        if (maskedUserIdOptional.isPresent()) {
-            // 아이디를 찾았으면 성공 메시지와 마스킹된 아이디를 리다이렉트 파라미터로 전달
-            rttr.addAttribute("success", maskedUserIdOptional.get());
-            log.info("아이디 찾기 성공, 리다이렉트.");
+        if (result.isPresent()) {
+            rttr.addAttribute("success", result.get());
+            log.info("아이디 찾기 성공");
         } else {
-            // 아이디를 찾지 못했으면 오류 메시지를 리다이렉트 파라미터로 전달
-            rttr.addAttribute("error", "입력하신 정보와 일치하는 아이디를 찾을 수 없습니다.");
-            log.warn("아이디 찾기 실패, 리다이렉트.");
+            rttr.addAttribute("error", "입력한 정보로 아이디를 찾을 수 없습니다.");
+            log.warn("아이디 찾기 실패");
         }
-        // GET 요청으로 리다이렉트하여 페이지를 다시 로드하고 메시지를 표시
         return "redirect:/user/find-id";
     }
 
-    // 회원 정보 수정 폼 표시
-    // @AuthenticationPrincipal을 사용하여 현재 로그인된 사용자 정보를 가져옴
+    // 프로필 수정 폼
     @GetMapping("/profile-edit")
     public String showProfileEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         if (userDetails == null) {
-            log.warn("인증되지 않은 사용자가 프로필 수정 폼에 접근 시도.");
-            return "redirect:/user/login"; // 로그인 페이지로 리다이렉트
-        }
-
-        // CustomUserDetails에서 userIdx를 직접 가져와서 사용자 정보 조회
-        UserDTO loggedInUser = userService.getUserProfile(userDetails.getUserIdx());
-        if (loggedInUser == null) {
-            log.error("로그인된 사용자(userIdx: {})의 정보를 DB에서 찾을 수 없습니다.", userDetails.getUserIdx());
-            // 이 경우는 심각한 상황이므로, 로그아웃 처리 또는 오류 페이지로 리다이렉트
-            return "redirect:/logout";
-        }
-
-        model.addAttribute("user", loggedInUser);
-        log.info("프로필 수정 폼 로드: userIdx={}", userDetails.getUserIdx());
-        return "user/profile-edit"; // src/main/resources/templates/user/profile-edit.html
-    }
-
-    // 일반 회원 정보 수정 처리 (이름, 닉네임, 이메일 등)
-    @PostMapping("/profile-edit")
-    public String updateProfile(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                @ModelAttribute("user") UserDTO user, // 폼에서 넘어온 UserDTO
-                                RedirectAttributes redirectAttributes) {
-
-        if (userDetails == null) {
-            log.warn("인증되지 않은 사용자가 프로필 수정 요청 시도.");
+            log.warn("비로그인 사용자의 프로필 수정 폼 접근");
             return "redirect:/user/login";
         }
 
-        // 보안: 클라이언트에서 넘어온 userIdx를 사용하지 않고, 로그인된 사용자의 userIdx를 강제 설정
+        UserDTO user = userService.getUserProfile(userDetails.getUserIdx());
+        if (user == null) {
+            log.error("로그인 사용자의 정보 없음: userIdx={}", userDetails.getUserIdx());
+            return "redirect:/logout";
+        }
+
+        model.addAttribute("user", user);
+        log.info("프로필 수정 폼 로드: userIdx={}", userDetails.getUserIdx());
+        return "user/profile-edit";
+    }
+
+    // 프로필 수정 처리
+    @PostMapping("/profile-edit")
+    public String updateProfile(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                @ModelAttribute("user") UserDTO user,
+                                RedirectAttributes redirectAttributes) {
+        if (userDetails == null) {
+            log.warn("비로그인 사용자의 프로필 수정 시도");
+            return "redirect:/user/login";
+        }
+
         user.setUserIdx(userDetails.getUserIdx());
 
         try {
             userService.updateUserInfo(user);
-            redirectAttributes.addFlashAttribute("message", "회원 정보가 성공적으로 수정되었습니다.");
-            log.info("회원 정보 업데이트 성공: userIdx={}", userDetails.getUserIdx());
-        } catch (IllegalArgumentException e) { // UserService에서 이메일 중복 시 던지는 예외
+            redirectAttributes.addFlashAttribute("message", "회원 정보가 수정되었습니다.");
+            log.info("프로필 수정 성공: userIdx={}", userDetails.getUserIdx());
+        } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            log.warn("회원 정보 업데이트 실패: userIdx={}, Error: {}", userDetails.getUserIdx(), e.getMessage());
+            log.warn("프로필 수정 실패: {}", e.getMessage());
         } catch (Exception e) {
-            log.error("회원 정보 업데이트 중 알 수 없는 오류 발생: userIdx={}, Error: {}", userDetails.getUserIdx(), e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "회원 정보 수정 중 오류가 발생했습니다.");
+            redirectAttributes.addFlashAttribute("errorMessage", "회원 정보 수정 중 오류 발생");
+            log.error("프로필 수정 오류: {}", e.getMessage(), e);
         }
-        return "redirect:/user/profile-edit"; // 수정 후 다시 프로필 수정 폼으로 (메시지 표시)
+        return "redirect:/user/profile-edit";
     }
 
     // 비밀번호 변경 처리
     @PostMapping("/profile-update-password")
     public String updatePassword(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                 @RequestParam("currentPassword") String currentPassword, // 폼 필드 이름 일치
-                                 @RequestParam("newPassword") String newPassword,         // 폼 필드 이름 일치
-                                 @RequestParam("confirmNewPassword") String confirmNewPassword, // 폼 필드 이름 일치
+                                 @RequestParam("currentPassword") String currentPassword,
+                                 @RequestParam("newPassword") String newPassword,
+                                 @RequestParam("confirmNewPassword") String confirmNewPassword,
                                  RedirectAttributes redirectAttributes) {
-
         if (userDetails == null) {
-            log.warn("인증되지 않은 사용자가 비밀번호 변경 요청 시도.");
+            log.warn("비로그인 사용자의 비밀번호 변경 시도");
             return "redirect:/user/login";
         }
 
-        // 새 비밀번호와 확인 비밀번호 일치 여부 1차 검증
         if (!newPassword.equals(confirmNewPassword)) {
-            redirectAttributes.addFlashAttribute("errorMessage", "새 비밀번호와 비밀번호 확인이 일치하지 않습니다.");
-            log.warn("비밀번호 변경 실패: userIdx={} - 새 비밀번호 불일치", userDetails.getUserIdx());
+            redirectAttributes.addFlashAttribute("errorMessage", "새 비밀번호가 일치하지 않습니다.");
+            log.warn("비밀번호 불일치: userIdx={}", userDetails.getUserIdx());
             return "redirect:/user/profile-edit";
         }
 
         try {
-            // UserService의 비밀번호 변경 메서드 호출
-            boolean isUpdated = userService.updatePassword(userDetails.getUserIdx(), currentPassword, newPassword);
-            if (isUpdated) {
-                redirectAttributes.addFlashAttribute("message", "비밀번호가 성공적으로 변경되었습니다.");
+            boolean updated = userService.updatePassword(userDetails.getUserIdx(), currentPassword, newPassword);
+            if (updated) {
+                redirectAttributes.addFlashAttribute("message", "비밀번호가 변경되었습니다.");
                 log.info("비밀번호 변경 성공: userIdx={}", userDetails.getUserIdx());
             } else {
-                // UserService에서 false를 반환하는 경우는 주로 현재 비밀번호 불일치
-                redirectAttributes.addFlashAttribute("errorMessage", "현재 비밀번호가 일치하지 않거나 변경에 실패했습니다.");
-                log.warn("비밀번호 변경 실패: userIdx={} - 현재 비밀번호 불일치 또는 기타 실패", userDetails.getUserIdx());
+                redirectAttributes.addFlashAttribute("errorMessage", "현재 비밀번호가 틀립니다.");
+                log.warn("비밀번호 변경 실패: 현재 비밀번호 불일치");
             }
         } catch (Exception e) {
-            log.error("비밀번호 변경 중 알 수 없는 오류 발생: userIdx={}, Error: {}", userDetails.getUserIdx(), e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "비밀번호 변경 중 오류가 발생했습니다.");
+            redirectAttributes.addFlashAttribute("errorMessage", "비밀번호 변경 중 오류 발생");
+            log.error("비밀번호 변경 오류: {}", e.getMessage(), e);
         }
-        return "redirect:/user/profile-edit"; // 변경 후 다시 프로필 수정 폼으로
+        return "redirect:/user/profile-edit";
     }
 
-    // 회원 정보 보기 페이지 표시
-    @GetMapping("/profile") // ✅ 이 부분이 정확히 "/profile" 인지 확인
-    public String showProfileView(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        if (userDetails == null) {
-            log.warn("인증되지 않은 사용자가 프로필 보기 페이지에 접근 시도.");
-            return "redirect:/user/login"; // 로그인 페이지로 리다이렉트
-        }
 
-        UserDTO loggedInUser = userService.getUserProfile(userDetails.getUserIdx());
-        if (loggedInUser == null) {
-            log.error("로그인된 사용자(userIdx: {})의 정보를 DB에서 찾을 수 없습니다.", userDetails.getUserIdx());
-            // 이 경우는 심각한 상황이므로, 로그아웃 처리 또는 오류 페이지로 리다이렉트
-            return "redirect:/logout";
-        }
+    // 프로필 보기 및 설정 기능 통합
+    @GetMapping("/profile")
+    public String showProfileAndSettingsView(Authentication authentication, Model model) {
 
-        model.addAttribute("user", loggedInUser);
-        log.info("프로필 보기 페이지 로드: userIdx={}", userDetails.getUserIdx());
-        return "user/profile"; // ✅ 이 부분이 "user/profile" 인지 확인 (확장자 .html은 자동으로 붙음)
-    }
-
-    @PostMapping("/delete")
-    public String deleteUser(Authentication authentication,
-                             RedirectAttributes redirectAttributes) {
+        // 1. 비로그인 사용자 리디렉션 (기존과 동일)
         if (authentication == null || !authentication.isAuthenticated()) {
-            redirectAttributes.addFlashAttribute("error", "로그인 후 이용해 주세요.");
+            log.warn("비로그인 사용자의 프로필 보기 시도");
             return "redirect:/user/login";
         }
 
-        String userId = authentication.getName();
+        // 2. 인증 정보를 통해 UserDTO 객체 가져오기 (기존과 동일)
+        Object principal = authentication.getPrincipal();
+        UserDTO user = null;
+
+        if (principal instanceof CustomUserDetails) {
+            CustomUserDetails userDetails = (CustomUserDetails) principal;
+            user = userService.getUserProfile(userDetails.getUserIdx());
+            log.info("일반회원 프로필 보기 확인");
+        } else if (principal instanceof DefaultOAuth2User) {
+            DefaultOAuth2User oAuth2User = (DefaultOAuth2User) principal;
+            String userId = oAuth2User.getAttribute("sub"); // Google의 경우 sub가 고유 식별자
+            user = userService.getOAuth2UserProfile(userId);
+            log.info("OAuth2 로그인 유저id: {}", userId);
+        } else {
+            log.warn("알 수 없는 사용자 타입: {}", principal.getClass().getName());
+        }
+
+        // 3. 사용자 정보가 없을 경우 처리 (기존과 동일)
+        if (user == null) {
+            log.error("프로필 보기 실패: DB에 사용자 없음");
+            return "redirect:/logout";
+        }
+
+        // 4. [추가된 로직] /settings의 isGoogleUser 판별 기능 통합
+        // UserDTO에 provider 정보가 있다는 가정 하에 진행합니다.
+        boolean isGoogleUser = user.getProvider() != null && "GOOGLE".equalsIgnoreCase(user.getProvider());
+        model.addAttribute("isGoogleUser", isGoogleUser);
+        log.info("Google 사용자 여부 확인: {}", isGoogleUser);
+
+
+        // 5. 모델에 사용자 정보 추가 후 뷰 렌더링 (기존과 동일)
+        model.addAttribute("user", user);
+        log.info("프로필 보기 로드: user={}", user);
+
+        // 이제 "user/settings"가 아닌 "user/profile"을 사용합니다.
+        return "user/profile";
+    }
+
+
+    // 회원 탈퇴 처리 (소프트 삭제)
+    @PostMapping("/delete")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> softDeleteUser(
+            @RequestParam(value = "passwordConfirm", required = false) String passwordConfirm,
+            @AuthenticationPrincipal CustomUserDetails currentUser, // ⭐ 다시 CustomUserDetails로 변경 ⭐
+            HttpServletRequest request // HttpServletRequest 주입
+    ) {
+        if (currentUser == null) {
+            log.warn("비로그인 사용자의 탈퇴 요청");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("success", false, "message", "로그인 후 이용하세요."));
+        }
+
+        String userId = currentUser.getUsername(); // 현재 로그인된 사용자의 ID 획득
+        String userProvider = currentUser.getUserDTO().getProvider(); // ⭐ CustomUserDetails에서 provider 정보 획득 ⭐
 
         try {
-            userService.softDeleteUser(userId);
-            redirectAttributes.addFlashAttribute("message", "계정이 성공적으로 삭제되었습니다.");
-            return "redirect:/logout"; // Spring Security의 로그아웃 URL 호출
+            // provider 컬럼 값으로 유저 유형 판별
+            if ("GOOGLE".equalsIgnoreCase(userProvider)) { // "google"은 예시 값. 실제 DB 값과 일치시켜야 함.
+                // 구글 간편 로그인 유저: 비밀번호 확인 없이 바로 소프트 삭제
+                userService.softDeleteGoogleUser(userId);
+                log.info("구글 간편 로그인 계정 소프트 삭제 성공: userId={}", userId);
+            } else if ("LOCAL".equalsIgnoreCase(userProvider)) { // "local"도 예시 값. 실제 DB 값과 일치시켜야 함.
+                // 로컬 유저: 비밀번호 확인 필요
+                if (passwordConfirm == null || passwordConfirm.isEmpty()) {
+                    log.warn("로컬 계정 삭제 실패: 비밀번호 누락 (userId={})", userId);
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(Map.of("success", false, "message", "비밀번호를 입력해주세요."));
+                }
+                userService.softDeleteLocalUser(userId, passwordConfirm);
+                log.info("로컬 계정 소프트 삭제 성공: userId={}", userId);
+            } else {
+                // 알 수 없거나 지원하지 않는 provider 타입
+                log.error("지원하지 않는 사용자 provider 타입: userId={}, provider={}", userId, userProvider);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("success", false, "message", "알 수 없는 사용자 유형입니다."));
+            }
+
+            // --- 현재 모든 세션 무효화 부분 추가 ---
+            // 계정 삭제 성공 시 현재 사용자의 세션을 무효화하여 강제 로그아웃
+            HttpSession session = request.getSession(false); // 기존 세션이 없으면 새로 생성하지 않음
+            if (session != null) {
+                session.invalidate(); // 세션 무효화
+                log.info("사용자 세션이 성공적으로 무효화되었습니다: userId={}", userId);
+            }
+            // --- 세션 무효화 부분 끝 ---
+
+            return ResponseEntity.ok(Map.of("success", true, "message", "계정이 삭제되었습니다."));
+
+        } catch (IllegalArgumentException e) {
+            log.warn("계정 삭제 실패 (IllegalArgumentException): userId={}, message={}", userId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("success", false, "message", e.getMessage()));
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "계정 삭제 중 오류가 발생했습니다: " + e.getMessage());
-            return "redirect:/user/profile";
+            log.error("계정 삭제 중 예상치 못한 오류 발생: userId={}, error={}", userId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", "계정 삭제 중 예상치 못한 오류 발생"));
         }
     }
 }

@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<!-- 예시 유저 맵퍼 -->
+<mapper namespace="generationgap.co.kr.mapper.user.UserMapper">
+     <resultMap id="userResultMap" type="generationgap.co.kr.domain.user.UserDTO">
+        <id property="userIdx" column="user_idx"/>
+        <result property="userId" column="user_id"/>
+        <result property="provider" column="provider"/>
+        <result property="userName" column="user_name"/>
+        <result property="nickname" column="nickname"/>
+        <result property="birthDate" column="birth_date" jdbcType="DATE"/>
+        <result property="gender" column="gender" jdbcType="CHAR"/>
+        <result property="userCi" column="user_ci"/>
+        <result property="passwordHash" column="password_hash"/>
+        <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
+        <result property="profileName" column="profile_name"/>
+        <result property="introduction" column="introduction"/>
+        <result property="signupDate" column="signup_date" jdbcType="DATE"/>
+        <result property="userStatus" column="user_status"/>
+        <result property="lastLoginAt" column="last_login_at" jdbcType="DATE"/>
+        <result property="updateAt" column="update_at" jdbcType="DATE"/>
+        <result property="ghost" column="ghost" jdbcType="DATE"/>
+        <!--신고위해 추가한 컬럼 추가 ksm-->
+        <result property="isSuspended" column="is_suspended"/>
+        <result property="suspendUntil" column="suspend_until"/>
+    </resultMap>
+
+
+
+    <insert id="insertUser" parameterType="generationgap.co.kr.domain.user.UserDTO">
+        INSERT INTO users (
+        user_id, provider, user_name, nickname, birth_date, gender,
+        user_ci, password_hash, email, phone, profile_name, introduction
+        ) VALUES (
+        #{userId}, #{provider}, #{userName}, #{nickname}, #{birthDate}, #{gender},
+        #{userCi, jdbcType=VARCHAR}, #{passwordHash}, #{email}, #{phone}, #{profileName, jdbcType=VARCHAR}, #{introduction}
+        )
+    </insert>
+
+    <select id="findByUserId" parameterType="java.lang.String" resultMap="userResultMap">
+        SELECT *
+        FROM users
+        WHERE user_id = #{userId} AND user_status = 'ACTIVE' AND provider = 'LOCAL'
+    </select>
+
+    <select id="findByUserIdx" parameterType="long" resultMap="userResultMap">
+        SELECT *
+        FROM users
+        WHERE user_idx = #{userIdx, jdbcType=NUMERIC} AND user_status = 'ACTIVE'
+    </select>
+
+    <select id="findByOAuth2UserId" parameterType="java.lang.String" resultMap="userResultMap">
+        SELECT *
+        FROM users
+        WHERE user_id = #{userId} AND user_status = 'ACTIVE' AND provider = 'GOOGLE'
+    </select>
+
+    <update id="updateUserPassword">
+        UPDATE users
+        SET
+        password_hash = #{passwordHash},
+        update_at = CURRENT_DATE WHERE user_idx = #{userIdx}
+    </update>
+
+    <update id="updateUserInfo" parameterType="generationgap.co.kr.domain.user.UserDTO">
+        UPDATE users
+        SET
+        user_name = #{userName},
+        nickname = #{nickname},
+        birth_date = #{birthDate, jdbcType=DATE},
+        gender = #{gender, jdbcType=CHAR},
+        email = #{email},
+        phone = #{phone, jdbcType=VARCHAR},
+        profile_name = #{profileName},
+        introduction = #{introduction, jdbcType=VARCHAR},
+        update_at = CURRENT_DATE WHERE user_id = #{userId, jdbcType=VARCHAR}
+    </update>
+
+    <select id="findByEmail" parameterType="java.lang.String" resultMap="userResultMap">
+        SELECT *
+        FROM users
+        WHERE email = #{email} AND user_status = 'ACTIVE'
+    </select>
+
+    <select id="findByUserNameAndPhone" parameterType="map" resultMap="userResultMap">
+        SELECT
+        user_id
+        FROM users
+        WHERE user_name = #{userName} AND phone = #{phone, jdbcType=VARCHAR} AND user_status = 'ACTIVE'
+        FETCH FIRST 1 ROW ONLY
+    </select>
+
+    <select id="findByUserIdForAuthentication" parameterType="java.lang.String" resultMap="userResultMap">
+        SELECT
+        user_idx, user_id, provider, user_name, nickname, birth_date, gender, user_ci,
+        password_hash, email, phone, profile_name, introduction, signup_date, user_status,
+        last_login_at, update_at, ghost
+        FROM users
+        WHERE user_id = #{userId}
+    </select>
+
+    <update id="softDeleteUser" parameterType="generationgap.co.kr.domain.user.UserDTO">
+        UPDATE users
+        SET
+        user_id = #{userId},
+        nickname = #{nickname},
+        email = #{email},
+        phone = #{phone, jdbcType=VARCHAR},
+        user_status = #{userStatus},
+        ghost = CURRENT_DATE,
+        update_at = CURRENT_DATE  WHERE user_idx = #{userIdx, jdbcType=NUMERIC}
+    </update>
+
+    <select id="countByUserId" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM users WHERE user_id = #{userId} AND user_status != 'DELETED'
+    </select>
+
+    <select id="countByNickname" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM users WHERE nickname = #{nickname} AND user_status != 'DELETED'
+    </select>
+
+    <select id="countByEmail" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM users WHERE email = #{email} AND user_status != 'DELETED'
+    </select>
+
+    <select id="countByPhone" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM users WHERE phone = #{phone} AND user_status != 'DELETED'
+    </select>
+
+    <select id="countByUserCi" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM users WHERE user_ci = #{userCi} AND user_status != 'DELETED'
+    </select>
+
+    <select id="findByProviderAndUserId" parameterType="map" resultMap="userResultMap">
+        SELECT *
+        FROM users
+        WHERE provider = #{provider}
+        AND user_id = #{userId}
+        AND user_status != 'DELETED'
+    </select>
+
+    <insert id="insertOAuthUser" parameterType="generationgap.co.kr.domain.user.UserDTO">
+        INSERT INTO users (
+        user_id, provider, user_name, nickname, birth_date, gender, user_ci,
+        email, phone, profile_name, introduction, last_login_at, update_at, ghost
+        ) VALUES (
+        #{userId}, #{provider}, #{userName}, #{nickname}, #{birthDate, jdbcType=DATE}, #{gender, jdbcType=CHAR}, #{userCi, jdbcType=VARCHAR},
+        #{email}, #{phone, jdbcType=VARCHAR}, #{profileName}, #{introduction, jdbcType=VARCHAR}, #{lastLoginAt, jdbcType=DATE}, #{updateAt, jdbcType=DATE}, #{ghost, jdbcType=DATE}
+        )
+    </insert>
+
+    <update id="updateProfileName">
+        UPDATE users
+        SET profile_name = #{profileName}
+        WHERE user_idx = #{userIdx}
+    </update>
+
+
+    <!-- 3일 정지 설정 ksm -->
+    <update id="suspendUser">
+        UPDATE users
+        SET is_suspended = 1,
+        suspend_until = SYSTIMESTAMP + NUMTODSINTERVAL(3, 'DAY')
+        WHERE user_idx = #{userId}
+    </update>
+
+    <!--시간 지나면 자동으로 정지 해제 ksm-->
+    <update id="releaseExpiredSuspensions">
+        <![CDATA[
+        UPDATE users
+            SET is_suspended = 0,
+            suspend_until = NULL
+        WHERE is_suspended = 1
+            AND suspend_until <= SYSTIMESTAMP
+        ]]>
+    </update>
+
+    <!--확인용 ksm-->
+    <select id="findSuspendCandidates" resultMap="userResultMap">
+        <![CDATA[
+        SELECT user_idx, user_id, is_suspended, suspend_until
+        FROM users
+        WHERE is_suspended = 1
+        AND suspend_until <= SYSTIMESTAMP
+        ]]>
+    </select>
+
+
+</mapper>

@@ -2,7 +2,9 @@ package generationgap.co.kr.controller;
 
 import generationgap.co.kr.domain.group.CategoryMain;
 import generationgap.co.kr.domain.group.Groups;
+import generationgap.co.kr.security.CustomUserDetails;
 import generationgap.co.kr.service.group.GroupService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,8 +21,11 @@ public class MainController {
     }
 
     @GetMapping("/main")
-    public String mainPage(Model model) {
-
+    public String mainPage(Model model,
+                           @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails != null) {
+            model.addAttribute("user", userDetails);
+        }
         // 카테고리 전체 리스트
         List<CategoryMain> categoryMainList = groupService.getAllMainCategory();
         model.addAttribute("categoryMainList",categoryMainList);
@@ -33,6 +38,11 @@ public class MainController {
         List<Groups> recommendGroupsList = groupService.getRecommendGroup();
         model.addAttribute("recommendGroupsList", recommendGroupsList);
 
-        return "main";
+        return "main/main";
+    }
+
+    @GetMapping("/main/MAIN")
+    public String mainPage2() {
+        return "main/MAIN"; // main.html 템플릿 반환
     }
 }

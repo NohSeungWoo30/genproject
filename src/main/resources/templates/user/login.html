@@ -1,117 +1,155 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>로그인</title>
-  <style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f4f4f4;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        margin: 0;
-    }
-    .login-container {
-        background-color: #fff;
-        padding: 30px;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        width: 300px;
-        text-align: center;
-    }
-    h2 {
-        margin-bottom: 20px;
-        color: #333;
-    }
-    .form-group {
-        margin-bottom: 15px;
-        text-align: left;
-    }
-    label {
-        display: block;
-        margin-bottom: 5px;
-        color: #555;
-        font-weight: bold;
-    }
-    input[type="text"],
-    input[type="password"] {
-        width: calc(100% - 20px); /* 패딩 값만큼 너비 조정 */
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
-    }
-    button {
-        width: 100%;
-        padding: 10px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        font-size: 16px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-    button:hover {
-        background-color: #0056b3;
-    }
-    .message {
-        margin-top: 15px;
-        font-weight: bold;
-        padding: 10px;
-        border-radius: 4px;
-    }
-    .message.error {
-        color: #d9534f; /* 붉은색 계열 */
-        background-color: #f2dede; /* 연한 붉은색 배경 */
-        border: 1px solid #ebccd1;
-    }
-    .message.success {
-        color: #5cb85c; /* 초록색 계열 */
-        background-color: #dff0d8; /* 연한 초록색 배경 */
-        border: 1px solid #d6e9c6;
-    }
-    .link-container {
-        margin-top: 20px;
-        font-size: 14px;
-    }
-    .link-container a {
-        color: #007bff;
-        text-decoration: none;
-    }
-    .link-container a:hover {
-        text-decoration: underline;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>로그인</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: calc(100% - 20px); /* 패딩 값만큼 너비 조정 */
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        /* 소셜 로그인 버튼 스타일 */
+        .social-login-group {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .social-login-button {
+            display: block; /* 블록 요소로 만들어 줄바꿈 */
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-decoration: none; /* 링크의 밑줄 제거 */
+            color: white; /* 텍스트 색상 */
+            margin-bottom: 10px; /* 버튼 간 간격 */
+            line-height: 1.5; /* 텍스트 정렬을 위해 */
+        }
+        .social-login-button.google {
+            background-color: #db4437; /* Google 브랜드 색상 */
+        }
+        .social-login-button.google:hover {
+            background-color: #c0392b;
+        }
+        .message {
+            margin-top: 15px;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .message.error {
+            color: #d9534f; /* 붉은색 계열 */
+            background-color: #f2dede; /* 연한 붉은색 배경 */
+            border: 1px solid #ebccd1;
+        }
+        .message.success {
+            color: #5cb85c; /* 초록색 계열 */
+            background-color: #dff0d8; /* 연한 초록색 배경 */
+            border: 1px solid #d6e9c6;
+        }
+        .link-container {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        .link-container a {
+            color: #007bff;
+            text-decoration: none;
+            margin: 0 5px; /* 링크 간 간격 */
+        }
+        .link-container a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .link-container a:hover {
+            text-decoration: underline;
+        }
+        .link-container span {
+            color: #ccc;
+        }
+    </style>
 </head>
 <body>
 <div class="login-container">
-  <h2>로그인</h2>
+    <h2>로그인</h2>
 
-  <div th:if="${param.error}" class="message error">
-    아이디 또는 비밀번호가 올바르지 않습니다.
-  </div>
-  <div th:if="${param.logout}" class="message success">
-    성공적으로 로그아웃되었습니다.
-  </div>
-
-  <form th:action="@{/login-process}" method="post">
-    <div class="form-group">
-      <label for="userId">아이디</label>
-      <input type="text" id="userId" name="userId" required />
+    <div th:if="${param.error}" class="message error">
+        아이디 또는 비밀번호가 올바르지 않습니다.
     </div>
-    <div class="form-group">
-      <label for="password">비밀번호</label>
-      <input type="password" id="password" name="password" required />
+    <div th:if="${param.logout}" class="message success">
+        성공적으로 로그아웃되었습니다.
     </div>
-    <button type="submit">로그인</button>
-  </form>
 
-  <div class="link-container">
-    <a th:href="@{/user/signup}">회원가입</a>
-  </div>
+    <form th:action="@{/login-process}" method="post">
+        <div class="form-group">
+            <label for="userId">아이디</label>
+            <input type="text" id="userId" name="userId" required />
+        </div>
+        <div class="form-group">
+            <label for="password">비밀번호</label>
+            <input type="password" id="password" name="password" required />
+        </div>
+        <button type="submit">로그인</button>
+    </form>
+    <div class="social-login-group">
+        <a th:href="@{/oauth2/authorization/google}" class="social-login-button google">
+            Google로 로그인
+        </a>
+    </div>
+    <div class="link-container">
+        <a th:href="@{/user/signup}">회원가입</a>
+    </div>
 </div>
 </body>
 </html>

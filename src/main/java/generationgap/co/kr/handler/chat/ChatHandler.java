@@ -3,15 +3,17 @@ package generationgap.co.kr.handler.chat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import generationgap.co.kr.domain.chat.ChatMessage;
 import generationgap.co.kr.mapper.user.UserMapper;
+import generationgap.co.kr.security.CustomUserDetails;
 import generationgap.co.kr.service.chat.ChatService;
 import org.json.JSONObject;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -45,34 +47,60 @@ public class ChatHandler extends TextWebSocketHandler {
     }//getParam
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws IOException {
+    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+
         String groupId = getParam(session, "groupId");
-        if (groupId == null || groupId.isBlank()) {
-            System.err.println("❗ groupId가 누락됨. 연결 종료");
+
+        SecurityContext context = (SecurityContext) session.getAttributes().get("SPRING_SECURITY_CONTEXT");
+        if (context == null || context.getAuthentication() == null) {
+            session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"세션에 인증 정보 없음\"}"));
             session.close();
             return;
         }
+
+        Authentication auth = context.getAuthentication();
+        Object principal = auth.getPrincipal();
+
+        if (!(principal instanceof CustomUserDetails customUser)) {
+            session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"인증된 사용자 아님\"}"));
+            session.close();
+            return;
+        }
+
+        Long userIdx = customUser.getUserIdx();
+        String nickname = customUser.getNickname();
+        String userId = customUser.getUsername();
+
+
         // 1. 세션 등록
         groupSessions.computeIfAbsent(groupId, k-> new HashSet<>()).add(session);
         System.out.println("✅ WebSocket 연결됨: groupId = " + groupId);
+
+        //먼저 현재 사용자 식별 메세지 전송하기
+        JSONObject identityMsg = new JSONObject();
+        identityMsg.put("type", "IDENTIFY");
+        identityMsg.put("userId", userId); // 현재 접속자 ID
+        identityMsg.put("userIdx", userIdx);
+        session.sendMessage(new TextMessage(identityMsg.toString()));
 
         // 2. 과거 메세지 조회
         List<ChatMessage> history = chatService.getMessagesByGroup(groupId);
         for (ChatMessage msg : history){
             JSONObject json = new JSONObject();
+            json.put("type", "INIT");
             json.put("from", msg.getNickname());
             json.put("msg", msg.getContent());
-            String msgUserId = userMapper.getUserIdByUserIdx(Long.valueOf(msg.getSenderIdx()));
+            String msgUserId = userMapper.getUserIdByUserIdx(msg.getSenderIdx());
             json.put("userId", msgUserId);
+            json.put("userIdx", msg.getSenderIdx()); // ✅ 숫자형 고유 ID 추가
             json.put("messageId", msg.getMessagesIdx());
             json.put("sentAt", msg.getSentAt().toString());
-
-
+            json.put("isDeleted", msg.getIsDeleted());
+            json.put("isEdited", msg.getIsEdited());
 
             session.sendMessage(new TextMessage(json.toString()));
         }
 
-        String nickname = userMapper.getNicknameByUserId(getParam(session, "userId"));
         sendSystemMessage(groupId, nickname + " 님이 입장하셨습니다.");
 
     }//afterConnectionEstablished
@@ -86,18 +114,30 @@ public class ChatHandler extends TextWebSocketHandler {
 
         // 1. 데이터 파싱
         String groupId = getParam(session, "groupId");
-        String userId = getParam(session, "userId");
-        if (groupId == null || groupId.isBlank()) {
-            System.err.println("❗ groupId가 누락됨. 연결 종료");
-            session.close();
+
+        // ✅ 인증 정보 수동 추출 (Spring Security 6.x 기준)
+        SecurityContext context = (SecurityContext) session.getAttributes().get("SPRING_SECURITY_CONTEXT");
+        if (context == null || context.getAuthentication() == null) {
+            session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"세션에 인증 정보 없음\"}"));
             return;
         }
+
+        Authentication auth = context.getAuthentication();
+        Object principal = auth.getPrincipal();
+        if (!(principal instanceof CustomUserDetails customUser)) {
+            session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"인증된 사용자 아님\"}"));
+            return;
+        }
+
+        Long userIdx = customUser.getUserIdx();
+        String nickname = customUser.getNickname();
+        String userId = customUser.getUsername();
+
 
         //EDIT 분기
         if (json.has("type") && json.getString("type").equals("EDIT")) {
             int messageId = json.getInt("messageId");
             String newContent = json.getString("newContent");
-            long userIdx = userMapper.getUserIdxByUserId(userId);
 
             try {
                 chatService.editMessageWithHistory(messageId, newContent, userIdx, userId);
@@ -108,11 +148,15 @@ public class ChatHandler extends TextWebSocketHandler {
                 response.put("newContent", newContent);
                 response.put("editedAt", LocalDateTime.now().toString());
                 // 채팅 수정 후 받지 못한 부분 추가
-                response.put("from", userMapper.getNicknameByUserId(userId)); // 닉네임
+                response.put("from",  nickname); // userMapper.getNicknameByUserId(userId)); // 닉네임
                 response.put("msg", newContent); // 수정된 내용
                 response.put("userId", userId); // 클라이언트 비교용
+                response.put("userIdx", userIdx);     // IDX 추가
+                response.put("isEdited", "Y");
 
-                
+
+
+
                 for (WebSocketSession s : groupSessions.getOrDefault(groupId, Set.of())) {
                     if (s.isOpen()) {
                         s.sendMessage(new TextMessage(response.toString()));
@@ -130,7 +174,6 @@ public class ChatHandler extends TextWebSocketHandler {
         //DELETE 분기
         if (json.has("type") && json.getString("type").equals("DELETE")) {
             int messageId = json.getInt("messageId");
-            long userIdx = userMapper.getUserIdxByUserId(userId);
 
             try {
                 chatService.deleteMessage(messageId, userIdx, userId);
@@ -139,8 +182,10 @@ public class ChatHandler extends TextWebSocketHandler {
                 response.put("type", "DELETE");
                 response.put("messageId", messageId);
                 response.put("msg", "삭제된 메시지입니다.");
-                response.put("from", userMapper.getNicknameByUserId(userId));
+                response.put("from", nickname); //userMapper.getNicknameByUserId(userId));
                 response.put("userId", userId);
+                response.put("userIdx", userIdx);     // IDX 추가
+
 
                 for (WebSocketSession s : groupSessions.getOrDefault(groupId, Set.of())) {
                     if (s.isOpen()) {
@@ -159,10 +204,8 @@ public class ChatHandler extends TextWebSocketHandler {
 
         //메세지 보내는 부분
         String msg = json.getString("msg");
-        // 2. 닉네임 조회
-        String nickname = userMapper.getNicknameByUserId(userId);
+
         // 3. DB저장
-        long userIdx = userMapper.getUserIdxByUserId(userId);
 
         ChatMessage chatMessage = new ChatMessage();
         chatMessage.setGroupChatIdx(Long.parseLong(groupId));
@@ -181,8 +224,11 @@ public class ChatHandler extends TextWebSocketHandler {
         response.put("from", nickname);
         response.put("msg", msg);
         response.put("userId", userId); // 본인 메세지만 수정 가능하게 하기 위해 추가됨
+        response.put("userIdx", userIdx);     // IDX 추가
         response.put("messageId", id);
         response.put("sentAt", chatMessage.getSentAt().toString());
+        response.put("isDeleted", chatMessage.getIsDeleted()); // 'Y' 또는 'N'
+
 
         for(WebSocketSession s : groupSessions.getOrDefault(groupId, Set.of())){
             if(s.isOpen()){
@@ -197,11 +243,20 @@ public class ChatHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status){
         String groupId = getParam(session, "groupId");
+
         Set<WebSocketSession> sessions = groupSessions.get(groupId);
         if(sessions != null){
             sessions.remove(session);
 
-            String nickname = userMapper.getNicknameByUserId(getParam(session, "userId"));
+            String nickname = "알 수 없음";
+            SecurityContext context = (SecurityContext) session.getAttributes().get("SPRING_SECURITY_CONTEXT");
+            if (context != null && context.getAuthentication() != null) {
+                Object principal = context.getAuthentication().getPrincipal();
+                if (principal instanceof CustomUserDetails customUser) {
+                    nickname = customUser.getNickname();
+                }
+            }
+
             sendSystemMessage(groupId, nickname + " 님이 퇴장하셨습니다.");
 
             if(sessions.isEmpty()){
@@ -215,17 +270,26 @@ public class ChatHandler extends TextWebSocketHandler {
     private void sendSystemMessage(String groupId, String content){
         ChatMessage systemMsg = new ChatMessage();
         systemMsg.setGroupChatIdx(Long.parseLong(groupId));
-        systemMsg.setSenderIdx(1L); // 시스템 user_idx
+        systemMsg.setSenderIdx(1l); // 시스템 user_idx
         systemMsg.setNickname("시스템");
         systemMsg.setContent(content);
         systemMsg.setSentAt(LocalDateTime.now());
         systemMsg.setIsDeleted("N");
+        systemMsg.setType("system");
 
         chatService.saveMessage(systemMsg);
 
         JSONObject json = new JSONObject();
         json.put("from", "시스템");
         json.put("msg", content);
+        json.put("type", "system");
+        json.put("messageId", systemMsg.getMessagesIdx());
+        json.put("sentAt", systemMsg.getSentAt().toString());
+        json.put("userId", "system");
+        json.put("userIdx", 1);  // 시스템 user idx
+        json.put("isDeleted", "N");
+
+
 
         for(WebSocketSession s : groupSessions.getOrDefault(groupId, Set.of())){
             if(s.isOpen()){
@@ -237,7 +301,5 @@ public class ChatHandler extends TextWebSocketHandler {
             }
         }
     }
-
-
 
 }
