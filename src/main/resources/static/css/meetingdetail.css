@@ -132,21 +132,99 @@
     .chat-messages { flex: 1; padding: 0 16px; overflow-y: auto; background-color: var(--background-secondary); }
     .message-group { padding-top: 8px; }
     .message-group.new-speaker { padding-top: 16px; }
+
+
+/*
     .message { display: flex; }
+*/
+
+    .message {
+      display: flex;
+      align-items: flex-start;
+      margin-top: 8px;
+      gap: 8px;
+    }
+
+/*
     .message.self { justify-content: flex-end; }
+*/
+    .message.self {
+      display: flex;
+      justify-content: flex-end; /* ✅ 오른쪽 정렬 핵심 */
+      text-align: right;
+    }
+
+
+/*
     .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; margin-right: 12px; }
+*/
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
     .message.self .avatar { display: none; }
+
+
+/*
     .content-container { display: flex; flex-direction: column; max-width: 70%; }
+*/
+
+    .content-container {
+      display: flex;
+      flex-direction: column;
+      max-width: 75%;
+    }
+
+/*
     .nickname { font-size: 14px; color: var(--text-primary); font-weight: 500; margin-bottom: 4px; }
+*/
+
+    .nickname {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+/*
     .message.self .nickname { align-self: flex-end; }
+*/
+    .message.self .nickname {
+      align-self: flex-end;
+      margin-right: 4px;
+      text-align: right;
+    }
+
+/*
     .bubble-container { display: flex; align-items: flex-end; gap: 8px; }
+*/
+    .bubble-container {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+/*
     .message.self .bubble-container { flex-direction: row-reverse; }
+*/
+    .message.self .bubble-container {
+      flex-direction: row-reverse;
+    }
+
     .bubble { padding: 10px 14px; border-radius: 18px; line-height: 1.5; word-break: break-word; font-size: 15px; }
     .message.self .bubble { background: var(--accent-color); color: white; }
     .message.other .bubble { background: var(--bubble-other-bg); color: var(--text-primary); }
     .timestamp { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+/*
     .message-group:not(.new-speaker) .avatar, .message-group:not(.new-speaker) .nickname { display: none; }
+*/
+/*
     .message-group:not(.new-speaker) .content-container { padding-left: 52px; }
+*/
     .message.self .message-group:not(.new-speaker) .content-container { padding-right: 0; }
     .date-separator { text-align: center; margin: 24px 0 16px 0; }
     .date-separator .text { padding: 4px 12px; font-size: 12px; font-weight: 500; color: var(--text-secondary); background-color: #DDE1E5; border-radius: 12px; }

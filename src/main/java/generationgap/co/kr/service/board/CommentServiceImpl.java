@@ -80,12 +80,16 @@ public class CommentServiceImpl implements CommentService {
             int postWriterId = commentMapper.getPostWriterByPostIdx(comment.getPostIdx());
             if (postWriterId != currentUserId) {
                 sendNotificationTo(postWriterId, postId, "/posts/" + comment.getPostIdx());
+                System.out.println("🎯 대상은 게시글 작성자");
+
             }
         } else {
             // 대댓글 → 부모 댓글 작성자에게 알림
             Comment parent = commentMapper.getCommentById(comment.getParentCommentId().intValue());
             if (parent != null && parent.getCommenterIdx() != currentUserId) {
                 sendNotificationTo(parent.getCommenterIdx(), postId, "/posts/" + comment.getPostIdx());
+                System.out.println("🎯 대상은 부모 댓글 작성자");
+
             }
         }
     }

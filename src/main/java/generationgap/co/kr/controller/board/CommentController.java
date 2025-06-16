@@ -1,8 +1,6 @@
 package generationgap.co.kr.controller.board;
 
 import generationgap.co.kr.domain.board.Comment;
-import generationgap.co.kr.domain.board.Post;
-import generationgap.co.kr.dto.notification.NotificationDto;
 import generationgap.co.kr.mapper.board.CommentMapper;
 import generationgap.co.kr.mapper.board.PostMapper;
 import generationgap.co.kr.security.CustomUserDetails;
@@ -56,26 +54,9 @@ public class CommentController {
         comment.setContent(content);
         comment.setParentCommentId(parentCommentId);
 
+        System.out.println("🌐 Controller 요청 도착");
         commentService.addComment(comment, userIdx);
 
-        // 2. 알림 전송
-        try {
-
-            System.out.println("컨트롤러에서 sendNotification 진입");
-
-            Post post = postMapper.getPostById(postIdx);
-            if (post != null && post.getAuthorIdx() != userIdx) {
-                NotificationDto dto = new NotificationDto();
-                dto.setRecipientId(post.getAuthorIdx().longValue());
-                dto.setNotiTypeIdx(1L);
-                dto.setVariables(Map.of("title", post.getTitle()));
-                dto.setNotiUrl("/posts/" + postIdx);
-
-                notificationService.sendNotification(dto);
-            }
-        } catch (Exception e) {
-            log.error("❗ 댓글 알림 처리 중 오류 발생", e);
-        }
         return "ok";
     }
 

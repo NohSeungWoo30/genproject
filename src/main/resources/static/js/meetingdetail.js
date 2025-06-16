@@ -291,7 +291,7 @@ function addMessage(msgData) {
 
   const messageDiv = document.createElement('div');
   messageDiv.className = `message ${type}`;
-  messageDiv.innerHTML = `
+  /*messageDiv.innerHTML = `
     <img class="avatar" src="${avatar}" alt="avatar">
     <div class="content-container">
       <span class="nickname">${nickname}</span>
@@ -302,7 +302,20 @@ function addMessage(msgData) {
         <span class="timestamp">${formatTime(date)}</span>
       </div>
     </div>
-  `;
+  `;*/
+
+  messageDiv.innerHTML = `
+      ${type === 'self' ? '' : `<img class="avatar" src="${avatar}" alt="avatar">`}
+      <div class="content-container">
+        <span class="nickname">${nickname}</span>
+        <div class="bubble-container">
+          <div class="bubble">
+            ${escapeHTML(content)}${edited ? ' <span class="edited-label">(수정됨)</span>' : ''}
+          </div>
+          <span class="timestamp">${formatTime(date)}</span>
+        </div>
+      </div>
+    `;
   group.appendChild(messageDiv);
   chatMessages.appendChild(group);
   chatMessages.scrollTop = chatMessages.scrollHeight;
