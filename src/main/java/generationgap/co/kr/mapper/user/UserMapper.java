@@ -51,4 +51,6 @@ public interface UserMapper {
 
     // 소프트 삭제 시 user_status와 UNIQUE 필드들을 업데이트하는 새로운 메서드 추가
     void updateUserStatusAndUniqueFields(UserDTO user);
+
+
 }

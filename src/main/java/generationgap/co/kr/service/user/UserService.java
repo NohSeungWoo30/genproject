@@ -2,17 +2,16 @@ package generationgap.co.kr.service.user;
 
 import generationgap.co.kr.domain.user.UserDTO;
 import generationgap.co.kr.mapper.user.UserMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.slf4j.Logger; // Logger 임포트
-import org.slf4j.LoggerFactory; // LoggerFactory 임포트
-import java.util.Optional;
-import java.text.SimpleDateFormat;
+
 import java.time.LocalDate;
-import java.util.Date; // Date 사용 시
-import java.util.UUID; // UUID를 이용한 고유 접미사 생성 시
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -228,4 +227,6 @@ public class UserService {
         // 5. 변경된 UserDTO 객체를 매퍼를 통해 DB에 업데이트
         userMapper.updateUserStatusAndUniqueFields(userToUpdate);
     }
+
+
 }

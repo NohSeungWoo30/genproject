@@ -4,6 +4,7 @@ import generationgap.co.kr.domain.group.CategoryMain;
 import generationgap.co.kr.domain.group.CategorySub;
 import generationgap.co.kr.domain.group.GroupMembers;
 import generationgap.co.kr.domain.group.Groups;
+import generationgap.co.kr.domain.user.UserDTO;
 import generationgap.co.kr.security.CustomUserDetails;
 import generationgap.co.kr.service.group.GroupService;
 import org.springframework.http.ResponseEntity;
@@ -135,7 +136,8 @@ public class GroupsController {
             redirectAttributes.addFlashAttribute("successMessage", "모임방 개설이 완료되었습니다!");
 
             // 성공적으로 생성이 되면 스크립트를 통해 디테일 페이지로 방생성번호와 함께 이동
-            return "redirect:/group/detail/" + createdGroupId;
+            //return "redirect:/group/detail/" + createdGroupId;
+            return "redirect:/group/detail?groupId=" + createdGroupId;
         } catch (Exception e) {
             System.err.println("그룹 저장 실패: " + e.getMessage());
             e.printStackTrace();
@@ -153,12 +155,22 @@ public class GroupsController {
     }
 
     // url경로로 넘어온 방 번호 숫자 캐치
-    @GetMapping("/detail/{groupId}")
-    public String detail(@PathVariable("groupId") int groupId, Model model) {
-        Groups groupDetail = groupService.getGroupById(groupId);
+    //@GetMapping("/detail/{groupId}")
+    @GetMapping("/detail")
+    //public String detail(@PathVariable("groupId") int groupId,
+    public String detail(@RequestParam("groupId") int groupId,
+                         @AuthenticationPrincipal CustomUserDetails userDetails,
+                         Model model) {
 
-        if (groupDetail != null) {
+        Groups groupDetail = groupService.getGroupById(groupId);
+        int hostIndex = groupDetail.getOwnerIdx().intValue();
+        System.out.println("Owner Index: " + hostIndex);
+        // 호스트의 유저번호, 닉네임, 프로필 이미지
+        UserDTO hostData = groupService.getUserId_Nick(hostIndex);
+        System.out.println("Host Data: " + hostData);
+        if (groupDetail != null || hostData != null) {
             model.addAttribute("groupDetail", groupDetail);
+            model.addAttribute("hostData", hostData);
             System.out.println("그룹 ID (groupIdx): " + groupDetail.getGroupIdx());
             System.out.println("그룹 제목 (title): " + groupDetail.getTitle());
             System.out.println("모임장 인덱스 (ownerIdx): " + groupDetail.getOwnerIdx());

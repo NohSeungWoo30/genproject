@@ -96,4 +96,5 @@
         ghost = #{ghost, jdbcType=DATE}
         WHERE user_idx = #{userIdx}
     </update>
+
 </mapper>

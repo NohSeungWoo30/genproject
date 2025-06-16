@@ -5,6 +5,7 @@ import generationgap.co.kr.domain.group.CategoryMain;
 import generationgap.co.kr.domain.group.CategorySub;
 import generationgap.co.kr.domain.group.GroupMembers;
 import generationgap.co.kr.domain.group.Groups;
+import generationgap.co.kr.domain.user.UserDTO;
 import generationgap.co.kr.mapper.group.GroupsMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -82,5 +83,7 @@ public class GroupService {
     public Groups getGroupById(int groupId){
         return groupsMapper.getGroupById(groupId);
     }
-
+    public UserDTO getUserId_Nick(int hostIndex){
+        return groupsMapper.getUserId_Nick(hostIndex);
+    }
 }

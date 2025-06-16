@@ -36,6 +36,7 @@
             <result property="userIdx" column="user_idx"/>
             <result property="userId" column="user_id"/>
             <result property="nickname" column="nickname"/>
+            <result property="profileName" column="profile_name"/>
         </association>
 
         <association property="categoryMain" javaType="generationgap.co.kr.domain.group.CategoryMain">
@@ -262,5 +263,17 @@
         GROUP_IDX = #{groupIdx}
     </select>
 
-
+    <!-- 유저 번호 닉네임 프로필 이미지 -->
+    <select id="getUserId_Nick" resultMap="Groups">
+        SELECT
+        U.user_idx,
+        U.nickname,
+        U.profile_name
+        FROM
+        USERS U
+        JOIN
+        GROUPS G ON U.user_idx = G.owner_idx
+        WHERE
+        G.group_idx = #{groupIdx}
+    </select>
 </mapper>
