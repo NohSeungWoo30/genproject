@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>마이페이지</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <style>
+    :root {
+        --primary-color: #4A90E2; /* 차분한 블루 계열 */
+        --primary-hover-color: #357ABD;
+        --danger-color: #D9534F;
+        --text-primary: #212529;
+        --text-secondary: #6C757D;
+        --bg-color: #F8F9FA;
+        --content-bg-color: #FFFFFF;
+        --border-color: #E9ECEF;
+    }
+
+    body {
+        font-family: 'Pretendard', sans-serif;
+        margin: 0;
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+    }
+
+    .mypage-wrapper {
+        display: flex;
+        max-width: 1200px;
+        margin: 40px auto;
+        gap: 30px;
+        padding: 0 20px;
+    }
+
+    /* ========== 1. 사이드바 ========== */
+    .mypage-sidebar {
+        width: 260px;
+        flex-shrink: 0;
+    }
+
+    .profile-card {
+        background: var(--content-bg-color);
+        border-radius: 12px;
+        padding: 24px;
+        text-align: center;
+        border: 1px solid var(--border-color);
+        margin-bottom: 20px;
+    }
+    .profile-card img {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid var(--border-color);
+        margin-bottom: 12px;
+        transition: transform 0.3s ease;
+    }
+    .profile-card img:hover {
+        transform: scale(1.05);
+    }
+    .profile-card .nickname {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+    .profile-card .email {
+        font-size: 14px;
+        color: var(--text-secondary);
+        word-break: break-all;
+        margin-bottom: 16px;
+    }
+
+    /* 프로필 카드 내 스탯 정보 */
+    .profile-stats {
+        display: flex;
+        justify-content: space-around;
+        text-align: center;
+        padding-top: 16px;
+        border-top: 1px solid var(--border-color);
+    }
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .stat-item .value {
+        font-size: 18px;
+        font-weight: 700;
+    }
+    .stat-item .label {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-top: 4px;
+    }
+    .stat-item .value.danger {
+        color: var(--danger-color);
+    }
+
+    .nav-menu {
+        background: var(--content-bg-color);
+        border-radius: 12px;
+        padding: 12px;
+        border: 1px solid var(--border-color);
+    }
+    .nav-menu a {
+        display: flex;
+        align-items: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        color: #495057;
+        font-weight: 500;
+        border-radius: 8px;
+        transition: all 0.2s ease-in-out;
+    }
+    .nav-menu a .material-icons-outlined {
+        margin-right: 12px;
+        font-size: 22px;
+    }
+    .nav-menu a:hover {
+        background-color: #F1F3F5;
+        color: var(--text-primary);
+    }
+    .nav-menu a.active {
+        background: var(--primary-color);
+        color: #ffffff;
+        font-weight: 700;
+        box-shadow: 0 2px 6px rgba(74, 144, 226, 0.3);
+    }
+    .nav-menu .divider {
+        height: 1px;
+        background-color: var(--border-color);
+        margin: 8px 12px;
+    }
+
+    /* ========== 2. 컨텐츠 영역 ========== */
+    .mypage-content {
+        flex-grow: 1;
+    }
+    .content-section {
+        background: var(--content-bg-color);
+        border-radius: 12px;
+        padding: 30px;
+        border: 1px solid var(--border-color);
+        display: none;
+    }
+    .content-section.active {
+        display: block;
+    }
+    .content-section h2 {
+        font-size: 22px;
+        margin-top: 0;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    /* 폼 스타일 */
+    form label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+    form input, form textarea {
+        width: 100%;
+        padding: 12px;
+        font-size: 15px;
+        box-sizing: border-box;
+        border: 1px solid #CED4DA;
+        border-radius: 6px;
+        margin-bottom: 16px;
+        transition: all 0.2s ease;
+    }
+    form input:focus, form textarea:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+    }
+    .form-actions { text-align: right; }
+    form button {
+        padding: 12px 24px;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    form button:hover {
+        background-color: var(--primary-hover-color);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    /* 카드 목록 스타일 */
+    .card-list .card {
+        display: flex;
+        align-items: center;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+        transition: all 0.2s ease;
+    }
+    .card-list .card:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .card-list .card-icon {
+        margin-right: 16px;
+        color: var(--primary-color);
+    }
+    .card-list .card-content { flex-grow: 1; }
+    .card-list .card-title { font-weight: 700; margin-bottom: 4px; }
+    .card-list .card-meta { font-size: 14px; color: var(--text-secondary); }
+
+    /* 데이터 없음 (Empty State) 스타일 */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-secondary);
+    }
+    .empty-state .material-icons-outlined {
+        font-size: 64px;
+        color: var(--border-color);
+    }
+    .empty-state h3 {
+        font-size: 18px;
+        margin-top: 16px;
+        color: var(--text-primary);
+    }
+    .empty-state p { font-size: 15px; }
+
+    /* 반응형 디자인 */
+    @media (max-width: 992px) {
+        .mypage-wrapper {
+            flex-direction: column;
+        }
+        .mypage-sidebar {
+            width: 100%;
+        }
+    }
+  </style>
+</head>
+<body>
+
+<div class="mypage-wrapper">
+  <aside class="mypage-sidebar">
+    <div class="profile-card">
+      <img id="sidebarProfileImage" th:src="${user.profileName}" alt="프로필 이미지">
+      <div class="nickname" th:text="${user.nickname}">프로트런트</div>
+      <div class="email" th:text="${user.email}">dev.frontrant@example.com</div>
+
+      <div class="profile-stats">
+        <div class="stat-item">
+          <span class="value" th:text="${user.trust}">32</span>
+          <span class="label">추천수</span>
+        </div>
+        <div class="stat-item">
+          <span class="value danger" th:text="${user.noShowCount}">1</span>
+          <span class="label">불참 횟수</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="nav-menu">
+      <a href="#info" class="active" onclick="showSection('info', this)">
+        <span class="material-icons-outlined">person</span> 내 정보 수정
+      </a>
+      <a href="#history" onclick="showSection('history', this)">
+        <span class="material-icons-outlined">history</span> 참여 이력
+      </a>
+      <a href="#payments" onclick="showSection('payments', this)">
+        <span class="material-icons-outlined">credit_card</span> 결제 내역
+      </a>
+      <a href="#posts" onclick="showSection('posts', this)">
+        <span class="material-icons-outlined">article</span> 내가 쓴 글
+      </a>
+      <div class="divider"></div>
+      <a href="/logout">
+        <span class="material-icons-outlined">logout</span> 로그아웃
+      </a>
+    </nav>
+  </aside>
+
+  <main class="mypage-content">
+    <section id="info-section" class="content-section active">
+      <h2>내 정보 수정</h2>
+      <div class="profile-image-edit-section">
+      <label>프로필 사진</label>
+      <div class="image-display-area">
+        <img id="currentProfileImage" th:src="${user.profileName ?: '/images/profile_upload/default_profile.jpg'}" alt="프로필 이미지">
+
+        <img id="imagePreview" src="#" alt="미리보기" style="display: none;">
+      </div>
+
+      <div class="image-actions">
+        <input type="file" id="profileImageInput" name="profileImage" accept="image/*" style="display: none;">
+        <button type="button" id="changeImageButton" class="btn btn-secondary">사진 변경</button>
+
+        <button type="button" id="deleteImageButton" class="btn btn-danger">사진 삭제</button>
+      </div>
+      </div>
+      <form th:action="@{/user/profile-edit}" th:object="${user}" method="post">
+
+        <label for="nickname">닉네임</label>
+        <input type="text" id="nickname" class="form-control" th:field="*{nickname}" required />
+
+        <label for="introduction">자기소개</label>
+        <textarea id="introduction" class="form-control" th:field="*{introduction}" rows="5"></textarea>
+        <div class="form-actions"><button type="submit">정보 저장</button></div>
+      </form>
+
+      <h2 style="margin-top: 40px;">비밀번호 변경</h2>
+      <form th:action="@{/user/profile-update-password}" method="post">
+        <label for="currentPassword">현재 비밀번호</label>
+        <input type="password" id="currentPassword" name="currentPassword" class="form-control" required />
+
+        <label for="newPassword">새 비밀번호</label>
+        <input type="password" id="newPassword" name="newPassword" required>
+
+        <label for="confirmNewPassword">새 비밀번호 확인</label>
+        <input type="password" id="confirmNewPassword" name="confirmNewPassword" required>
+
+        <div class="form-actions">
+          <button type="submit">비밀번호 변경</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="history-section" class="content-section card-list">
+      <h2>참여 이력</h2>
+      <div th:if="${#lists.isEmpty(history)}" class="empty-state">
+        <span class="material-icons-outlined">event_busy</span>
+        <h3>참여한 모임이 없습니다.</h3>
+        <p>다양한 모임에 참여하고 기록을 남겨보세요.</p>
+      </div>
+      <div th:each="meeting : ${history}" class="card">
+        <span class="material-icons-outlined card-icon">groups</span>
+        <div class="card-content">
+          <div class="card-title" th:text="${meeting.title}">모임 제목</div>
+          <div class="card-meta" th:text="${meeting.date} + ' | ' + ${meeting.participants} + '명 참여'"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="payments-section" class="content-section card-list">
+      <h2>결제 내역</h2>
+      <div th:if="${#lists.isEmpty(payments)}" class="empty-state">
+        <span class="material-icons-outlined">receipt_long</span>
+        <h3>결제 내역이 없습니다.</h3>
+      </div>
+      <div th:each="payment : ${payments}" class="card">
+        <span class="material-icons-outlined card-icon">shopping_cart</span>
+        <div class="card-content">
+          <div class="card-title" th:text="${payment.productName}">상품명</div>
+          <div class="card-meta" th:text="${#temporals.format(payment.approvedAt, 'yyyy-MM-dd')} + ' | ' + ${payment.paidAmount} + '원 | ' + ${payment.status}"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="posts-section" class="content-section card-list">
+      <h2>내가 쓴 글</h2>
+      <div th:if="${#lists.isEmpty(posts)}" class="empty-state">
+        <span class="material-icons-outlined">inbox</span>
+        <h3>작성한 글이 없습니다.</h3>
+        <p>커뮤니티에 글을 작성하고 소통해보세요.</p>
+      </div>
+      <div th:each="post : ${posts}" class="card">
+        <span class="material-icons-outlined card-icon">edit_note</span>
+        <div class="card-content">
+          <div class="card-title" th:text="${post.title}">글 제목</div>
+          <div class="card-meta" th:text="${post.category} + ' | ' + ${#temporals.format(post.createdAt, 'yyyy.MM.dd')} + ' | 조회 ' + ${post.views}"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+      const hash = window.location.hash.substring(1);
+      if (hash) {
+          const link = document.querySelector(`.nav-menu a[href="#${hash}"]`);
+          if (link) showSection(hash, link);
+      }
+
+      // 비밀번호 변경 폼 유효성 검사
+      const passwordForm = document.getElementById('passwordChangeForm');
+      if (passwordForm) {
+          passwordForm.addEventListener('submit', function (e) {
+              const currentPw = document.getElementById('currentPassword').value.trim();
+              const newPw = document.getElementById('newPassword').value.trim();
+              const confirmPw = document.getElementById('confirmNewPassword').value.trim();
+
+              if (!currentPw || !newPw || !confirmPw) {
+                  alert('비밀번호를 모두 입력해주세요.');
+                  e.preventDefault();
+                  return;
+              }
+
+              if (newPw.length < 6) {
+                  alert('새 비밀번호는 최소 6자 이상이어야 합니다.');
+                  e.preventDefault();
+                  return;
+              }
+
+              if (newPw === currentPw) {
+                  alert('기존 비밀번호와 새 비밀번호가 같습니다.');
+                  e.preventDefault();
+                  return;
+              }
+
+              if (newPw !== confirmPw) {
+                  alert('새 비밀번호가 일치하지 않습니다.');
+                  e.preventDefault();
+                  return;
+              }
+          });
+      }
+  });
+
+  function showSection(sectionId, element) {
+      if(element) {
+          document.querySelectorAll('.nav-menu a').forEach(a => a.classList.remove('active'));
+          element.classList.add('active');
+      }
+      document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+      document.getElementById(sectionId + '-section').classList.add('active');
+  }
+</script>
+
+</body>
+</html>

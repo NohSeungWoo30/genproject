@@ -81,11 +81,11 @@
         WHERE email = #{email} AND user_status = 'ACTIVE'
     </select>
 
-    <select id="findByUserNameAndPhone" parameterType="java.lang.String" resultMap="userResultMap">
+    <select id="findByUserNameAndPhone" parameterType="generationgap.co.kr.domain.user.UserDTO" resultType="java.lang.String">
         SELECT
         user_id
         FROM users
-        WHERE user_name = #{userName} AND phone = #{phone, jdbcType=VARCHAR} AND user_status = 'ACTIVE'
+        WHERE user_name = #{userName} AND phone = #{phone} AND user_status = 'ACTIVE'
         FETCH FIRST 1 ROW ONLY
     </select>
 

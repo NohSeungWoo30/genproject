@@ -62,4 +62,5 @@ public interface UserMapper {
     void insertOAuthUser(UserDTO user);
 
     void updateProfileName(@Param("userIdx") Long userIdx, @Param("profileName") String profileName);
+
 }

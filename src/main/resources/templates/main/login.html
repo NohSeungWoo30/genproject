@@ -58,7 +58,8 @@
     <button type="submit" class="btn-submit">로그인</button>
     <p class="text-helper">
       <a href="signup.html" id="signupLink">회원가입</a> ·
-      <a href="/find-account" id="findAccountLink">아이디·비밀번호 찾기</a>
+      <a href="/find-id" id="findIdLink">아이디 찾기</a> ·
+      <a href="/find-password" id="findPasswordLink">비밀번호 찾기</a>
     </p>
     <div class="divider">또는</div>
     <button type="button" id="googleLogin" class="btn-social google">
@@ -68,14 +69,6 @@
               class="social-icon"
       />
       <span>Google로 시작하기</span>
-    </button>
-    <button type="button" id="kakaoLogin" class="btn-social kakao">
-      <img
-              src="/img/img(로그인회원가입)/icon-kakao0.svg"
-              alt="Kakao 아이콘"
-              class="social-icon"
-      />
-      <span>카카오로 시작하기</span>
     </button>
   </form>
 </div>
@@ -157,10 +150,6 @@
 
   document.getElementById('googleLogin').addEventListener('click', function () {
     window.location.href = '/oauth/google';
-  });
-
-  document.getElementById('kakaoLogin').addEventListener('click', function () {
-    window.location.href = '/oauth/kakao';
   });
 </script>
 </body>
