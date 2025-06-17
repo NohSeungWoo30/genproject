@@ -1,4 +1,4 @@
-<script th:inline="javascript">
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- 1. 데이터 준비 (시안에 맞게 수정) ---
     const currentLoggedInUser = { name: '프로트런트', avatar: 'https://i.pravatar.cc/150?u=me' };
@@ -302,4 +302,3 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     profileCloseBtn.addEventListener('click', () => profilePanel.classList.remove('active'));
   });
-</script>

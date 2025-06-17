@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (groupIdx) {
                 // 상세 페이지 URL을 생성하고 페이지를 이동합니다.
                 // 예: /groups/detail?groupId=123
-                window.location.href = '/groups/detail?groupId=' + groupIdx;
+                window.location.href = '/group/detail?groupId=' + groupIdx;
             } else {
                 console.warn('groupIdx not found for this card.');
             }

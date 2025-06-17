@@ -190,5 +190,17 @@
         ]]>
     </select>
 
-
+    <!-- 유저 번호 닉네임 프로필 이미지 -->
+    <select id="getUserId_Nick" resultMap="userResultMap">
+        SELECT
+        U.user_idx,
+        U.nickname,
+        U.profile_name
+        FROM
+        USERS U
+        JOIN
+        GROUPS G ON U.user_idx = G.owner_idx
+        WHERE
+        G.group_idx = #{groupIdx}
+    </select>
 </mapper>

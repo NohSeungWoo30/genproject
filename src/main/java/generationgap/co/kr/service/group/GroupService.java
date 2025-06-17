@@ -5,7 +5,6 @@ import generationgap.co.kr.domain.group.CategoryMain;
 import generationgap.co.kr.domain.group.CategorySub;
 import generationgap.co.kr.domain.group.GroupMembers;
 import generationgap.co.kr.domain.group.Groups;
-import generationgap.co.kr.domain.user.UserDTO;
 import generationgap.co.kr.mapper.group.GroupsMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,26 @@ public class GroupService {
     private GroupsMapper groupsMapper;   // GroupMapper 의존성 주입
 
     public List<Groups> getAllGroups(){
-        return groupsMapper.getAllGroups();
+        List<Groups> fullAllGroups = groupsMapper.getAllGroups();
+
+        if (fullAllGroups != null && !fullAllGroups.isEmpty()) {
+            List<Groups> processedList = fullAllGroups.stream()
+                    .filter(java.util.Objects::nonNull)
+                    .limit(10) // 뽑아온 리스트중 최대10까지만 가져옴
+                    .map(group -> {
+                        // 각 그룹 객체에 대해 주소에서 지역구를 추출하여 설정
+                        String address = group.getPlaceAddress();
+                        if (address != null) {
+                            group.setDistrict(extractDistrict(address));
+                        }
+                        return group;
+                    })
+                    .collect(Collectors.toList());
+            return processedList;
+
+        } else {
+            return new java.util.ArrayList<>();
+        }
     }
 
     public List<Groups> getRecommendGroup(){
@@ -83,7 +101,72 @@ public class GroupService {
     public Groups getGroupById(int groupId){
         return groupsMapper.getGroupById(groupId);
     }
-    public UserDTO getUserId_Nick(int hostIndex){
-        return groupsMapper.getUserId_Nick(hostIndex);
+    public List<Groups> getGroupByCategory(){
+        List<Groups> fullGroupByCategory =  groupsMapper.getGroupByCategory();
+
+        if (fullGroupByCategory != null && !fullGroupByCategory.isEmpty()) {
+            List<Groups> processedList = fullGroupByCategory.stream()
+                    .filter(java.util.Objects::nonNull)
+                    .limit(10) // 뽑아온 리스트중 최대10까지만 가져옴
+                    .map(group -> {
+                        // 각 그룹 객체에 대해 주소에서 지역구를 추출하여 설정
+                        String address = group.getPlaceAddress();
+                        if (address != null) {
+                            group.setDistrict(extractDistrict(address));
+                        }
+                        return group;
+                    })
+                    .collect(Collectors.toList());
+            return processedList;
+
+        } else {
+            return new java.util.ArrayList<>();
+        }
+    }
+
+    public List<Groups> getGroupByCreateDate(){
+        List<Groups> fullGroupByCreateDate =  groupsMapper.getGroupByCreateDate();
+
+        if (fullGroupByCreateDate != null && !fullGroupByCreateDate.isEmpty()) {
+            List<Groups> processedList = fullGroupByCreateDate.stream()
+                    .filter(java.util.Objects::nonNull)
+                    .limit(10) // 뽑아온 리스트중 최대10까지만 가져옴
+                    .map(group -> {
+                        // 각 그룹 객체에 대해 주소에서 지역구를 추출하여 설정
+                        String address = group.getPlaceAddress();
+                        if (address != null) {
+                            group.setDistrict(extractDistrict(address));
+                        }
+                        return group;
+                    })
+                    .collect(Collectors.toList());
+            return processedList;
+
+        } else {
+            return new java.util.ArrayList<>();
+        }
+    }
+
+    public List<Groups> getGroupByGroupDate(){
+        List<Groups> fullGroupByGroupDate =  groupsMapper.getGroupByCreateDate();
+
+        if (fullGroupByGroupDate != null && !fullGroupByGroupDate.isEmpty()) {
+            List<Groups> processedList = fullGroupByGroupDate.stream()
+                    .filter(java.util.Objects::nonNull)
+                    .limit(10) // 뽑아온 리스트중 최대10까지만 가져옴
+                    .map(group -> {
+                        // 각 그룹 객체에 대해 주소에서 지역구를 추출하여 설정
+                        String address = group.getPlaceAddress();
+                        if (address != null) {
+                            group.setDistrict(extractDistrict(address));
+                        }
+                        return group;
+                    })
+                    .collect(Collectors.toList());
+            return processedList;
+
+        } else {
+            return new java.util.ArrayList<>();
+        }
     }
 }

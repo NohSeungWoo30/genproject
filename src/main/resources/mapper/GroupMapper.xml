@@ -110,8 +110,6 @@
         u.nickname,
         cm.category_main_idx AS cm_category_main_idx,
         cm.category_main_name,
-        cs.category_sub_idx,
-        cs.category_sub_name,
         g.title,
         g.gender_limit,
         g.age_min,
@@ -136,7 +134,6 @@
         FROM groups g
         JOIN users u ON g.owner_idx = u.user_idx
         JOIN group_category_main cm ON g.category_main_idx = cm.category_main_idx
-        JOIN group_category_sub cs ON g.category_sub_idx = cs.category_sub_idx
     </select>
 
     <!-- 방 생성 -->
@@ -263,17 +260,83 @@
         GROUP_IDX = #{groupIdx}
     </select>
 
-    <!-- 유저 번호 닉네임 프로필 이미지 -->
-    <select id="getUserId_Nick" resultMap="Groups">
+    <!-- 인기 장르 모임 -->
+    <select id="getGroupByCategory" resultMap="Groups">
+        WITH CategoryGroupCounts AS (
         SELECT
-        U.user_idx,
-        U.nickname,
-        U.profile_name
+        g.category_main_idx,
+        COUNT(g.group_idx) AS group_count_in_category
         FROM
-        USERS U
+        groups g
         JOIN
-        GROUPS G ON U.user_idx = G.owner_idx
+        group_category_main cm ON g.category_main_idx = cm.category_main_idx
+        GROUP BY
+        g.category_main_idx, cm.category_main_name
+        )
+        SELECT
+        g.group_idx,
+        g.owner_idx,
+        g.title,
+        cm.category_main_name,
+        g.group_date,
+        g.place_address,
+        g.group_img_url
+        FROM
+        groups g
+        LEFT JOIN
+        group_category_main cm ON g.category_main_idx = cm.category_main_idx
+        JOIN
+        CategoryGroupCounts cgc ON g.category_main_idx = cgc.category_main_idx
         WHERE
-        G.group_idx = #{groupIdx}
+        g.groups_status = 'RECRUITING'
+        ORDER BY
+        cgc.group_count_in_category DESC,
+        g.group_date DESC
+        FETCH FIRST 10 ROWS ONLY
+    </select>
+
+    <!-- 최근 생성날 기준 모임 -->
+    <select id="getGroupByCreateDate" resultMap="Groups">
+        SELECT
+        g.group_idx,
+        g.owner_idx,
+        g.title,
+        cm.category_main_name,
+        g.group_date,
+        g.place_address,
+        g.group_img_url,
+        g.created_at
+        FROM
+        groups g
+        LEFT JOIN
+        group_category_main cm ON cm.category_main_idx = g.category_main_idx
+        WHERE
+        g.groups_status = 'RECRUITING'
+        ORDER BY
+        g.created_at DESC
+        FETCH FIRST 10 ROWS ONLY
+    </select>
+
+    <!-- 모임날짜 임박 기준 -->
+    <select id="getGroupByGroupDate" resultMap="Groups">
+    SELECT
+    g.group_idx,
+    g.owner_idx,
+    g.title,
+    cm.category_main_name,
+    g.group_date,
+    g.place_address,
+    g.group_img_url
+    FROM
+    groups g
+    LEFT JOIN
+    group_category_main cm ON g.category_main_idx = cm.category_main_idx
+    WHERE
+    g.groups_status = 'RECRUITING' AND
+    g.group_date >= SYSDATE
+
+    ORDER BY
+    g.group_date ASC
+    FETCH FIRST 10 ROWS ONLY;
     </select>
 </mapper>

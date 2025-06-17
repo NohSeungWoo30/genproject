@@ -2,11 +2,10 @@ package generationgap.co.kr.mapper.user;
 
 import generationgap.co.kr.domain.user.UserDTO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Param; // @Param 사용 시 필요
 
 import java.util.List;
-import java.util.Optional;
 
 
 @Mapper
@@ -74,6 +73,9 @@ public interface UserMapper {
 
     //테스트용 ksm
     List<UserDTO> findSuspendCandidates();
+
+    // 호스트 유저 닉네임/프로필
+    UserDTO getUserId_Nick(int hostIndex);
 
     /*//user_idx로 조회하는 매서드 추가 ksm
     UserDTO findByUserIdx(@Param("userIdx") Long userIdx);

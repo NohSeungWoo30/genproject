@@ -74,6 +74,11 @@ dependencies {
     implementation 'com.google.oauth-client:google-oauth-client-jetty:1.39.0' // 최신 버전으로 시도
     implementation 'com.google.apis:google-api-services-people:v1-rev20250513-2.0.0' // 최신 버전으로 시도
     implementation 'com.google.http-client:google-http-client-jackson2:1.44.2'
+
+	// 조호현 - 통계청_법정동 연계정보(API) 사용하기 위한 의존성 추가
+	// WebClient 사용을 위한 Spring Boot Webflux 스타터
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
 }
 
 tasks.named('test') {

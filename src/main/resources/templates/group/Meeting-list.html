@@ -1,219 +1,17 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- 기존 CSS 변수 파일/메인 스타일 -->
-  <link rel="stylesheet" href="vars.css" />
+  <!--<link rel="stylesheet" href="/css/vars.css" />-->
   <link rel="stylesheet" href="/css/mainstyle.css" />
+  <link rel="stylesheet" href="/css/meetinglist.css" />
 
   <title>모임목록 페이지</title>
 
-  <!-- region selector를 위해 필요한 CSS -->
-  <style>
-    /* 기존 디자인에 영향을 최소화하기 위해, 이 부분은 region.html에서 가져온 최소한의 스타일만 적용했습니다. */
-
-    /* region-selector 상자 모양 */
-    .region-selector-container {
-      padding: 12px 0;
-    }
-    .region-selector {
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      width: 100%;
-      max-width: 800px;
-      margin: 0 auto;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    .region-header {
-      display: flex;
-      align-items: center;
-      padding: 8px;
-      border-bottom: 1px solid #eee;
-      gap: 8px;
-    }
-    .region-header .btn {
-      padding: 6px 12px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      background: #fafafa;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .region-header .btn.active {
-      background: #007BFF;
-      color: #fff;
-      border-color: #007BFF;
-    }
-    .region-header .search-box {
-      flex-grow: 1;
-      position: relative;
-    }
-    .region-header .search-box input {
-      width: 100%;
-      padding: 6px 28px 6px 12px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-    .region-header .search-box .icon {
-      position: absolute;
-      right: 8px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 16px;
-      color: #aaa;
-    }
-    .region-content {
-      display: flex;
-      padding: 8px;
-      gap: 8px;
-    }
-    .region-pane {
-      flex: 1;
-      border-right: 1px solid #eee;
-      padding-right: 8px;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-    .region-pane:last-child {
-      border-right: none;
-      padding-right: 0;
-    }
-    .region-pane h4 {
-      margin-top: 0;
-      font-size: 15px;
-      color: #333;
-      margin-bottom: 4px;
-    }
-    .region-pane ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .region-pane li {
-      padding: 6px 8px;
-      cursor: pointer;
-      border-radius: 4px;
-      font-size: 14px;
-      color: #333;
-    }
-    .region-pane li:hover {
-      background: #f0f0f0;
-    }
-    .region-pane li.selected {
-      background: #007BFF;
-      color: #fff;
-    }
-    .selected-tags {
-      padding: 8px;
-      border-top: 1px solid #eee;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      background: #fafafa;
-    }
-    .selected-tags .tag {
-      display: flex;
-      align-items: center;
-      background: #e0e0e0;
-      border-radius: 12px;
-      padding: 4px 8px;
-      font-size: 13px;
-      color: #333;
-    }
-    .selected-tags .tag .remove-btn {
-      margin-left: 6px;
-      cursor: pointer;
-      font-weight: bold;
-      color: #666;
-    }
-
-    /* 나이 듀얼 슬라이더(기능) */
-    .age-container {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      user-select: none;
-      font-size: 14px;
-      width: 160px;
-    }
-    .age-value {
-      font-size: 13px;
-      color: #007BFF;
-      white-space: nowrap;
-    }
-    .dual-range {
-      position: relative;
-      width: 100%;
-      height: 6px;
-    }
-    .dual-range input[type="range"] {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 6px;
-      background: transparent;
-      -webkit-appearance: none;
-      pointer-events: all;
-    }
-    .dual-range input#age-max::-webkit-slider-runnable-track {
-      height: 6px;
-      border-radius: 3px;
-      background: #ddd;
-    }
-    .dual-range input#age-max::-moz-range-track {
-      height: 6px;
-      border-radius: 3px;
-      background: #ddd;
-    }
-    .dual-range input#age-min::-webkit-slider-runnable-track {
-      height: 6px;
-      border-radius: 3px;
-      background: transparent;
-    }
-    .dual-range input#age-min::-moz-range-track {
-      height: 6px;
-      border-radius: 3px;
-      background: transparent;
-    }
-    .dual-range input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 12px;
-      height: 12px;
-      background-color: #007BFF;
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      margin-top: -3px;
-    }
-    .dual-range input[type="range"]::-moz-range-thumb {
-      width: 12px;
-      height: 12px;
-      background-color: #007BFF;
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-    }
-    .age-ticks {
-      display: flex;
-      justify-content: space-between;
-      font-size: 11px;
-      color: #666;
-      padding: 0 2px;
-    }
-
-    /* 크기가 너무 작을 때 눈금 숨김 */
-    @media (max-width: 480px) {
-      .age-ticks {
-        display: none;
-      }
-    }
-  </style>
 </head>
 <body>
 <div class="_1920-w-light">
@@ -221,33 +19,22 @@
   <!-- ─── 1. 상단 내비게이션 바 ─── -->
   <header class="container-nav">
     <div class="nav-left">
-      <a href="MAIN.html">
+      <a href="/main">
         <img class="logo" src="/img/icons/MT5.png" alt="M 로고" />
       </a>
     </div>
     <div class="nav-right">
-      <div style="
-        width: 112px;
-        height: 21px;
-        color: #383535;
-        font-size: 15px;
-        font-family: Pretendard;
-        font-weight: 400;
-        line-height: 24px;
-        word-wrap: break-word;
-      ">
-        로그인ㆍ회원가입
-      </div>
+      <a href="user/login" class="login-link">로그인ㆍ회원가입</a>
     </div>
   </header>
 
   <!-- ─── 2. 하단 네비게이션 바 (모임생성 / 모임목록 / 상품목록 / 자유 게시판) ─── -->
   <section class="bottom-nav-wrapper">
     <nav class="bottom-nav">
-      <a href="meetingcreate.html" class="bottom-link">모임생성</a>
-      <a href="Meeting-list.html" class="bottom-link">모임목록</a>
+      <a th:href="@{/group/create}" class="bottom-link">모임생성</a>
+      <a href="" class="bottom-link">모임목록</a>
       <a href="#" class="bottom-link">상품목록</a>
-      <a href="board.html" class="bottom-link">자유 게시판</a>
+      <a th:href="@{/posts}" class="bottom-link">자유 게시판</a>
     </nav>
   </section>
 
@@ -256,8 +43,8 @@
 
     <!-- 날짜 선택 -->
     <div style="display: inline-block; margin-right: 12px;">
-      <label for="date-input" style="font-size: 14px; color: #333;">날짜</label><br />
-      <input type="date" id="date-input" style="padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;" />
+      <label for="date-input" style="font-size: 14px; color: #333;">모임날짜</label><br />
+      <input type="date" id="date-input" name="groupDate" style="padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;" />
     </div>
 
     <!-- 지역 선택 (버튼 클릭 시 region selector가 아래에 펼쳐집니다) -->
@@ -283,13 +70,13 @@
 
     <!-- 인원수 선택 -->
     <div style="display: inline-block; margin-right: 12px;">
-      <label for="count-select" style="font-size: 14px; color: #333;">인원수</label><br />
+      <label for="count-select" style="font-size: 14px; color: #333;">최대참가인원수</label><br />
       <select id="count-select" style="padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;">
         <option value="" selected>선택</option>
-        <option value="2">2명</option>
-        <option value="3-5">3~5명</option>
-        <option value="6-10">6~10명</option>
+        <option value="">전체</option>
+        <option value="2-10">2~10명</option>
         <option value="11-20">11~20명</option>
+        <option value="21-30">21~30명</option>
         <option value="21-30">21~30명</option>
       </select>
     </div>
@@ -302,19 +89,13 @@
               style="padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; width: 140px;"
       >
         <option value="" selected disabled>선택</option>
-        <option value="운동/액티비티">운동/액티비티</option>
-        <option value="문화/예술">문화/예술</option>
-        <option value="지식/스터디">지식/스터디</option>
-        <option value="음식/카페">음식/카페</option>
-        <option value="여행/탐험">여행/탐험</option>
-        <option value="게임/오락">게임/오락</option>
-        <option value="반려동물/자연">반려동물/자연</option>
-        <option value="만들기/공예">만들기/공예</option>
-        <option value="소셜/친목">소셜/친목</option>
-        <option value="기타">기타</option>
+        <option th:each="item : ${categoryMainList}"
+                th:value="${item.cmCategoryMainIdx}"
+                th:text="${item.categoryMainName}">
+        </option>
       </select>
     </div>
-
+  </div>
   <!-- ─── 4. region 필터가 펼쳐지는 영역 (초기 숨김) ─── -->
   <div id="filter-region-panel" style="display: none; margin-top: 8px; max-width: 1200px; margin-left: auto; margin-right: auto; padding: 0 10px;">
     <div class="region-selector-container">
@@ -347,237 +128,27 @@
     </div>
   </div>
 
-  <!-- ─── 5. “모임 카드”가 들어갈 가로 스크롤 래퍼 ─── -->
-  <section class="container2" style="margin-top: 20px;">
-    <!-- 첫 번째 줄 -->
-    <div class="flex-row">
-      <div class="card">
+  <!-- ─── “모임 카드” ─── -->
+  <div class="meeting-list-container">
+    <div id="meeting-grid" class="meeting-grid">
+      <div th:each="item : ${groupsList}" th:data-group-idx="${item.groupIdx}" class="card">
         <div class="card-thumb">
-          <img src="/img/div4.png" alt="카드 1 이미지" />
+          <img th:if="${item.groupImgUrl != null and !#strings.isEmpty(item.groupImgUrl)}"
+               th:src="@{${item.groupImgUrl}}" />
+          <img th:unless="${item.groupImgUrl != null and !#strings.isEmpty(item.groupImgUrl)}"
+               th:src="@{/img/noImage.jpg}" />
         </div>
         <div class="card-info">
-          <div class="card-category">중구 · 푸드·드링크</div>
-          <div class="card-title">
-            🥭생망고 올라간 망고 빅토리아 케이크 만들기!
+          <div class="card-category">
+            <span th:text="${item.district}"></span> · <span th:text="${item.categoryMain.categoryMainName}"></span>
           </div>
-          <div class="card-date">25.5.30(금) 오전 10:00</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-thumb">
-          <img src="/img/div7.png" alt="카드 2 이미지" />
-        </div>
-        <div class="card-info">
-          <div class="card-category">강남구 · N잡·재테크</div>
-          <div class="card-title">
-            e커머스 - 광고, SNS 마케팅 패키지 클래스
+          <div class="card-title" th:text="${item.title}">
           </div>
-          <div class="card-date">25.6.7(토) 오전 6:00</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-thumb">
-          <img src="/img/div8.png" alt="카드 3 이미지" />
-        </div>
-        <div class="card-info">
-          <div class="card-category">마포구 · 취미</div>
-          <div class="card-title">
-            🦩너와나&lt;이어지는 글 파티&gt;🎉🖍️모집 중!🔥
-          </div>
-          <div class="card-date">25.6.7(토) 오전 8:00</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-thumb">
-          <img src="/img/div11.png" alt="카드 4 이미지" />
-        </div>
-        <div class="card-info">
-          <div class="card-category">동작구 · 파티</div>
-          <div class="card-title">
-            🌷비주얼파티🌷토요일은 플인서💜 도파민(ep.46)
-          </div>
-          <div class="card-date">25.5.31(토) 오전 10:00</div>
+          <div class="card-date" th:text="${#temporals.format(item.groupDate, 'yyyy.MM.dd(E) HH:mm')}"></div>
         </div>
       </div>
     </div>
-  </section>
-
-  <!-- ─── 6. 두 번째 줄 (flex-row-2) ─── -->
-  <section class="container2 second-row">
-    <div class="flex-row">
-      <div class="card">
-        <div class="card-thumb"><img src="/img/div13.png" alt="카드 5 이미지" /></div>
-        <div class="card-info">
-          <div class="card-category">중구 · 푸드·드링크</div>
-          <div class="card-title">
-            🥭생망고 올라간 망고 빅토리아 케이크 만들기!
-          </div>
-          <div class="card-date">25.5.30(금) 오전 10:00</div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-thumb"><img src="/img/div16.png" alt="카드 6 이미지" /></div>
-        <div class="card-info">
-          <div class="card-category">강남구 · N잡·재테크</div>
-          <div class="card-title">
-            e커머스 - 광고, SNS 마케팅 패키지 클래스
-          </div>
-          <div class="card-date">25.6.7(토) 오전 6:00</div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-thumb"><img src="/img/div17.png" alt="카드 7 이미지" /></div>
-        <div class="card-info">
-          <div class="card-category">마포구 · 취미</div>
-          <div class="card-title">
-            🦩너와나&lt;이어지는 글 파티&gt;🎉🖍️모집 중!🔥
-          </div>
-          <div class="card-date">25.6.7(토) 오전 8:00</div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-thumb"><img src="/img/div20.png" alt="카드 8 이미지" /></div>
-        <div class="card-info">
-          <div class="card-category">동작구 · 파티</div>
-          <div class="card-title">
-            🌷비주얼파티🌷토요일은 플인서💜 도파민(ep.46)
-          </div>
-          <div class="card-date">25.5.31(토) 오전 10:00</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ─── 7. 세 번째 줄 (flex-row-3) ─── -->
-  <section class="container2 third-row">
-    <div class="flex-row">
-      <div class="card">
-        <div class="card-thumb"><img src="/img/div22.png" alt="카드 9 이미지" /></div>
-        <div class="card-info">
-          <div class="card-category">유성구 · 소셜게임</div>
-          <div class="card-title">
-            [두뇌서바이벌] 오행레이스 🎃대전지부
-          </div>
-          <div class="card-date">25.6.7(토) 오전 11:00</div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-thumb"><img src="/img/div25.png" alt="카드 10 이미지" /></div>
-        <div class="card-info">
-          <div class="card-category">마포구 · 취미</div>
-          <div class="card-title">
-            주말 늦은 오후 연남 연희 같이 걸을래요?
-          </div>
-          <div class="card-date">25.5.31(토) 오전 6:30</div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-thumb"><img src="/img/div28.png" alt="카드 11 이미지" /></div>
-        <div class="card-info">
-          <div class="card-category">은평구 · 여행·나들이</div>
-          <div class="card-title">서울경기근교여행</div>
-          <div class="card-date">25.6.2(월) 오전 1:00</div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-thumb"><img src="/img/div31.png" alt="카드 12 이미지" /></div>
-        <div class="card-info">
-          <div class="card-category">영등포구 · 액티비티</div>
-          <div class="card-title">런린이 양화한강 러닝🌹</div>
-          <div class="card-date">25.5.27(화) 오전 10:30</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ─── 8. 네 번째 줄 (flex-row-4) ─── -->
-  <section class="container2 fourth-row">
-    <div class="flex-row">
-      <div class="card">
-        <div class="card-thumb"><img src="/img/div34.png" alt="카드 13 이미지" /></div>
-        <div class="card-info">
-          <div class="card-category">중구 · 푸드·드링크</div>
-          <div class="card-title">🔥 후끈 후끈 [텍사스 홀덤] 116회차 🔥</div>
-          <div class="card-date">25.6.1(일) 오전 9:00</div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-thumb"><img src="/img/div36.png" alt="카드 14 이미지" /></div>
-        <div class="card-info">
-          <div class="card-category">동대문구 · 소셜게임</div>
-          <div class="card-title">
-            마지막❗🌸 연프에 폭싹 빠졌수다🌸 탑승 or 환승❓🚇서브웨이🚇
-          </div>
-          <div class="card-date">25.5.31(토) 오전 8:30</div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-thumb"><img src="/img/div38.png" alt="카드 15 이미지" /></div>
-        <div class="card-info">
-          <div class="card-category">강남구 · 파티</div>
-          <div class="card-title">🧀 크림치즈 쏙 들어간 쿠키 3종 골라 만들기</div>
-          <div class="card-date">25.6.1(일) 오전 5:00</div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-thumb"><img src="/img/div40.png" alt="카드 16 이미지" /></div>
-        <div class="card-info">
-          <div class="card-category">강남구 · 소셜게임</div>
-          <div class="card-title">
-            &lt;현재 여4/남3&gt;🔥[마피아-진심모드]🔥
-          </div>
-          <div class="card-date">25.5.31(토) 오전 8:30</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ─── 9. 다섯 번째 줄 (flex-row-5) ─── -->
-  <section class="container2 fifth-row">
-    <div class="flex-row">
-      <div class="card">
-        <div class="card-thumb"><img src="/img/div42.png" alt="카드 17 이미지" /></div>
-        <div class="card-info">
-          <div class="card-category">영등포구 · 파티</div>
-          <div class="card-title">
-            ♥일욜낮소규모특집♥/ 제주게하 담은 따뜻한 와인 Party
-          </div>
-          <div class="card-date">25.6.1(일) 오전 5:00</div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-thumb"><img src="/img/div44.png" alt="카드 18 이미지" /></div>
-        <div class="card-info">
-          <div class="card-category">영등포구 · 파티</div>
-          <div class="card-title">
-            ♥토욜낮소규모특집♥/ 제주게하 담은 따뜻한 와인 Party
-          </div>
-          <div class="card-date">25.5.31(토) 오전 5:00</div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-thumb"><img src="/img/div46.png" alt="카드 19 이미지" /></div>
-        <div class="card-info">
-          <div class="card-category">마포구 · 취미</div>
-          <div class="card-title">
-            주말 늦은 오후 연남 연희 같이 걸을래요?
-          </div>
-          <div class="card-date">25.6.1(일) 오전 9:00</div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-thumb"><img src="/img/div49.png" alt="카드 20 이미지" /></div>
-        <div class="card-info">
-          <div class="card-category">성동구 · 문화·예술</div>
-          <div class="card-title">250523~250608 &lt;드림 시어터&gt;</div>
-          <div class="card-date">25.6.8(일) 오전 10:00</div>
-        </div>
-      </div>
-    </div>
-  </section>
+  </div>
 
   <!-- ─── 10. 중간 배너 (가로 배너, 메인과 동일) ─── -->
   <div class="mid-banner">
@@ -605,232 +176,10 @@
   </footer>
 </div>
 
-<!-- ─── 12. 스크립트: region 토글, 듀얼 슬라이더, tag 관리 ─── -->
-<script>
-  // region selector 토글
-  const btnRegion = document.getElementById('btn-region');
-  const panelRegion = document.getElementById('filter-region-panel');
-  btnRegion.addEventListener('click', () => {
-    panelRegion.style.display = panelRegion.style.display === 'none' ? 'block' : 'none';
-  });
-
-  // 듀얼 슬라이더 (나이)
-  const sliderMin = document.getElementById('age-min');
-  const sliderMax = document.getElementById('age-max');
-  const ageValueText = document.getElementById('age-value');
-  const STEP = 5;
-
-  function updateAgeText() {
-    const minVal = parseInt(sliderMin.value);
-    const maxVal = parseInt(sliderMax.value);
-    ageValueText.textContent = `${minVal}세 - ${maxVal}세`;
-  }
-
-  sliderMin.addEventListener('input', () => {
-    let minVal = parseInt(sliderMin.value);
-    let maxVal = parseInt(sliderMax.value);
-    if (minVal >= maxVal) {
-      minVal = maxVal - STEP;
-      sliderMin.value = minVal;
-    }
-    updateAgeText();
-  });
-
-  sliderMax.addEventListener('input', () => {
-    let minVal = parseInt(sliderMin.value);
-    let maxVal = parseInt(sliderMax.value);
-    if (maxVal <= minVal) {
-      maxVal = minVal + STEP;
-      sliderMax.value = maxVal;
-    }
-    updateAgeText();
-  });
-
-  updateAgeText();
-
-  // 태그 관리(지역 필터에서 선택된 항목)
-
-  const sidoListEl = document.getElementById('sido-list');
-  const sigunguListEl = document.getElementById('sigungu-list');
-  const dongListEl = document.getElementById('dong-list');
-  const selectedTagsEl = document.getElementById('selected-tags');
-  const searchInput = document.getElementById('search-input');
-
-  let currentSido = null;
-  let currentSigungu = null;
-  const selectedDongs = new Set();
-  const selectedParents = new Set();
-  const selectedFilters = new Set();
-
-  function renderSidoList() {
-    sidoListEl.innerHTML = '';
-    Object.keys(regionData).forEach(sido => {
-      const li = document.createElement('li');
-      li.textContent = sido;
-      li.addEventListener('click', () => selectSido(sido));
-      if (selectedParents.has(`${sido} 전체`)) li.classList.add('selected');
-      else li.classList.remove('selected');
-      sidoListEl.appendChild(li);
-    });
-  }
-
-  function selectSido(sido) {
-    currentSido = sido;
-    currentSigungu = null;
-    renderSidoList();
-    renderSigunguList(sido);
-    dongListEl.innerHTML = '<li>시/구군을 먼저 선택하세요</li>';
-  }
-
-  function renderSigunguList(sido) {
-    sigunguListEl.innerHTML = '';
-    const allSidoLi = document.createElement('li');
-    allSidoLi.textContent = `${sido} 전체`;
-    allSidoLi.addEventListener('click', () => selectEntireSido(sido));
-    if (selectedParents.has(`${sido} 전체`)) allSidoLi.classList.add('selected');
-    else allSidoLi.classList.remove('selected');
-    sigunguListEl.appendChild(allSidoLi);
-
-    Object.keys(regionData[sido]).forEach(sigungu => {
-      const li = document.createElement('li');
-      li.textContent = sigungu;
-      li.addEventListener('click', () => selectSigungu(sido, sigungu));
-      if (selectedParents.has(`${sigungu} 전체`)) li.classList.add('selected');
-      else li.classList.remove('selected');
-      sigunguListEl.appendChild(li);
-    });
-  }
-
-  function selectSigungu(sido, sigungu) {
-    currentSigungu = sigungu;
-    selectedParents.clear();
-    selectedParents.add(`${sigungu} 전체`);
-    renderSidoList();
-    renderSigunguList(sido);
-    renderDongList(sido, sigungu);
-    updateRegionTags();
-  }
-
-  function renderDongList(sido, sigungu) {
-    dongListEl.innerHTML = '';
-    const allSigunguLi = document.createElement('li');
-    allSigunguLi.textContent = `${sigungu} 전체`;
-    allSigunguLi.addEventListener('click', () => selectEntireSigungu(sido, sigungu));
-    if (selectedParents.has(`${sigungu} 전체`)) allSigunguLi.classList.add('selected');
-    else allSigunguLi.classList.remove('selected');
-    dongListEl.appendChild(allSigunguLi);
-
-    regionData[sido][sigungu].forEach(dong => {
-      const li = document.createElement('li');
-      li.textContent = dong;
-      li.addEventListener('click', () => toggleDong(dong));
-      if (selectedDongs.has(dong)) li.classList.add('selected');
-      else li.classList.remove('selected');
-      dongListEl.appendChild(li);
-    });
-  }
-
-  function selectEntireSido(sido) {
-    selectedParents.clear();
-    selectedParents.add(`${sido} 전체`);
-    selectedDongs.clear();
-    renderSidoList();
-    renderSigunguList(sido);
-    dongListEl.innerHTML = '<li>시/구군을 먼저 선택하세요</li>';
-    updateRegionTags();
-  }
-
-  function selectEntireSigungu(sido, sigungu) {
-    selectedParents.clear();
-    selectedParents.add(`${sigungu} 전체`);
-    selectedDongs.clear();
-    renderSidoList();
-    renderSigunguList(sido);
-    renderDongList(sido, sigungu);
-    updateRegionTags();
-  }
-
-  function toggleDong(dong) {
-    selectedParents.clear();
-    if (selectedDongs.has(dong)) selectedDongs.delete(dong);
-    else selectedDongs.add(dong);
-    if (currentSido) renderSidoList();
-    if (currentSido) renderSigunguList(currentSido);
-    if (currentSido && currentSigungu) renderDongList(currentSido, currentSigungu);
-    updateRegionTags();
-  }
-
-  function updateRegionTags() {
-    // 기존 지역 태그 제거
-    [...selectedFilters].forEach(label => {
-      if (label.includes('전체') || selectedDongs.has(label)) {
-        selectedFilters.delete(label);
-      }
-    });
-    selectedParents.forEach(parent => selectedFilters.add(parent));
-    selectedDongs.forEach(dong => selectedFilters.add(dong));
-    renderSelectedTags();
-  }
-
-  function renderSelectedTags() {
-    selectedTagsEl.innerHTML = '';
-    selectedFilters.forEach(label => {
-      const tag = document.createElement('div');
-      tag.className = 'tag';
-      tag.textContent = label;
-      const removeBtn = document.createElement('span');
-      removeBtn.className = 'remove-btn';
-      removeBtn.textContent = '×';
-      removeBtn.addEventListener('click', () => {
-        selectedFilters.delete(label);
-        renderSidoList();
-        if (currentSido) renderSigunguList(currentSido);
-        if (currentSido && currentSigungu) renderDongList(currentSido, currentSigungu);
-        renderSelectedTags();
-      });
-      tag.appendChild(removeBtn);
-      selectedTagsEl.appendChild(tag);
-    });
-  }
-
-  searchInput.addEventListener('input', () => {
-    const query = searchInput.value.trim();
-    if (!query) {
-      renderSidoList();
-      return;
-    }
-    sidoListEl.innerHTML = '';
-    Object.keys(regionData).forEach(sido => {
-      if (sido.includes(query)) {
-        const li = document.createElement('li');
-        li.textContent = sido;
-        li.addEventListener('click', () => selectSido(sido));
-        sidoListEl.appendChild(li);
-      } else {
-        let match = false;
-        Object.keys(regionData[sido]).forEach(sigungu => {
-          if (sigungu.includes(query)) match = true;
-          regionData[sido][sigungu].forEach(dong => {
-            if (dong.includes(query)) match = true;
-          });
-        });
-        if (match) {
-          const li = document.createElement('li');
-          li.textContent = sido;
-          li.addEventListener('click', () => selectSido(sido));
-          sidoListEl.appendChild(li);
-        }
-      }
-    });
-  });
-
-  // 초기 지역 렌더링
-  renderSidoList();
-  sigunguListEl.innerHTML = '<li>시/도를 먼저 선택하세요</li>';
-  dongListEl.innerHTML = '<li>시/구군을 먼저 선택하세요</li>';
-</script>
-<!-- ─── 13. regionData.js 파일을 동일 경로에 두고 호출하세요 ─── -->
-<script src="/js/regionData.js"></script>
-  <script src="/js/meetingcreate.js"></script>
+<!-- ───regionData.js 파일을 동일 경로에 두고 호출하세요 ─── -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="/js/regionData.js"></script>
+  <script src="/js/meetinglist.js"></script>
+  <!--<script src="/js/meetingcreate.js"></script>-->
 </body>
 </html>

@@ -4,7 +4,6 @@ import generationgap.co.kr.domain.group.CategoryMain;
 import generationgap.co.kr.domain.group.CategorySub;
 import generationgap.co.kr.domain.group.GroupMembers;
 import generationgap.co.kr.domain.group.Groups;
-import generationgap.co.kr.domain.user.UserDTO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -26,7 +25,9 @@ public interface GroupsMapper {
     void insertHostMember(GroupMembers hostMember);
     // 특정그룹 번호의 그룹정보
     Groups getGroupById(int groupId);
-    // 호스트 유저 닉네임/프로필
-    UserDTO getUserId_Nick(int hostIndex);
-
+    // 인기 카테고리(장르) 모음
+    List<Groups> getGroupByCategory();
+    // 최근 생성날 기준 모임
+    List<Groups> getGroupByCreateDate();
+    List<Groups> getGroupByGroupDate();
 }

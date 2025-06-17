@@ -46,4 +46,5 @@ public class Groups {
     private CategorySub categorySub;       // 소분류
     private UserData userData;
     private GroupMembers groupMembers;
+
 }

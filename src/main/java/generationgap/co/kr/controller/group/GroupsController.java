@@ -7,6 +7,9 @@ import generationgap.co.kr.domain.group.Groups;
 import generationgap.co.kr.domain.user.UserDTO;
 import generationgap.co.kr.security.CustomUserDetails;
 import generationgap.co.kr.service.group.GroupService;
+import generationgap.co.kr.service.user.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -25,38 +28,36 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping("/group")  // 그룹에 해당하는 모든 경로
+@RequiredArgsConstructor
 public class GroupsController {
 
     private final GroupService groupService;
+    @Autowired
+    private UserService userService;
     // 이미지 저장 경로를 상수로 정의하여 관리 용이성 높임
     private static final String UPLOAD_DIR = "src/main/resources/static/upload/groupImg/";
 
-    public GroupsController(GroupService groupService) {
-        this.groupService = groupService;
-    }
-    @GetMapping("/test")
-    public String test(Model model) {
-        return  "group/test";
-    }
     /*상단 메뉴 버튼 모임리스트*/
     @GetMapping("/meetinglist")
     public String meetinglist(Model model,
+                             @RequestParam(value="mainCategoryId", required = false) String category,
                              @AuthenticationPrincipal CustomUserDetails userDetails){
         // 카테고리 전체 리스트
         List<CategoryMain> categoryMainList = groupService.getAllMainCategory();
         model.addAttribute("categoryMainList",categoryMainList);
+        // 카테고리 확인용
+        for (CategoryMain categorys : categoryMainList) {
+            System.out.println(categorys.getCmCategoryMainIdx());
+            System.out.println(categorys.getCategoryMainName());
+        }
 
         // 그룹 전체 리스트
         List<Groups> groupsList = groupService.getAllGroups();
         model.addAttribute("groupsList",groupsList);
 
-        /* 콘솔 찍어보기 용
-        for (Groups group : groupsList) {
-            System.out.println(group.getGroupIdx());
-        }*/
-
         return "group/Meeting-list";
     }
+
 
     /* 모임방 생성 개설 프론트 */
     @GetMapping("/create")
@@ -166,7 +167,7 @@ public class GroupsController {
         int hostIndex = groupDetail.getOwnerIdx().intValue();
         System.out.println("Owner Index: " + hostIndex);
         // 호스트의 유저번호, 닉네임, 프로필 이미지
-        UserDTO hostData = groupService.getUserId_Nick(hostIndex);
+        UserDTO hostData = userService.getUserId_Nick(hostIndex);
         System.out.println("Host Data: " + hostData);
         if (groupDetail != null || hostData != null) {
             model.addAttribute("groupDetail", groupDetail);

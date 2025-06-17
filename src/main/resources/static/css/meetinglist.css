@@ -1,0 +1,280 @@
+/* region-selector 상자 모양 */
+    .region-selector-container {
+      padding: 12px 0;
+    }
+    .region-selector {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .region-header {
+      display: flex;
+      align-items: center;
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+      gap: 8px;
+    }
+    .region-header .btn {
+      padding: 6px 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #fafafa;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .region-header .btn.active {
+      background: #007BFF;
+      color: #fff;
+      border-color: #007BFF;
+    }
+    .region-header .search-box {
+      flex-grow: 1;
+      position: relative;
+    }
+    .region-header .search-box input {
+      width: 100%;
+      padding: 6px 28px 6px 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .region-header .search-box .icon {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      color: #aaa;
+    }
+    .region-content {
+      display: flex;
+      padding: 8px;
+      gap: 8px;
+    }
+    .region-pane {
+      flex: 1;
+      border-right: 1px solid #eee;
+      padding-right: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .region-pane:last-child {
+      border-right: none;
+      padding-right: 0;
+    }
+    .region-pane h4 {
+      margin-top: 0;
+      font-size: 15px;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    .region-pane ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .region-pane li {
+      padding: 6px 8px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 14px;
+      color: #333;
+    }
+    .region-pane li:hover {
+      background: #f0f0f0;
+    }
+    .region-pane li.selected {
+      background: #007BFF;
+      color: #fff;
+    }
+    .selected-tags {
+      padding: 8px;
+      border-top: 1px solid #eee;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      background: #fafafa;
+    }
+    .selected-tags .tag {
+      display: flex;
+      align-items: center;
+      background: #e0e0e0;
+      border-radius: 12px;
+      padding: 4px 8px;
+      font-size: 13px;
+      color: #333;
+    }
+    .selected-tags .tag .remove-btn {
+      margin-left: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #666;
+    }
+
+    /* 나이 듀얼 슬라이더(기능) */
+    .age-container {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      user-select: none;
+      font-size: 14px;
+      width: 160px;
+    }
+    .age-value {
+      font-size: 13px;
+      color: #007BFF;
+      white-space: nowrap;
+    }
+    .dual-range {
+      position: relative;
+      width: 100%;
+      height: 6px;
+    }
+    .dual-range input[type="range"] {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 6px;
+      background: transparent;
+      -webkit-appearance: none;
+      pointer-events: all;
+    }
+    .dual-range input#age-max::-webkit-slider-runnable-track {
+      height: 6px;
+      border-radius: 3px;
+      background: #ddd;
+    }
+    .dual-range input#age-max::-moz-range-track {
+      height: 6px;
+      border-radius: 3px;
+      background: #ddd;
+    }
+    .dual-range input#age-min::-webkit-slider-runnable-track {
+      height: 6px;
+      border-radius: 3px;
+      background: transparent;
+    }
+    .dual-range input#age-min::-moz-range-track {
+      height: 6px;
+      border-radius: 3px;
+      background: transparent;
+    }
+    .dual-range input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      background-color: #007BFF;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      margin-top: -3px;
+    }
+    .dual-range input[type="range"]::-moz-range-thumb {
+      width: 12px;
+      height: 12px;
+      background-color: #007BFF;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .age-ticks {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #666;
+      padding: 0 2px;
+    }
+
+    /* 크기가 너무 작을 때 눈금 숨김 */
+    @media (max-width: 480px) {
+      .age-ticks {
+        display: none;
+      }
+    }
+
+/* 필터 관련 CSS 설정 끝 */
+
+    #meeting-list-container {
+        max-width: 1200px;
+        margin: 0 auto 20px auto;
+        padding: 0 15px;
+    }
+
+    /* 모임카드 */
+    #meeting-grid {
+      display: grid;
+      /* 한 줄에 4개의 컬럼, 각 컬럼은 균등하게 분배 */
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px; /* 행과 열 사이의 간격 */
+      /* 필요한 경우 최대 너비 설정 */
+      max-width: 1200px; /* 예시 */
+      margin: 0 auto; /* 가운데 정렬 */
+    }
+
+    /* 반응형 디자인을 위한 미디어 쿼리 */
+        @media (max-width: 1024px) {
+          #meeting-grid {
+            grid-template-columns: repeat(3, 1fr); /* 3개씩 */
+          }
+        }
+
+        @media (max-width: 768px) {
+          #meeting-grid {
+            grid-template-columns: repeat(2, 1fr); /* 2개씩 */
+          }
+        }
+
+        @media (max-width: 480px) {
+          #meeting-grid {
+            grid-template-columns: 1fr; /* 1개씩 */
+          }
+        }
+
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      background-color: #fff;
+      display: flex; /* 내부 콘텐츠를 위해 flex 사용 */
+      flex-direction: column;
+    }
+
+    .card-thumb img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+
+    .card-info {
+      padding: 10px;
+      flex-grow: 1;
+    }
+
+    .card-category {
+      font-size: 0.8em;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .card-title {
+      font-weight: bold;
+      font-size: 1.1em;
+      margin-bottom: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-date {
+      font-size: 0.9em;
+      color: #888;
+    }
+
+
+

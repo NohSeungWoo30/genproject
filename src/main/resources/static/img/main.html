@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -30,178 +30,74 @@
   <!-- ─── 상단 네비게이션 ─── -->
   <header class="container-nav">
     <div class="nav-left">
-      <a href="main"><img class="logo" src="/img/icons/Group 17.png" alt="M 로고"></a>
+      <a href="main.html"><img class="logo" src="/img/icons/Group 17.png" alt="M 로고"></a>
     </div>
 
     <div class="nav-center">
-      <img src="/img/봄.png" class="nav-img" alt="그림10">
-      <img src="/img/여름.png" class="nav-img" alt="그림10">
-      <img src="/img/가을.png" class="nav-img" alt="그림10">
-      <img src="/img/겨울.png" class="nav-img" alt="그림10">
+      <img src="/img/my1.png" class="nav-img" alt="그림1">
+      <img src="/img/my2.png" class="nav-img" alt="그림2">
+      <img src="/img/my3.png" class="nav-img" alt="그림3">
+      <img src="/img/my4.png" class="nav-img" alt="그림4">
     </div>
     <div class="nav-right" id="navRight">
       <!-- 로그인 전 기본 표시 → 스크립트에서 교체 -->
-      <a href="user/login" class="login-link">로그인ㆍ회원가입</a>
+      <a href="../../templates/main/login.html" class="login-link">로그인ㆍ회원가입</a>
     </div>
   </header>
 
   <!-- ─── 하단 고정 네비 (모바일 bottom‑nav 스타일) ─── -->
   <section class="bottom-nav-wrapper">
     <nav class="bottom-nav">
-      <a href="group/create" class="bottom-link">모임 생성</a>
-      <a href="group/meetinglist" class="bottom-link">모임 목록</a>
-      <a href="#" class="bottom-link">상품 목록</a>
-      <a th:href="@{/posts}" class="bottom-link">자유 게시판</a>
+      <a href="#"                class="bottom-link">모임 생성</a>
+      <a href="../../templates/main/meeting-list.html" class="bottom-link">모임 목록</a>
+      <a href="#"                class="bottom-link">상품 목록</a>
+      <a href="../../templates/main/board.html" class="bottom-link">자유 게시판</a>
     </nav>
   </section>
 
   <!-- ─── 메인 배너 ─── -->
   <section class="main-banner">
-    <div class="banner-slide-wrapper">
-      <img src="/img/고기.png" class="banner-image" />
-      <img src="/img/콘서트.png" class="banner-image" />
-      <img src="/img/러닝.png" class="banner-image" />
-    </div>
-    <button class="banner-prev">←</button>
-    <button class="banner-next">→</button>
+    <img src="/img/_2025-05-30-182035-10.png" alt="예상 못한 기쁨 배너 이미지" class="banner-image" />
   </section>
-
-
 
   <!-- ─── 카테고리 아이콘 링크 ─── -->
   <nav class="category-links">
-    <a href="group/meetinglist?mainCategoryId=1" class="cat-link">
-      <img src="/img/icons/ball1.png" alt="운동/액티비티 아이콘" class="cat-icon" />
-      <span class="cat-text">운동/액티비티</span>
-    </a>
-
-    <a href="group/meetinglist?mainCategoryId=2" class="cat-link">
-      <img src="/img/icons/art1.png" alt="문화/예술 아이콘" class="cat-icon" />
-      <span class="cat-text">문화/예술</span>
-    </a>
-
-    <a href="group/meetinglist?mainCategoryId=3" class="cat-link">
-      <img src="/img/icons/book1.png" alt="지식/스터디 아이콘" class="cat-icon" />
-      <span class="cat-text">지식/스터디</span>
-    </a>
-
-    <a href="group/meetinglist?mainCategoryId=4" class="cat-link">
-      <img src="/img/icons/food1.png" alt="음식/카페 아이콘" class="cat-icon" />
-      <span class="cat-text">음식/카페</span>
-    </a>
-
-    <a href="group/meetinglist?mainCategoryId=5" class="cat-link">
-      <img src="/img/icons/travel1.png" alt="여행/탐험 아이콘" class="cat-icon" />
-      <span class="cat-text">여행/탐험</span>
-    </a>
-
-    <a href="group/meetinglist?mainCategoryId=6" class="cat-link">
-      <img src="/img/icons/game1.png" alt="게임/오락 아이콘" class="cat-icon" />
-      <span class="cat-text">게임/오락</span>
-    </a>
-
-    <a href="group/meetinglist?mainCategoryId=7" class="cat-link">
-      <img src="/img/icons/game1.png" alt="게임/오락 아이콘" class="cat-icon" />
-      <span class="cat-text">반려동물/자연</span>
-    </a>
-
-    <a href="group/meetinglist?mainCategoryId=8" class="cat-link">
-      <img src="/img/icons/build1.png" alt="만들기/공예 아이콘" class="cat-icon" />
-      <span class="cat-text">만들기/공예</span>
-    </a>
-
-    <a href="group/meetinglist?mainCategoryId=9" class="cat-link">
-      <img src="/img/icons/social3.png" alt="소셜/친목 아이콘" class="cat-icon" />
-      <span class="cat-text">소셜/친목</span>
-    </a>
-
-    <a href="group/meetinglist?mainCategoryId=10" class="cat-link">
-      <img src="/img/icons/guitar1.png" alt="기타 아이콘" class="cat-icon" />
-      <span class="cat-text">기타</span>
-    </a>
+    <a href="../../templates/main/meeting-list.html" class="cat-link"><img src="/img/icons/ball1.png" alt="운동/액티비티" class="cat-icon"/><span class="cat-text">운동/액티비티</span></a>
+    <a href="../../templates/main/meeting-list.html" class="cat-link"><img src="/img/icons/art1.png" alt="문화/예술" class="cat-icon"/><span class="cat-text">문화/예술</span></a>
+    <a href="../../templates/main/meeting-list.html" class="cat-link"><img src="/img/icons/book1.png" alt="지식/스터디" class="cat-icon"/><span class="cat-text">지식/스터디</span></a>
+    <a href="../../templates/main/meeting-list.html" class="cat-link"><img src="/img/icons/food1.png" alt="음식/카페" class="cat-icon"/><span class="cat-text">음식/카페</span></a>
+    <a href="../../templates/main/meeting-list.html" class="cat-link"><img src="/img/icons/travel1.png" alt="여행/탐험" class="cat-icon"/><span class="cat-text">여행/탐험</span></a>
+    <a href="../../templates/main/meeting-list.html" class="cat-link"><img src="/img/icons/game1.png" alt="게임/오락" class="cat-icon"/><span class="cat-text">게임/오락</span></a>
+    <a href="../../templates/main/meeting-list.html" class="cat-link"><img src="/img/icons/pet1.png" alt="반려동물/자연" class="cat-icon"/><span class="cat-text">반려동물/자연</span></a>
+    <a href="../../templates/main/meeting-list.html" class="cat-link"><img src="/img/icons/build1.png" alt="만들기/공예" class="cat-icon"/><span class="cat-text">만들기/공예</span></a>
+    <a href="../../templates/main/meeting-list.html" class="cat-link"><img src="/img/icons/social3.png" alt="소셜/친목" class="cat-icon"/><span class="cat-text">소셜/친목</span></a>
+    <a href="../../templates/main/meeting-list.html" class="cat-link"><img src="/img/icons/guitar1.png" alt="기타" class="cat-icon"/><span class="cat-text">기타</span></a>
   </nav>
 
   <!-- ─── 최신 모임 (가로 스크롤 카드) ─── -->
   <section class="container2">
-    <span>최근 생성 모임</span>
     <div class="flex-row">
-      <!-- 1 최근 생성 모임 -->
-      <div th:each="gd_group : ${groupByCreateDate}" th:data-group-idx="${gd_group.groupIdx}" class="card">
-        <div class="card-thumb">
-          <img th:if="${gd_group.groupImgUrl != null and !#strings.isEmpty(gd_group.groupImgUrl)}"
-               th:src="@{${gd_group.groupImgUrl}}" />
-          <img th:unless="${gd_group.groupImgUrl != null and !#strings.isEmpty(gd_group.groupImgUrl)}"
-               th:src="@{/img/noImage.jpg}" />
-        </div>
-        <div class="card-info">
-          <div class="card-category">
-            <span th:text="${gd_group.district}"></span> · <span th:text="${gd_group.categoryMain.categoryMainName}"></span>
-          </div>
-          <div class="card-title" th:text="${gd_group.title}">
-          </div>
-          <div class="card-date" th:text="${#temporals.format(gd_group.groupDate, 'yyyy.MM.dd(E) HH:mm')}"></div>
-        </div>
-      </div>
+      <div class="card"><div class="card-thumb"><img src="/img/div4.png"  alt="망고 케이크"/></div><div class="card-info"><div class="card-category">중구 · 푸드·드링크</div><div class="card-title">🥭생망고 올라간 망고 빅토리아 케이크 만들기!</div><div class="card-date">2025.05.30(금) 10:00</div></div></div>
+      <div class="card"><div class="card-thumb"><img src="/img/div7.png"  alt="e커머스 마케팅"/></div><div class="card-info"><div class="card-category">강남구 · N잡·재테크</div><div class="card-title">e커머스 – 광고, SNS 마케팅 패키지 클래스</div><div class="card-date">2025.06.07(토) 06:00</div></div></div>
+      <div class="card"><div class="card-thumb"><img src="/img/div8.png"  alt="이어지는 글 파티"/></div><div class="card-info"><div class="card-category">마포구 · 취미</div><div class="card-title">🦩너와나&lt;이어지는 글 파티&gt;🎉🖍️모집 중!🔥</div><div class="card-date">2025.06.07(토) 08:00</div></div></div>
+      <div class="card"><div class="card-thumb"><img src="/img/div11.png" alt="비주얼파티"/></div><div class="card-info"><div class="card-category">동작구 · 파티</div><div class="card-title">🌷비주얼파티🌷토요일은 플인서💜 도파민(ep.46)</div><div class="card-date">2025.05.31(토) 10:00</div></div></div>
     </div>
   </section>
 
-  <section class="container2">
-    <span>활발한 모임(지역)</span>
-    <div class="flex-row">
-      <!-- 2 카테고리가 많은 인기 모임순 -->
-      <div th:each="groupCategory : ${groupByCategory}" th:data-group-idx="${groupCategory.groupIdx}" class="card">
-        <div class="card-tzhumb">
-          <img th:if="${groupCategory.groupImgUrl != null and !#strings.isEmpty(groupCategory.groupImgUrl)}"
-               th:src="@{${groupCategory.groupImgUrl}}" />
-          <img th:unless="${groupCategory.groupImgUrl != null and !#strings.isEmpty(groupCategory.groupImgUrl)}"
-               th:src="@{/img/noImage.jpg}" />
-        </div>
-        <div class="card-info">
-          <div class="card-category">
-            <span th:text="${groupCategory.district}"></span> · <span th:text="${groupCategory.categoryMain.categoryMainName}"></span>
-          </div>
-          <div class="card-title" th:text="${groupCategory.title}">
-          </div>
-          <div class="card-date" th:text="${#temporals.format(groupCategory.groupDate, 'yyyy.MM.dd(E) HH:mm')}"></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="container2">
-    <span>모임 날짜 임박</span>
-    <div class="flex-row">
-      <!-- 3 모임 날짜 임박순 -->
-      <div th:each="groupDate : ${groupByGroupDate}" th:data-group-idx="${groupDate.groupIdx}" class="card">
-        <div class="card-thumb">
-          <img th:if="${groupDate.groupImgUrl != null and !#strings.isEmpty(groupDate.groupImgUrl)}"
-               th:src="@{${groupDate.groupImgUrl}}" />
-          <img th:unless="${groupDate.groupImgUrl != null and !#strings.isEmpty(groupDate.groupImgUrl)}"
-               th:src="@{/img/noImage.jpg}" />
-        </div>
-        <div class="card-info">
-          <div class="card-category">
-            <span th:text="${groupDate.district}"></span> · <span th:text="${groupDate.categoryMain.categoryMainName}"></span>
-          </div>
-          <div class="card-title" th:text="${groupDate.title}">
-          </div>
-          <div class="card-date" th:text="${#temporals.format(groupDate.groupDate, 'yyyy.MM.dd(E) HH:mm')}"></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-
+  <!-- ─── 중간 배너 ─── -->
+  <div class="mid-banner">
+    <img src="/img/_200.png" alt="중간 배너 이미지" class="mid-banner-img"/>
+  </div>
 
   <!-- ─── Footer ─── -->
   <footer class="footer">
     <div class="footer-links">
-      <a href="#"        class="footer-link">회사소개</a><span class="footer-divider"></span>
-      <a href="#"  class="footer-link">제휴안내</a><span class="footer-divider"></span>
-      <a href="#"  class="footer-link">광고안내</a><span class="footer-divider"></span>
-      <a href="#"        class="footer-link">이용약관</a><span class="footer-divider"></span>
-      <a href="#"      class="footer-link">개인정보처리방침</a><span class="footer-divider"></span>
-      <a href="#" class="footer-link">청소년보호정책</a>
+      <a href="about.html"        class="footer-link">회사소개</a><span class="footer-divider"></span>
+      <a href="partnership.html"  class="footer-link">제휴안내</a><span class="footer-divider"></span>
+      <a href="advertising.html"  class="footer-link">광고안내</a><span class="footer-divider"></span>
+      <a href="terms.html"        class="footer-link">이용약관</a><span class="footer-divider"></span>
+      <a href="privacy.html"      class="footer-link">개인정보처리방침</a><span class="footer-divider"></span>
+      <a href="youth-policy.html" class="footer-link">청소년보호정책</a>
     </div>
     <div class="footer-copyright">© 1999 – 2025 dcinside. All rights reserved.</div>
   </footer>
@@ -329,33 +225,5 @@
 <script src="/js/notify.js" defer></script>
 <script src="/js/dev-login.js" defer></script>
 <script src="/js/filter.js" defer></script> <!-- simple.html 기능 js 분리 -->
-<script src="/js/mainHomePage.js"></script>
-<script>
-  $(document).ready(function () {
-  const $wrapper = $('.banner-slide-wrapper');
-  const slideCount = $wrapper.children().length;
-  let current = 0;
-
-  function goToSlide(index) {
-    const percent = (100 / slideCount) * index;
-    $wrapper.css('transform', `translateX(-${percent}%)`);
-  }
-
-  $('.banner-next').click(function () {
-    current = (current + 1) % slideCount;
-    goToSlide(current);
-  });
-
-  $('.banner-prev').click(function () {
-    current = (current - 1 + slideCount) % slideCount;
-    goToSlide(current);
-  });
-
-  goToSlide(0); // 초기 위치
-});
-
-</script>
-
-
 </body>
 </html>
