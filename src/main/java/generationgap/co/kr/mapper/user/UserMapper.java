@@ -4,8 +4,8 @@ import generationgap.co.kr.domain.user.UserDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Param; // @Param 사용 시 필요
-
 import java.util.List;
+import java.util.Optional;
 
 @Mapper
 public interface UserMapper {

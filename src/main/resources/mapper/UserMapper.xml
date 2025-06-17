@@ -3,9 +3,8 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-
-<!-- 예시 유저 맵퍼 -->
 <mapper namespace="generationgap.co.kr.mapper.user.UserMapper">
+
     <resultMap id="userResultMap" type="generationgap.co.kr.domain.user.UserDTO">
         <id property="userIdx" column="user_idx"/>
         <result property="userId" column="user_id"/>
@@ -30,15 +29,13 @@
         <result property="suspendUntil" column="suspend_until"/>
     </resultMap>
 
-
-
     <insert id="insertUser" parameterType="generationgap.co.kr.domain.user.UserDTO">
         INSERT INTO users (
-        user_id, provider, user_name, nickname, birth_date, gender,
-        user_ci, password_hash, email, phone, profile_name, introduction
+        user_id, provider, user_name, nickname, birth_date, gender, user_ci, password_hash,
+        email, phone, profile_name, introduction, last_login_at, update_at, ghost
         ) VALUES (
-        #{userId}, #{provider}, #{userName}, #{nickname}, #{birthDate}, #{gender},
-        #{userCi, jdbcType=VARCHAR}, #{passwordHash}, #{email}, #{phone}, #{profileName, jdbcType=VARCHAR}, #{introduction}
+        #{userId}, #{provider}, #{userName}, #{nickname}, #{birthDate, jdbcType=DATE}, #{gender, jdbcType=CHAR}, #{userCi, jdbcType=VARCHAR}, #{passwordHash},
+        #{email}, #{phone, jdbcType=VARCHAR}, #{profileName}, #{introduction, jdbcType=VARCHAR}, #{lastLoginAt, jdbcType=DATE}, #{updateAt, jdbcType=DATE}, #{ghost, jdbcType=DATE}
         )
     </insert>
 
@@ -67,22 +64,19 @@
         update_at = CURRENT_DATE WHERE user_idx = #{userIdx}
     </update>
 
-    <!-- 전체 정보 업데이트(닉네임·프로필사진·자기소개 포함) -->
     <update id="updateUserInfo" parameterType="generationgap.co.kr.domain.user.UserDTO">
         UPDATE users
         SET
-        user_name    = #{userName},
-        nickname     = #{nickname},
-        birth_date   = #{birthDate, jdbcType=DATE},
-        gender       = #{gender, jdbcType=CHAR},
-        email        = #{email},
-        phone        = #{phone, jdbcType=VARCHAR},
+        user_name = #{userName},
+        nickname = #{nickname},
+        birth_date = #{birthDate, jdbcType=DATE},
+        gender = #{gender, jdbcType=CHAR},
+        email = #{email},
+        phone = #{phone, jdbcType=VARCHAR},
         profile_name = #{profileName},
         introduction = #{introduction, jdbcType=VARCHAR},
-        update_at    = CURRENT_DATE
-        WHERE user_id = #{userId, jdbcType=VARCHAR}
+        update_at = CURRENT_DATE WHERE user_id = #{userId, jdbcType=VARCHAR}
     </update>
-
 
     <select id="findByEmail" parameterType="java.lang.String" resultMap="userResultMap">
         SELECT *
@@ -90,11 +84,11 @@
         WHERE email = #{email} AND user_status = 'ACTIVE'
     </select>
 
-    <select id="findByUserNameAndPhone" parameterType="map" resultMap="userResultMap">
+    <select id="findByUserNameAndPhone" parameterType="generationgap.co.kr.domain.user.UserDTO" resultType="java.lang.String">
         SELECT
         user_id
         FROM users
-        WHERE user_name = #{userName} AND phone = #{phone, jdbcType=VARCHAR} AND user_status = 'ACTIVE'
+        WHERE user_name = #{userName} AND phone = #{phone} AND user_status = 'ACTIVE'
         FETCH FIRST 1 ROW ONLY
     </select>
 

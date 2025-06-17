@@ -95,6 +95,31 @@
 <div class="container">
     <h1 class="my-4">내 회원 정보</h1>
 
+    <div th:if="${messageInfo}" class="alert alert-success" role="alert" th:text="${messageInfo}">
+        회원 정보가 성공적으로 수정되었습니다.
+    </div>
+    <div th:if="${errorMessageInfo01}" class="alert alert-danger" role="alert" th:text="${errorMessageInfo01}">
+        회원 정보 수정에 실패했습니다.
+    </div>
+    <div th:if="${errorMessageInfo02}" class="alert alert-danger" role="alert" th:text="${errorMessageInfo02}">
+        회원 정보가 수정 중 오류 발생.
+    </div>
+    <div th:if="${messagePass}" class="alert alert-success" role="alert" th:text="${messagePass}">
+        비밀번호가 변경되었습니다.
+    </div>
+    <div th:if="${errorMessagePass01}" class="alert alert-danger" role="alert" th:text="${errorMessagePass01}">
+        새 비밀번호가 일치하지 않습니다.
+    </div>
+    <div th:if="${errorMessagePass02}" class="alert alert-danger" role="alert" th:text="${errorMessagePass02}">
+        새 비밀번호는 최소 6자 이상이어야 합니다.
+    </div>
+    <div th:if="${errorMessagePass03}" class="alert alert-danger" role="alert" th:text="${errorMessagePass03}">
+        현재 비밀번호가 틀립니다.
+    </div>
+    <div th:if="${errorMessagePass04}" class="alert alert-danger" role="alert" th:text="${errorMessagePass04}">
+        비밀번호 변경 중 오류 발생
+    </div>
+
     <div class="info-section">
         <h3>회원 상세 정보</h3>
         <div class="info-item">
@@ -131,8 +156,12 @@
             <p th:text="${user.phone} ? ${user.phone} : '미입력'">010-1234-5678</p>
         </div>
         <div class="info-item">
-            <label>프로필 사진 이름</label>
-            <p th:text="${user.profileName} ? ${user.profileName} : '없음'">profile.jpg</p>
+            <label>프로필 이미지</label>
+            <div>
+                <img th:src="${user.profileName != null} ? ${user.profileName} : '@{/images/default-profile.png}'"
+                     alt="프로필 이미지"
+                     style="width:150px; height:150px; object-fit:cover; border-radius:50%;">
+            </div>
         </div>
         <div class="info-item">
             <label>소개</label>

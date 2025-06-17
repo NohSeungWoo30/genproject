@@ -41,9 +41,18 @@ public class MainController {
         return "main/main";
     }
 
-    @GetMapping("/main/MAIN")
+    @GetMapping("/main/main")
     public String mainPage2() {
-        return "main/MAIN"; // main.html 템플릿 반환
+        return "main/main"; // main.html 템플릿 반환
+    }
+
+    @GetMapping("/main/login")
+    public String login2() {
+        return "main/login"; // main.html 템플릿 반환
+    }
+    @GetMapping("/mypage")
+    public String mypage() {
+        return "mypage"; // main.html 템플릿 반환
     }
 
 }

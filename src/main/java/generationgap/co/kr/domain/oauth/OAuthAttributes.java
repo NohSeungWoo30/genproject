@@ -98,7 +98,7 @@ public class OAuthAttributes {
                 .lastLoginAt(LocalDate.now()) // 마지막 로그인도 현재 날짜
                 .updateAt(LocalDate.now()) // 업데이트 날짜도 현재 날짜
                 // People API로 가져온 추가 정보는 CustomOAuth2UserService에서 직접 설정할 예정이므로 여기서는 Builder로 직접 주입
-                .phone(phone)         // phone으로 변경
+                //.phone(phone)         // phone으로 변경
                 .gender(parsedGender) // Character 타입으로 변환 후 주입
                 .birthDate(parsedBirthDate) // LocalDate 타입으로 변환 후 주입
                 .build();

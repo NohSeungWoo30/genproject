@@ -1,315 +1,315 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>마이페이지</title>
-  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
-  <style>
-    :root {
-      --primary-color: #4A90E2;
-      --primary-hover-color: #357ABD;
-      --text-primary: #212529;
-      --text-secondary: #6C757D;
-      --bg-color: #F8F9FA;
-      --content-bg-color: #FFFFFF;
-      --border-color: #E9ECEF;
-    }
-    body {
-      margin: 0;
-      font-family: 'Pretendard', sans-serif;
-      background: var(--bg-color);
-      color: var(--text-primary);
-    }
-    .wrapper {
-      display: flex;
-      max-width: 1200px;
-      margin: 40px auto;
-      gap: 20px;
-      padding: 0 20px;
-    }
-    .sidebar {
-      width: 260px;
-      flex-shrink: 0;
-    }
-    .profile-card {
-      background: var(--content-bg-color);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 24px;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .profile-card img {
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--border-color);
-      margin-bottom: 12px;
-    }
-    .nickname {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-    .introduction {
-      font-size: 14px;
-      color: var(--text-secondary);
-      margin-bottom: 12px;
-      word-break: break-all;
-    }
-    .stats {
-      display: flex;
-      justify-content: space-around;
-      border-top: 1px solid var(--border-color);
-      padding-top: 12px;
-    }
-    .stat {
-      text-align: center;
-    }
-    .stat .value {
-      font-size: 16px;
-      font-weight: 700;
-    }
-    .stat .label {
-      font-size: 12px;
-      color: var(--text-secondary);
-    }
-    .nav-menu {
-      background: var(--content-bg-color);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .nav-menu a {
-      display: block;
-      padding: 12px 16px;
-      text-decoration: none;
-      color: #495057;
-      font-weight: 500;
-      border-bottom: 1px solid var(--border-color);
-      transition: background 0.2s;
-    }
-    .nav-menu a:last-child {
-      border-bottom: none;
-    }
-    .nav-menu a.active,
-    .nav-menu a:hover {
-      background: var(--primary-color);
-      color: #fff;
-    }
-    .content-area {
-      flex: 1;
-    }
-    .section {
-      background: var(--content-bg-color);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 24px;
-      margin-bottom: 20px;
-      display: none;
-    }
-    .section.active {
-      display: block;
-    }
-    .section h2 {
-      margin-top: 0;
-      margin-bottom: 16px;
-      font-size: 20px;
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 8px;
-    }
-    form label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 500;
-    }
-    form input[type="text"],
-    form input[type="file"],
-    form input[type="password"],
-    form textarea {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      margin-bottom: 16px;
-      box-sizing: border-box;
-    }
-    .form-actions {
-      text-align: right;
-      margin-top: 16px;
-    }
-    form button {
-      padding: 10px 20px;
-      background: var(--primary-color);
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    form button:hover {
-      background: var(--primary-hover-color);
-    }
-    ul.list {
-      list-style: none;
-      padding: 0;
-    }
-    ul.list li {
-      padding: 8px 0;
-      border-bottom: 1px solid var(--border-color);
-    }
-    ul.list li:last-child {
-      border-bottom: none;
-    }
-    .card-list .card {
-      margin-bottom: 12px;
-    }
-    .card {
-      display: flex;
-      align-items: center;
-      padding: 16px;
-      background: var(--content-bg-color);
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-    .card-link {
-      display: flex;
-      text-decoration: none;
-      color: inherit;
-      width: 100%;
-    }
-    .card-icon {
-      font-size: 24px;
-      margin-right: 16px;
-      color: var(--primary-color);
-    }
-    .card-content {
-      flex-grow: 1;
-    }
-    .card-title {
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-    .card-meta {
-      font-size: 14px;
-      color: var(--text-secondary);
-    }
-    .empty-state {
-      text-align: center;
-      color: var(--text-secondary);
-      padding: 60px 0;
-    }
-    .empty-state .material-icons-outlined {
-      font-size: 64px;
-      margin-bottom: 16px;
-    }
-    @media (max-width: 768px) {
-      .wrapper { flex-direction: column; }
-      .sidebar { width: 100%; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마이페이지</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <style>
+        :root {
+          --primary-color: #4A90E2;
+          --primary-hover-color: #357ABD;
+          --text-primary: #212529;
+          --text-secondary: #6C757D;
+          --bg-color: #F8F9FA;
+          --content-bg-color: #FFFFFF;
+          --border-color: #E9ECEF;
+        }
+        body {
+          margin: 0;
+          font-family: 'Pretendard', sans-serif;
+          background: var(--bg-color);
+          color: var(--text-primary);
+        }
+        .wrapper {
+          display: flex;
+          max-width: 1200px;
+          margin: 40px auto;
+          gap: 20px;
+          padding: 0 20px;
+        }
+        .sidebar {
+          width: 260px;
+          flex-shrink: 0;
+        }
+        .profile-card {
+          background: var(--content-bg-color);
+          border: 1px solid var(--border-color);
+          border-radius: 8px;
+          padding: 24px;
+          text-align: center;
+          margin-bottom: 20px;
+        }
+        .profile-card img {
+          width: 90px;
+          height: 90px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 2px solid var(--border-color);
+          margin-bottom: 12px;
+        }
+        .nickname {
+          font-size: 18px;
+          font-weight: 700;
+          margin-bottom: 4px;
+        }
+        .introduction {
+          font-size: 14px;
+          color: var(--text-secondary);
+          margin-bottom: 12px;
+          word-break: break-all;
+        }
+        .stats {
+          display: flex;
+          justify-content: space-around;
+          border-top: 1px solid var(--border-color);
+          padding-top: 12px;
+        }
+        .stat {
+          text-align: center;
+        }
+        .stat .value {
+          font-size: 16px;
+          font-weight: 700;
+        }
+        .stat .label {
+          font-size: 12px;
+          color: var(--text-secondary);
+        }
+        .nav-menu {
+          background: var(--content-bg-color);
+          border: 1px solid var(--border-color);
+          border-radius: 8px;
+          overflow: hidden;
+        }
+        .nav-menu a {
+          display: block;
+          padding: 12px 16px;
+          text-decoration: none;
+          color: #495057;
+          font-weight: 500;
+          border-bottom: 1px solid var(--border-color);
+          transition: background 0.2s;
+        }
+        .nav-menu a:last-child {
+          border-bottom: none;
+        }
+        .nav-menu a.active,
+        .nav-menu a:hover {
+          background: var(--primary-color);
+          color: #fff;
+        }
+        .content-area {
+          flex: 1;
+        }
+        .section {
+          background: var(--content-bg-color);
+          border: 1px solid var(--border-color);
+          border-radius: 8px;
+          padding: 24px;
+          margin-bottom: 20px;
+          display: none;
+        }
+        .section.active {
+          display: block;
+        }
+        .section h2 {
+          margin-top: 0;
+          margin-bottom: 16px;
+          font-size: 20px;
+          border-bottom: 1px solid var(--border-color);
+          padding-bottom: 8px;
+        }
+        form label {
+          display: block;
+          margin-bottom: 8px;
+          font-weight: 500;
+        }
+        form input[type="text"],
+        form input[type="file"],
+        form input[type="password"],
+        form textarea {
+          width: 100%;
+          padding: 8px;
+          border: 1px solid var(--border-color);
+          border-radius: 4px;
+          margin-bottom: 16px;
+          box-sizing: border-box;
+        }
+        .form-actions {
+          text-align: right;
+          margin-top: 16px;
+        }
+        form button {
+          padding: 10px 20px;
+          background: var(--primary-color);
+          color: #fff;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: background 0.2s;
+        }
+        form button:hover {
+          background: var(--primary-hover-color);
+        }
+        ul.list {
+          list-style: none;
+          padding: 0;
+        }
+        ul.list li {
+          padding: 8px 0;
+          border-bottom: 1px solid var(--border-color);
+        }
+        ul.list li:last-child {
+          border-bottom: none;
+        }
+        .card-list .card {
+          margin-bottom: 12px;
+        }
+        .card {
+          display: flex;
+          align-items: center;
+          padding: 16px;
+          background: var(--content-bg-color);
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .card-link {
+          display: flex;
+          text-decoration: none;
+          color: inherit;
+          width: 100%;
+        }
+        .card-icon {
+          font-size: 24px;
+          margin-right: 16px;
+          color: var(--primary-color);
+        }
+        .card-content {
+          flex-grow: 1;
+        }
+        .card-title {
+          font-weight: 600;
+          margin-bottom: 4px;
+        }
+        .card-meta {
+          font-size: 14px;
+          color: var(--text-secondary);
+        }
+        .empty-state {
+          text-align: center;
+          color: var(--text-secondary);
+          padding: 60px 0;
+        }
+        .empty-state .material-icons-outlined {
+          font-size: 64px;
+          margin-bottom: 16px;
+        }
+        @media (max-width: 768px) {
+          .wrapper { flex-direction: column; }
+          .sidebar { width: 100%; }
+        }
+    </style>
 </head>
 <body>
 <div class="wrapper">
-  <aside class="sidebar">
-    <div class="profile-card">
-      <img th:src="@{${pageData.user.profileImageUrl}}" alt="프로필">
-      <div class="nickname" th:text="${pageData.user.nickname}">닉네임</div>
-      <div class="introduction" th:text="${pageData.user.introduction}">자기소개를 입력하세요.</div>
-      <div class="stats">
-        <div class="stat">
-          <div class="value" th:text="${pageData.user.trust}">0</div>
-          <div class="label">추천수</div>
+    <aside class="sidebar">
+        <div class="profile-card">
+            <img th:src="@{${pageData.user.profileImageUrl}}" alt="프로필">
+            <div class="nickname" th:text="${pageData.user.nickname}">닉네임</div>
+            <div class="introduction" th:text="${pageData.user.introduction}">자기소개를 입력하세요.</div>
+            <div class="stats">
+                <div class="stat">
+                    <div class="value" th:text="${pageData.user.trust}">0</div>
+                    <div class="label">추천수</div>
+                </div>
+                <div class="stat">
+                    <div class="value" th:text="${pageData.user.noShowCount}">0</div>
+                    <div class="label">불참 횟수</div>
+                </div>
+            </div>
         </div>
-        <div class="stat">
-          <div class="value" th:text="${pageData.user.noShowCount}">0</div>
-          <div class="label">불참 횟수</div>
-        </div>
-      </div>
+        <nav class="nav-menu">
+            <a th:href="@{/main}">메인페이지로 이동</a>
+            <a href="#info" class="active" onclick="showSection('info', this)">내 정보 수정</a>
+            <a href="#history" onclick="showSection('history', this)">참여 이력</a>
+            <a href="#payments" onclick="showSection('payments', this)">결제 내역</a>
+            <a href="#posts" onclick="showSection('posts', this)">내가 쓴 글</a>
+            <div class="divider"></div>
+            <a th:href="@{/logout}">로그아웃</a>
+        </nav>
+    </aside>
+    <div class="content-area">
+        <section id="info" class="section active">
+            <h2>내 정보 수정</h2>
+            <form th:object="${user}"
+                  th:action="@{/user/profile-edit}"
+                  method="post"
+                  enctype="multipart/form-data">
+                <label for="profileImage">프로필 사진</label>
+                <input type="file" id="profileImage" th:field="*{profileName}">
+                <label for="nickname">닉네임</label>
+                <input type="text" id="nickname" th:field="*{nickname}">
+                <label for="introduction">자기소개</label>
+                <textarea id="introduction" th:field="*{introduction}" rows="4"></textarea>
+                <div class="form-actions"><button type="submit">정보 저장</button></div>
+            </form>
+            <h2 style="margin-top: 32px;">비밀번호 변경</h2>
+            <form id="passwordChangeForm"
+                  th:object="${changePasswordDTO}"
+                  th:action="@{/user/profile-update-password}" method="post">
+                <label for="currentPassword">현재 비밀번호</label>
+                <input type="password" id="currentPassword" th:field="*{currentPassword}">
+                <label for="newPassword">새 비밀번호</label>
+                <input type="password" id="newPassword" th:field="*{newPassword}">
+                <label for="confirmPassword">비밀번호 확인</label>
+                <input type="password" id="confirmPassword" th:field="*{confirmPassword}">
+                <div class="form-actions"><button type="submit">비밀번호 변경</button></div>
+            </form>
+        </section>
+        <section id="history" class="section card-list">
+            <!-- 참여 이력 섹션 그대로 유지 -->
+        </section>
+        <section id="payments" class="section card-list">
+            <!-- 결제 내역 섹션 그대로 유지 -->
+        </section>
+        <section id="posts" class="section card-list">
+            <!-- 내가 쓴 글 섹션 그대로 유지 -->
+        </section>
     </div>
-    <nav class="nav-menu">
-      <a th:href="@{/main}">메인페이지로 이동</a>
-      <a href="#info" class="active" onclick="showSection('info', this)">내 정보 수정</a>
-      <a href="#history" onclick="showSection('history', this)">참여 이력</a>
-      <a href="#payments" onclick="showSection('payments', this)">결제 내역</a>
-      <a href="#posts" onclick="showSection('posts', this)">내가 쓴 글</a>
-      <div class="divider"></div>
-      <a th:href="@{/logout}">로그아웃</a>
-    </nav>
-  </aside>
-  <div class="content-area">
-    <section id="info" class="section active">
-      <h2>내 정보 수정</h2>
-      <form th:object="${user}"
-            th:action="@{/user/profile-edit}"
-            method="post"
-            enctype="multipart/form-data">
-        <label for="profileImage">프로필 사진</label>
-        <input type="file" id="profileImage" th:field="*{profileName}">
-        <label for="nickname">닉네임</label>
-        <input type="text" id="nickname" th:field="*{nickname}">
-        <label for="introduction">자기소개</label>
-        <textarea id="introduction" th:field="*{introduction}" rows="4"></textarea>
-        <div class="form-actions"><button type="submit">정보 저장</button></div>
-      </form>
-      <h2 style="margin-top: 32px;">비밀번호 변경</h2>
-      <form id="passwordChangeForm"
-            th:object="${changePasswordDTO}"
-            th:action="@{/user/profile-update-password}" method="post">
-        <label for="currentPassword">현재 비밀번호</label>
-        <input type="password" id="currentPassword" th:field="*{currentPassword}">
-        <label for="newPassword">새 비밀번호</label>
-        <input type="password" id="newPassword" th:field="*{newPassword}">
-        <label for="confirmPassword">비밀번호 확인</label>
-        <input type="password" id="confirmPassword" th:field="*{confirmPassword}">
-        <div class="form-actions"><button type="submit">비밀번호 변경</button></div>
-      </form>
-    </section>
-    <section id="history" class="section card-list">
-      <!-- 참여 이력 섹션 그대로 유지 -->
-    </section>
-    <section id="payments" class="section card-list">
-      <!-- 결제 내역 섹션 그대로 유지 -->
-    </section>
-    <section id="posts" class="section card-list">
-      <!-- 내가 쓴 글 섹션 그대로 유지 -->
-    </section>
-  </div>
 </div>
 <script>
-  function showSection(id, el) {
-    document.querySelectorAll('.nav-menu a').forEach(a => a.classList.remove('active'));
-    el.classList.add('active');
-    document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-  }
+    function showSection(id, el) {
+      document.querySelectorAll('.nav-menu a').forEach(a => a.classList.remove('active'));
+      el.classList.add('active');
+      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
 
-  const pwdForm = document.getElementById('passwordChangeForm');
-  if (pwdForm) {
-    pwdForm.addEventListener('submit', function(e) {
-      const current = document.getElementById('currentPassword').value.trim();
-      const next = document.getElementById('newPassword').value.trim();
-      const confirm = document.getElementById('confirmPassword').value.trim();
-      if (!current || !next || !confirm) {
-        alert('모든 비밀번호 필드를 입력해주세요.');
-        e.preventDefault();
-        return;
-      }
-      if (next.length < 6) {
-        alert('새 비밀번호는 최소 6자 이상이어야 합니다.');
-        e.preventDefault();
-        return;
-      }
-      if (next !== confirm) {
-        alert('새 비밀번호와 확인이 일치하지 않습니다.');
-        e.preventDefault();
-        return;
-      }
-    });
-  }
+    const pwdForm = document.getElementById('passwordChangeForm');
+    if (pwdForm) {
+      pwdForm.addEventListener('submit', function(e) {
+        const current = document.getElementById('currentPassword').value.trim();
+        const next = document.getElementById('newPassword').value.trim();
+        const confirm = document.getElementById('confirmPassword').value.trim();
+        if (!current || !next || !confirm) {
+          alert('모든 비밀번호 필드를 입력해주세요.');
+          e.preventDefault();
+          return;
+        }
+        if (next.length < 6) {
+          alert('새 비밀번호는 최소 6자 이상이어야 합니다.');
+          e.preventDefault();
+          return;
+        }
+        if (next !== confirm) {
+          alert('새 비밀번호와 확인이 일치하지 않습니다.');
+          e.preventDefault();
+          return;
+        }
+      });
+    }
 </script>
 </body>
 </html>
