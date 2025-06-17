@@ -1,6 +1,6 @@
 package generationgap.co.kr.mapper.post;
 
-import generationgap.co.kr.domain.mypage.PostDto;
+import generationgap.co.kr.dto.mypage.PostDto;
 import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
 

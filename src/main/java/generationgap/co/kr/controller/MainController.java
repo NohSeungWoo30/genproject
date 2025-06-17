@@ -45,4 +45,5 @@ public class MainController {
     public String mainPage2() {
         return "main/MAIN"; // main.html 템플릿 반환
     }
+
 }

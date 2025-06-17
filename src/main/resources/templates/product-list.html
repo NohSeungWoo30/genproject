@@ -16,80 +16,90 @@
   <style>
     /* 3. 현재 활성화된 메뉴('상품 목록')가 더 잘 보이도록 스타일 수정 */
     .bottom-nav .bottom-link.active {
-        font-weight: bold; /* 굵은 글씨로 변경 */
-        border-bottom: 2px solid #FFFFFF; /* 흰색 밑줄 추가 */
-        padding-bottom: 6px; /* 밑줄과 글자 사이 간격 조정 */
+        font-weight: bold;
+        border-bottom: 2px solid #FFFFFF;
+        padding-bottom: 6px;
     }
 
     /* 4. 상품 목록을 스크롤바 없이 한 줄에 4개가 모두 보이도록 grid 방식으로 변경 */
     .flex-row {
         display: grid;
-        /* 카드의 개수인 4개에 맞춰 수정하여 꽉 차게 표시 */
         grid-template-columns: repeat(4, 1fr);
-        gap: 30px; /* 카드 사이의 간격 */
+        gap: 30px;
+        overflow-x: hidden;
     }
 
-    /* --- 아래에 추가된 스타일 --- */
+    /* 상위 컨테이너 스크롤 숨김 */
+    .container2,
+    ._1920-w-light {
+        overflow-x: hidden;
+    }
 
-    /* 카드 최소 높이 지정 및 내부 요소 정렬 */
-    .card {
+    /* 카드 레이아웃 크기 및 스타일 */
+    .product-card {
         display: flex;
-        flex-direction: column; /* 내부 요소를 세로로 정렬 */
-        min-height: 450px; /* 카드의 최소 높이를 늘려 전체적으로 크게 보이게 함 */
+        flex-direction: column;
+        min-height: 450px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
-
-    /* 카드 상단 이미지/색상 영역의 높이를 늘림 */
-    .card-thumb {
+    .product-thumb {
         min-height: 180px;
         display: flex;
         align-items: center;
         justify-content: center;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        background: #f5f6f8;
     }
-
-    /* 카드 하단 정보 영역이 남은 공간을 모두 채우도록 설정 */
-    .card-info {
+    .product-info {
         display: flex;
         flex-direction: column;
-        flex-grow: 1; /* 남은 세로 공간을 모두 차지하도록 설정 */
-        padding: 25px; /* 내부 여백 증가 */
+        flex-grow: 1;
+        padding: 25px;
     }
-
-    /* 카드 상단 텍스트 크기 증가 */
     .placeholder-title {
-        font-size: 2em; /* 기존보다 크게 */
+        font-size: 2em;
         font-weight: bold;
     }
-
     .placeholder-subtitle {
-        font-size: 1.5em; /* 기존보다 크게 */
+        font-size: 1.5em;
         margin-top: 10px;
+        color: #666;
     }
-
-    /* 카드 하단 텍스트들의 폰트 사이즈를 키움 */
-    .card-category {
+    .product-title {
         font-size: 1.2em;
         font-weight: bold;
+        margin-bottom: 4px;
     }
-
-    .card-title {
-        font-size: 2.2em; /* 가격 폰트 크게 */
+    .product-price {
+        font-size: 1.5em;
         font-weight: bold;
-        margin-top: 10px;
+        margin-bottom: 12px;
+        color: #333;
     }
-
-    .card-features {
-        font-size: 1.1em; /* 설명 폰트 크게 */
-        margin-top: 20px;
+    .product-desc {
+        font-size: 1.1em;
+        color: #555;
         margin-bottom: 20px;
-        flex-grow: 1; /* 버튼을 아래로 밀기 위해 남은 공간 차지 */
+        flex-grow: 1;
     }
-
-    /* 버튼 스타일 수정 */
-    .card-button {
-        font-size: 1.2em; /* 버튼 폰트 크게 */
-        padding: 18px 20px; /* 버튼 크기(세로, 가로) 키움 */
-        border-radius: 8px; /* 버튼 모서리를 약간 둥글게 */
-        /* margin-top: auto; 버튼을 카드 하단에 고정시키는 역할 */
+    .product-button {
+        font-size: 1.1em;
+        padding: 14px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        border: none;
+        transition: background 0.2s;
+    }
+    .btn-pay {
+        background: #0066ff;
+        color: #fff;
+        margin-bottom: 8px;
+    }
+    .product-button:hover {
+        opacity: 0.9;
     }
   </style>
 </head>
@@ -99,7 +109,7 @@
 
   <header class="container-nav">
     <div class="nav-left">
-      <a th:href="@{/main/MAIN}" class="logo-link">
+      <a th:href="@{/main}" class="logo-link">
         <img th:src="@{/img/icons/MT5.png}" class="logo" alt="M 로고"/>
       </a>
     </div>
@@ -117,17 +127,17 @@
 
   <section class="bottom-nav-wrapper">
     <nav class="bottom-nav">
-      <a th:href="@{/main/meetingcreate}" class="bottom-link">모임 생성</a>
-      <a th:href="@{/main/Meeting-list}" class="bottom-link">모임 목록</a>
+      <a th:href="@{/meetingcreate}" class="bottom-link">모임 생성</a>
+      <a th:href="@{/Meeting-list}" class="bottom-link">모임 목록</a>
       <a th:href="@{/product-list}" class="bottom-link active">상품 목록</a>
-      <a th:href="@{/main/board}" class="bottom-link">자유 게시판</a>
+      <a th:href="@{/posts}" class="bottom-link">자유 게시판</a>
     </nav>
   </section>
 
   <section class="container2">
     <div class="flex-row">
 
-      <!-- 변경 후 상품 카드 -->
+      <!-- 1회 이용권 -->
       <div class="product-card free">
         <div class="product-thumb">
           <div class="product-text-placeholder">
@@ -153,7 +163,7 @@
         </div>
       </div>
 
-      <!-- 이하 상품들도 동일하게 교체 -->
+      <!-- 5회 이용권 -->
       <div class="product-card standard">
         <div class="product-thumb">
           <div class="product-text-placeholder">
@@ -179,6 +189,7 @@
         </div>
       </div>
 
+      <!-- 1달 무제한 -->
       <div class="product-card premium">
         <div class="product-thumb">
           <div class="product-text-placeholder">
@@ -204,6 +215,7 @@
         </div>
       </div>
 
+      <!-- 1년 무제한 -->
       <div class="product-card vip">
         <div class="product-thumb">
           <div class="product-text-placeholder">
@@ -232,6 +244,7 @@
     </div>
   </section>
 
+  <!-- 결제 모달 -->
   <div id="payment-modal-backdrop" class="payment-modal-backdrop">
     <div id="payment-widget-container" class="payment-widget-container">
       <h2 class="modal-title">결제 정보 입력</h2>
@@ -249,126 +262,51 @@
 
 <script th:inline="javascript">
   document.addEventListener('DOMContentLoaded', function () {
-
-    console.log('1. TossPayments Payment Widget SDK 로드 확인:', window.PaymentWidget);
-
-    if (typeof window.PaymentWidget === 'undefined') {
-      console.error('TossPayments Payment Widget SDK가 로드되지 않았습니다! 네트워크 탭이나 CSP 설정을 확인하세요.');
-      return;
-    }
-
+    if (typeof window.PaymentWidget === 'undefined') return;
     const clientKey = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
-
     const userIdx = /*[[${userIdx}]]*/ null;
     const customerKey = userIdx ? String(userIdx) : 'guest_' + new Date().getTime();
+    const paymentWidget = PaymentWidget(clientKey, customerKey);
 
-    console.log('[DEBUG] customerKey:', customerKey, 'typeof customerKey:', typeof customerKey);
-
-    let paymentWidget;
-    try {
-        paymentWidget = PaymentWidget(clientKey, customerKey);
-        console.log('[DEBUG] PaymentWidget 초기화 완료:', paymentWidget);
-    } catch (e) {
-        console.error('PaymentWidget 초기화 중 오류 발생:', e);
-        alert('결제 시스템 초기화에 실패했습니다. 잠시 후 다시 시도해주세요.');
-        return;
-    }
-
-
-    const paymentModalBackdrop = document.getElementById('payment-modal-backdrop');
-    const paymentMethodsDiv = document.getElementById('payment-methods-div');
+    const modalBackdrop = document.getElementById('payment-modal-backdrop');
+    const methodsDiv = document.getElementById('payment-methods-div');
     const agreementDiv = document.getElementById('agreement-div');
-    const requestPaymentButton = document.getElementById('request-payment-button');
-    const closeWidgetButton = document.getElementById('close-widget-button');
-    const modalCloseXButton = document.getElementById('modal-close-x-button');
+    const reqBtn = document.getElementById('request-payment-button');
+    const closeBtn = document.getElementById('close-widget-button');
+    const xBtn = document.getElementById('modal-close-x-button');
+    let currentOrder='', currentAmt=0;
 
-    let currentOrderName = '';
-    let currentAmount = 0;
+    document.querySelectorAll('.btn-pay').forEach(btn => btn.addEventListener('click', () => {
+      currentOrder = btn.dataset.productName;
+      currentAmt = parseInt(btn.dataset.amount,10);
+      if (isNaN(currentAmt)) return alert('금액 오류');
+      paymentWidget.renderPaymentMethods('#payment-methods-div',{value:currentAmt});
+      paymentWidget.renderAgreement('#agreement-div');
+      modalBackdrop.style.display='flex';
+    }));
 
-    const productButtons = document.querySelectorAll('.btn-pay');
-    productButtons.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        currentOrderName = btn.dataset.productName;
-        currentAmount = parseInt(btn.dataset.amount, 10);
-
-        if (isNaN(currentAmount)) {
-          alert('결제 금액이 올바르지 않습니다.');
-          console.error('Invalid amount:', btn.dataset.amount);
-          return;
-        }
-
-        try {
-            paymentWidget.renderPaymentMethods(
-                '#payment-methods-div',
-                { value: currentAmount }
-            );
-            paymentWidget.renderAgreement('#agreement-div');
-
-            paymentModalBackdrop.style.display = 'flex';
-
-        } catch (e) {
-            console.error('결제위젯 렌더링 중 오류 발생:', e);
-            alert('결제 화면을 불러오는 데 실패했습니다.');
-        }
-      });
+    reqBtn.addEventListener('click', () => {
+      const orderId = 'order_'+Date.now();
+      const successUrl = new URL(window.location.origin+'/payment/result');
+      successUrl.searchParams.append('orderName', currentOrder);
+      const failUrl = new URL(window.location.origin+'/payment/fail');
+      failUrl.searchParams.append('orderName', currentOrder);
+      paymentWidget.requestPayment({
+        orderId, orderName: currentOrder,
+        customerName: /*[[${#authentication.name}]]*/'비회원',
+        customerEmail: /*[[${#authentication.principal?.email}]]*/'test@example.com',
+        successUrl: successUrl.toString(),
+        failUrl: failUrl.toString()
+      }).catch(err=>{if(err.code!=='USER_CANCEL')alert('오류:'+err.message);});
     });
 
-    requestPaymentButton.addEventListener('click', function () {
-        const orderId = 'order_' + new Date().getTime() + Math.random().toString(36).substring(2, 15);
-        const customerName = /*[[${#authentication.name}]]*/ '비회원' || '고객';
-        const customerEmail = /*[[${#authentication.principal?.email}]]*/ 'test@example.com';
-
-        // *** currentOrderName을 successUrl 및 failUrl의 쿼리 파라미터로 추가 ***
-        const successUrl = new URL(window.location.origin + '/payment/result');
-        successUrl.searchParams.append('orderName', currentOrderName);
-
-        const failUrl = new URL(window.location.origin + '/payment/fail');
-        failUrl.searchParams.append('orderName', currentOrderName);
-
-        console.log('\n--- 결제 요청 데이터 디버깅 시작 ---');
-        console.log('  amount:', currentAmount, 'typeof:', typeof currentAmount, 'isNaN:', isNaN(currentAmount));
-        console.log('  orderId:', orderId, 'typeof:', typeof orderId);
-        console.log('  orderName:', currentOrderName, 'typeof:', typeof currentOrderName);
-        console.log('  customerName:', customerName, 'typeof:', typeof customerName);
-        console.log('  customerEmail:', customerEmail, 'typeof:', typeof customerEmail);
-        console.log('  successUrl:', successUrl.toString(), 'typeof:', typeof successUrl.toString());
-        console.log('  failUrl:', failUrl.toString(), 'typeof:', typeof failUrl.toString());
-        console.log('--- 결제 요청 데이터 디버깅 끝 ---\n');
-
-        paymentWidget.requestPayment({
-            orderId: orderId,
-            orderName: currentOrderName, // 토스페이먼츠에 전달되는 orderName
-            customerName: customerName,
-            customerEmail: customerEmail,
-            successUrl: successUrl.toString(),
-            failUrl: failUrl.toString()
-        }).catch(function (error) {
-            if (error.code === 'USER_CANCEL') {
-                console.warn('결제가 취소되었습니다. (사용자 취소)');
-                alert('결제가 취소되었습니다.');
-            } else {
-                console.error('결제 요청 중 오류 발생:', error);
-                alert('결제 요청 중 오류가 발생했습니다: ' + error.message);
-            }
-        });
-    });
-
-    // 모달 닫기 함수
-    function closePaymentModal() {
-        paymentModalBackdrop.style.display = 'none';
-        paymentMethodsDiv.innerHTML = '';
-        agreementDiv.innerHTML = '';
+    function closeModal(){
+      modalBackdrop.style.display='none';
+      methodsDiv.innerHTML=''; agreementDiv.innerHTML='';
     }
-
-    closeWidgetButton.addEventListener('click', closePaymentModal);
-    modalCloseXButton.addEventListener('click', closePaymentModal);
-
-    paymentModalBackdrop.addEventListener('click', function(event) {
-        if (event.target === paymentModalBackdrop) {
-            closePaymentModal();
-        }
-    });
-
+    closeBtn.addEventListener('click',closeModal);
+    xBtn.addEventListener('click',closeModal);
+    modalBackdrop.addEventListener('click',e=>{if(e.target===modalBackdrop)closeModal();});
   });
 </script>
 </body>

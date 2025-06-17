@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="generationgap.co.kr.mapper.payment.PaymentMapper">
 
-    <select id="findPaymentsByUserIdx" resultType="generationgap.co.kr.domain.mypage.PaymentDto">
+    <select id="findPaymentsByUserIdx" resultType="generationgap.co.kr.dto.mypage.PaymentDto">
         SELECT
         product_name AS productName,
         approved_at AS approvedAt,

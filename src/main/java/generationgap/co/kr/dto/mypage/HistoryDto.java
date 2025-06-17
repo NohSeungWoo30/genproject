@@ -1,4 +1,4 @@
-package generationgap.co.kr.domain.mypage;
+package generationgap.co.kr.dto.mypage;
 
 import lombok.Getter;
 import lombok.Setter;

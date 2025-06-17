@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     dom.profileBtn.addEventListener('click', () => {
-      window.location.href = '/user/mypage';
+      window.location.href = '/mypage';
     });
 
     dom.listBox.addEventListener('click', (e) => {

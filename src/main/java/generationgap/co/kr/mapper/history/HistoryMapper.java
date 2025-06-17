@@ -1,6 +1,6 @@
 package generationgap.co.kr.mapper.history;
 
-import generationgap.co.kr.domain.mypage.HistoryDto;
+import generationgap.co.kr.dto.mypage.HistoryDto;
 import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
 

@@ -5,7 +5,94 @@
     <title>회원가입</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <style>
-        /* 메시지 스타일 */
+        /* 기본 스타일 초기화 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #f5f5f5;
+            font-family: "Pretendard-Regular", sans-serif;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        /* 컨테이너 스타일 */
+        .container {
+            max-width: 400px;
+            margin: 60px auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 20px 24px 32px;
+        }
+
+        /* 제목 스타일 */
+        h2 {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        /* 각 폼 그룹 (div) 스타일 */
+        form > div { /* form 바로 하위의 div에 적용 */
+            margin-bottom: 16px;
+        }
+
+        /* 라벨 스타일 */
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        /* 입력 필드 스타일 (input, select, textarea 포함) */
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="date"], /* date input은 드롭다운으로 대체되었지만 혹시 몰라 유지 */
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #fafafa;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="email"]:focus,
+        input[type="tel"]:focus,
+        input[type="date"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #6a5acd;
+            background: #fff;
+        }
+
+        /* 파일 입력 필드 특정 스타일 */
+        input[type="file"] {
+            padding: 8px 12px;
+            background: #fff;
+        }
+
+        /* 작은 텍스트 (설명, 메시지) 스타일 */
+        p.validation-message, /* 유효성 메시지 */
+        form > div > p { /* 프로필 사진 설명 등 */
+            display: block;
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        /* 메시지 스타일 (기존 유지) */
         .error-message {
             color: red;
             font-size: 0.9em;
@@ -16,83 +103,129 @@
             font-size: 0.9em;
             margin-top: 5px;
         }
-        /* 입력 필드와 메시지 간격 조정 */
-        div {
-            margin-bottom: 10px;
-        }
-        input {
-            margin-right: 5px;
-        }
-        /* ⭐ 추가: 프로필 이미지 미리보기 스타일 ⭐ */
+
+        /* 프로필 이미지 미리보기 스타일 */
         #profileImagePreview {
-            width: 100px; /* 적절한 크기로 조정 */
-            height: 100px; /* 적절한 크기로 조정 */
-            border-radius: 50%; /* 원형 이미지 */
-            object-fit: cover; /* 이미지가 잘리지 않고 채워지도록 */
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
             border: 1px solid #ddd;
+            margin: 10px auto 0;
+            display: block;
+        }
+
+        /* 생년월일 드롭다운 그룹 스타일 */
+        .birthdate-select-group {
+            display: flex;
+            gap: 8px;
+        }
+        .birthdate-select-group select {
+            width: auto;
+            flex-grow: 1;
+        }
+
+        /* 버튼 스타일 */
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            background: #6a5acd;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
             margin-top: 10px;
-            display: block; /* 블록 요소로 표시 */
+        }
+        .btn-submit:hover {
+            background: #5548b6;
+        }
+        .btn-submit:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* 하단 링크 스타일 */
+        .text-center {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 13px;
+        }
+        .text-center a {
+            color: #6a5acd;
+            text-decoration: none;
+        }
+        .text-center a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-<h2>회원가입 🙌</h2>
-<form th:action="@{/user/signup}" method="post" th:object="${user}" enctype="multipart/form-data">
-    <div>
-        <label for="userId">아이디:</label>
-        <input type="text" id="userId" th:field="*{userId}" required />
-        <p id="userIdMessage" class="validation-message"></p>
-    </div>
-    <div>
-        <label for="userName">이름:</label>
-        <input type="text" id="userName" th:field="*{userName}" />
-    </div>
-    <div>
-        <label for="nickname">닉네임:</label>
-        <input type="text" id="nickname" th:field="*{nickname}" required />
-        <p id="nicknameMessage" class="validation-message"></p>
-    </div>
-    <div>
-        <label for="birthDate">생년월일:</label>
-        <input type="date" id="birthDate" th:field="*{birthDate}" />
-    </div>
-    <div>
-        <label for="gender">성별:</label>
-        <select id="gender" th:field="*{gender}">
-            <option value="M">남자</option>
-            <option value="F">여자</option>
-        </select>
-    </div>
-    <div>
-        <label for="email">이메일:</label>
-        <input type="email" id="email" th:field="*{email}" required />
-        <p id="emailMessage" class="validation-message"></p>
-    </div>
-    <div>
-        <label for="phone">전화번호:</label>
-        <input type="text" id="phone" th:field="*{phone}" required placeholder="예: 01012345678" />
-        <p id="phoneMessage" class="validation-message"></p>
-    </div>
-    <div>
-        <label for="password">비밀번호:</label>
-        <input type="password" id="password" th:field="*{password}" required />
-    </div>
-    <div>
-        <label for="profileImageFile">프로필 사진:</label>
-        <input type="file" id="profileImageFile" name="profileImageFile" accept="image/*">
-        <img id="profileImagePreview" src="/images/profile_upload/default_profile.jpg" alt="프로필 이미지 미리보기">
-        <p>선택하지 않으면 기본 이미지가 적용됩니다. (최대 10MB)</p>
-    </div>
-    <div>
-        <label for="introduction">자기소개:</label>
-        <input type="text" id="introduction" th:field="*{introduction}" />
-    </div>
-    <button type="submit" id="submitButton">가입하기</button>
-</form>
+<div class="container">
+    <h2>회원가입 🙌</h2>
+    <form th:action="@{/user/signup}" method="post" th:object="${user}" enctype="multipart/form-data">
+        <div>
+            <label for="userId">아이디:</label>
+            <input type="text" id="userId" th:field="*{userId}" required />
+            <p id="userIdMessage" class="validation-message"></p>
+        </div>
+        <div>
+            <label for="userName">이름:</label>
+            <input type="text" id="userName" th:field="*{userName}" />
+        </div>
+        <div>
+            <label for="nickname">닉네임:</label>
+            <input type="text" id="nickname" th:field="*{nickname}" required />
+            <p id="nicknameMessage" class="validation-message"></p>
+        </div>
+        <div>
+            <label>생년월일:</label>
+            <div class="birthdate-select-group">
+                <select id="birthYear" required></select>
+                <select id="birthMonth" required></select>
+                <select id="birthDay" required></select>
+            </div>
+        </div>
+        <div>
+            <label for="gender">성별:</label>
+            <select id="gender" th:field="*{gender}">
+                <option value="M">남자</option>
+                <option value="F">여자</option>
+            </select>
+        </div>
+        <div>
+            <label for="email">이메일:</label>
+            <input type="email" id="email" th:field="*{email}" required />
+            <p id="emailMessage" class="validation-message"></p>
+        </div>
+        <div>
+            <label for="phone">전화번호:</label>
+            <input type="text" id="phone" th:field="*{phone}" required placeholder="예: 01012345678" />
+            <p id="phoneMessage" class="validation-message"></p>
+        </div>
+        <div>
+            <label for="password">비밀번호:</label>
+            <input type="password" id="password" th:field="*{password}" required />
+        </div>
+        <div>
+            <label for="profileImageFile">프로필 사진:</label>
+            <input type="file" id="profileImageFile" name="profileImageFile" accept="image/*">
+            <img id="profileImagePreview" src="/images/profile_upload/default_profile.jpg" alt="프로필 이미지 미리보기">
+            <p>선택하지 않으면 기본 이미지가 적용됩니다. (최대 10MB)</p>
+        </div>
+        <div>
+            <label for="introduction">자기소개:</label>
+            <textarea id="introduction" th:field="*{introduction}" rows="4" placeholder="자신을 소개하는 글을 작성해주세요."></textarea>
+        </div>
+        <button type="submit" id="submitButton" class="btn-submit">가입하기</button>
+    </form>
+</div>
 
 <script th:inline="javascript">
     /*<![CDATA[*/
-    // CSRF 토큰을 Thymeleaf를 통해 서버에서 주입받습니다.
+    // CSRF 토큰은 Thymeleaf 폼 제출 방식에서 자동으로 처리되지만, AJAX 중복 확인을 위해 필요합니다.
     const csrfParameterName = /*[[${_csrf != null ? _csrf.parameterName : ''}]]*/ '';
     const csrfToken = /*[[${_csrf != null ? _csrf.token : ''}]]*/ '';
     /*]]>*/
@@ -104,8 +237,7 @@
             nickname: false,
             email: false,
             phone: false,
-             // CI는 필수가 아니거나, 중복 확인을 나중에 추가할 경우 기본 true로 설정하는 것이 합리적입니다.
-                        // 만약 CI도 필수 중복 확인이 필요하다면 `false`로 변경 후 checkDuplication 호출
+            birthDate: false
         };
 
         // 회원가입 버튼 상태 업데이트 함수
@@ -120,6 +252,76 @@
         // 초기 버튼 상태 설정 (처음에는 비활성화)
         updateSubmitButtonStatus();
 
+        // ⭐ 생년월일 드롭다운 초기화 및 유효성 검사 ⭐
+        const $birthYear = $('#birthYear');
+        const $birthMonth = $('#birthMonth');
+        const $birthDay = $('#birthDay');
+
+        function populateYears() {
+            const currentYear = new Date().getFullYear();
+            $birthYear.append('<option value="">연도</option>');
+            for (let i = currentYear; i >= currentYear - 100; i--) { // 과거 100년까지
+                $birthYear.append('<option value="' + i + '">' + i + '</option>');
+            }
+        }
+
+        function populateMonths() {
+            $birthMonth.append('<option value="">월</option>');
+            for (let i = 1; i <= 12; i++) {
+                $birthMonth.append('<option value="' + String(i).padStart(2, '0') + '">' + i + '</option>');
+            }
+        }
+
+        function populateDays() {
+            const year = parseInt($birthYear.val());
+            const month = parseInt($birthMonth.val());
+            const $birthDay = $('#birthDay');
+            $birthDay.empty().append('<option value="">일</option>'); // 기존 옵션 비우고 "일" 추가
+
+            if (year && month) {
+                const daysInMonth = new Date(year, month, 0).getDate(); // 해당 월의 마지막 날
+                for (let i = 1; i <= daysInMonth; i++) {
+                    $birthDay.append('<option value="' + String(i).padStart(2, '0') + '">' + i + '</option>');
+                }
+            }
+            validateBirthDate(); // 날짜가 변경될 때마다 유효성 검사
+        }
+
+        function validateBirthDate() {
+            const year = $birthYear.val();
+            const month = $birthMonth.val();
+            const day = $birthDay.val();
+
+            // 모든 드롭다운이 선택되었는지 확인
+            if (year && month && day) {
+                const selectedDate = new Date(year, parseInt(month) - 1, day);
+                // 선택된 날짜가 유효한 날짜인지 추가 검사 (예: 2월 30일과 같은 경우)
+                if (selectedDate.getFullYear() == year &&
+                    selectedDate.getMonth() == parseInt(month) - 1 &&
+                    selectedDate.getDate() == day) {
+                    validationStatus.birthDate = true;
+                } else {
+                    validationStatus.birthDate = false;
+                }
+            } else {
+                validationStatus.birthDate = false;
+            }
+            updateSubmitButtonStatus();
+        }
+
+        populateYears();
+        populateMonths();
+
+        $birthYear.on('change', function() {
+            populateDays();
+            validateBirthDate();
+        });
+        $birthMonth.on('change', function() {
+            populateDays();
+            validateBirthDate();
+        });
+        $birthDay.on('change', validateBirthDate); // 일 선택 시 바로 유효성 검사
+
         // 공통 중복 확인 함수
         function checkDuplication(inputId, messageId, apiEndpoint, paramName, validationKey) {
             const $input = $('#' + inputId);
@@ -128,7 +330,7 @@
             $input.on('blur', function() {
                 const value = $input.val().trim();
                 if (value === '') {
-                    $message.text('필수 항목입니다.').removeClass('success-message').addClass('error-message'); // 빈 값일 경우 오류 메시지
+                    $message.text('필수 항목입니다.').removeClass('success-message').addClass('error-message');
                     validationStatus[validationKey] = false;
                     updateSubmitButtonStatus();
                     return;
@@ -159,8 +361,7 @@
 
             // (선택 사항) 입력 중에도 실시간으로 체크하려면 'keyup' 이벤트 추가
             $input.on('keyup', function() {
-                 // 비밀번호 입력 시에도 버튼 상태 업데이트 (공백이 아닌지 확인)
-                updateSubmitButtonStatus();
+                 updateSubmitButtonStatus();
             });
         }
 
@@ -169,34 +370,30 @@
         checkDuplication('nickname', 'nicknameMessage', 'check/nickname', 'nickname', 'nickname');
         checkDuplication('email', 'emailMessage', 'check/email', 'email', 'email');
         checkDuplication('phone', 'phoneMessage', 'check/phone', 'phone', 'phone');
-        // userCi도 UNIQUE 제약 조건이 있다면 아래 주석 해제하여 사용
-        // checkDuplication('userCi', 'userCiMessage', 'check/userCi', 'userCi', 'userCi');
 
         // 비밀번호 입력 시 버튼 상태 업데이트
         $('#password').on('keyup', updateSubmitButtonStatus);
 
-
-        // ⭐ 프로필 이미지 미리보기 기능 ⭐
+        // 프로필 이미지 미리보기 기능
         const $profileImageInput = $('#profileImageFile');
         const $profileImagePreview = $('#profileImagePreview');
 
         $profileImageInput.on('change', function(event) {
-            const file = event.target.files[0]; // 선택된 파일 가져오기
+            const file = event.target.files[0];
             if (file) {
-                const reader = new FileReader(); // FileReader 객체 생성
+                const reader = new FileReader();
                 reader.onload = function(e) {
-                    $profileImagePreview.attr('src', e.target.result); // 미리보기 이미지의 src를 선택된 파일의 데이터 URL로 설정
-                    $profileImagePreview.show(); // 이미지를 보이게 함
+                    $profileImagePreview.attr('src', e.target.result);
+                    $profileImagePreview.show();
                 };
-                reader.readAsDataURL(file); // 파일을 Data URL로 읽어들임
+                reader.readAsDataURL(file);
             } else {
-                $profileImagePreview.attr('src', '/images/profile_upload/default_profile.jpg'); // 파일 선택 취소 시 기본 이미지로 되돌리기
+                $profileImagePreview.attr('src', '/images/profile_upload/default_profile.jpg');
             }
         });
 
-        // 폼 제출 이벤트 가로채기 (선택 사항: jQuery serialize() 대신 FormData 사용)
+        // ⭐ 폼 제출 이벤트 가로채기 (AJAX 제출 대신 일반 폼 제출로 변경) ⭐
         $('form').on('submit', function(event) {
-            // 필수 필드가 비어있거나, 유효성 검사를 통과하지 못하면 제출 방지
             const allFieldsValid = Object.values(validationStatus).every(status => status === true);
             const passwordEntered = $('#password').val().trim() !== '';
 
@@ -206,38 +403,35 @@
                 return;
             }
 
-            // AJAX로 폼 데이터 전송
-            event.preventDefault(); // 기본 폼 제출 동작 방지
+            // ⭐ 생년월일 값을 YYYY-MM-DD 형식으로 조합하여 hidden input에 설정 ⭐
+            // Thymeleaf의 th:object="${user}"와 연동되도록 name 속성을 user.birthDate로 설정
+            const year = $birthYear.val();
+            const month = $birthMonth.val();
+            const day = $birthDay.val();
 
-            const $form = $(this);
-            const formData = new FormData($form[0]); // jQuery 객체에서 DOM 요소 추출 후 FormData 생성
-
-            // CSRF 토큰을 FormData에 추가
-            if (csrfParameterName && csrfToken) {
-                formData.append(csrfParameterName, csrfToken);
+            if (year && month && day) {
+                const birthDateValue = `${year}-${month}-${day}`;
+                // 기존 form에 hidden input을 추가하거나, 이미 있다면 값을 업데이트
+                let $birthDateHiddenInput = $('input[name="birthDate"]');
+                if ($birthDateHiddenInput.length === 0) {
+                    $birthDateHiddenInput = $('<input>').attr({
+                        type: 'hidden',
+                        name: 'birthDate', // UserDTO의 필드 이름과 일치
+                        id: 'hiddenBirthDate' // 필요 시 ID 추가
+                    }).appendTo(this); // 현재 폼에 추가
+                }
+                $birthDateHiddenInput.val(birthDateValue);
+            } else {
+                alert("생년월일을 올바르게 선택해주세요.");
+                event.preventDefault(); // 폼 제출 중단
+                return;
             }
 
-            $.ajax({
-                url: $form.attr('action'), // 폼의 action 속성 사용
-                type: $form.attr('method'), // 폼의 method 속성 사용
-                data: formData,
-                processData: false, // FormData를 사용할 때는 false
-                contentType: false, // FormData를 사용할 때는 false
-                success: function(response) {
-                    // 서버 응답이 JSON 형식이라고 가정
-                    if (response.success) {
-                        alert(response.message || '회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.');
-                        window.location.href = '/user/login'; // Spring Security 로그인 페이지로 이동
-                    } else {
-                        alert('회원가입 실패: ' + (response.message || '알 수 없는 오류가 발생했습니다.'));
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error("AJAX Submission Error: ", status, error, xhr.responseText);
-                    const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : '서버 요청 중 오류가 발생했습니다.';
-                    alert('회원가입 중 오류가 발생했습니다: ' + errorMessage);
-                }
-            });
+            // CSRF 토큰은 Thymeleaf 폼이 자동으로 처리하므로 수동 추가 필요 없음.
+            // 다만, AJAX 중복 확인 시에는 필요하므로 위쪽 변수는 유지.
+
+            // 여기까지 오면 폼이 정상적으로 서버로 제출됩니다 (AJAX 아님).
+            // 서버는 리다이렉트 응답을 보내고 브라우저가 이를 따라갈 것입니다.
         });
     });
 </script>

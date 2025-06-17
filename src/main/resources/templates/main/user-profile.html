@@ -1,98 +1,106 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8" />
-    <title th:text="${profile.nickname} + '의 프로필'">사용자 프로필</title>
+    <title>사용자 프로필</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     <style>
         body {
-          margin: 0;
-          padding: 0;
-          font-family: sans-serif;
-          background-color: #f7f8fa;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', sans-serif;
+            background-color: #f7f8fa;
         }
         .profile-container {
-          max-width: 500px;
-          margin: 60px auto;
-          padding: 40px;
-          background-color: white;
-          border-radius: 16px;
-          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-          text-align: center;
+            max-width: 500px;
+            margin: 60px auto;
+            padding: 40px;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+            text-align: center;
         }
         .profile-img {
-          width: 120px;
-          height: 120px;
-          border-radius: 50%;
-          object-fit: cover;
-          margin-bottom: 20px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
         }
         .profile-name {
-          font-size: 24px;
-          font-weight: bold;
-          margin-bottom: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
         }
         .profile-intro {
-          font-size: 16px;
-          color: #555;
-          margin-bottom: 24px;
-          white-space: pre-wrap;
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 24px;
+            white-space: pre-wrap;
         }
         .trust-info {
-          font-size: 15px;
-          color: #333;
-          margin-bottom: 24px;
+            font-size: 15px;
+            color: #333;
+            margin-bottom: 24px;
         }
         .action-buttons {
-          display: flex;
-          justify-content: center;
-          gap: 16px;
-          margin-bottom: 24px;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 24px;
         }
         .btn {
-          padding: 10px 20px;
-          border: none;
-          border-radius: 8px;
-          cursor: pointer;
-          font-size: 15px;
-          transition: 0.2s;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: 0.2s;
         }
-        .btn-recommend {
-          background-color: #5c6bc0;
-          color: white;
-        }
-        .btn-report {
-          background-color: #e57373;
-          color: white;
-        }
-        .btn:hover {
-          opacity: 0.9;
-        }
+        .btn-recommend { background-color: #5c6bc0; color: white; }
+        .btn-report    { background-color: #e57373; color: white; }
+        .btn-mypage    { background-color: #4A90E2; color: white; }
+        .btn:hover     { opacity: 0.9; }
         .back-btn {
-          display: inline-block;
-          background-color: #ddd;
-          color: #333;
-          border: none;
-          border-radius: 6px;
-          padding: 8px 16px;
-          cursor: pointer;
-          font-size: 14px;
+            display: inline-block;
+            background-color: #ddd;
+            color: #333;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
 
 <div class="profile-container">
-    <img th:src="${profile.avatar}" alt="프로필 사진" class="profile-img" />
-    <div class="profile-name" th:text="${profile.nickname}">닉네임</div>
-    <div class="profile-intro" th:text="${profile.intro}">자기소개</div>
+    <img th:src="${pageData.user.profileImageUrl}" alt="프로필 사진" class="profile-img" />
+    <div class="profile-name" th:text="${pageData.user.nickname}">닉네임</div>
+    <div class="profile-intro" th:text="${pageData.user.introduction}">자기소개</div>
     <div class="trust-info">
         <span class="material-icons" style="vertical-align: middle;">thumb_up</span>
-        추천 수: <span th:text="${profile.trust}">0</span>
+        추천 수: <span th:text="${pageData.user.trust}">0</span>
     </div>
     <div class="action-buttons">
-        <button class="btn btn-recommend">추천하기</button>
-        <button class="btn btn-report">신고하기</button>
+        <!-- 본인 프로필이 아닐 때 -->
+        <button th:if="${#authentication.principal.username != pageData.user.username}"
+                class="btn btn-recommend"
+                th:onclick="|location.href='@{/user/' + ${pageData.user.id} + '/recommend'}'|">
+            추천하기
+        </button>
+        <button th:if="${#authentication.principal.username != pageData.user.username}"
+                class="btn btn-report"
+                th:onclick="|location.href='@{/user/' + ${pageData.user.id} + '/report'}'|">
+            신고하기
+        </button>
+        <!-- 본인 프로필일 때 -->
+        <button th:if="${#authentication.principal.username == pageData.user.username}"
+                class="btn btn-mypage"
+                th:onclick="|location.href='@{/mypage}'|">
+            마이페이지
+        </button>
     </div>
     <button class="back-btn" onclick="history.back()">← 돌아가기</button>
 </div>

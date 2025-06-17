@@ -4,15 +4,17 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="generationgap.co.kr.mapper.history.HistoryMapper">
 
-    <select id="findHistoryByUserIdx" resultType="generationgap.co.kr.domain.mypage.HistoryDto">
+    <select id="findHistoryByUserIdx"
+            resultType="generationgap.co.kr.dto.mypage.HistoryDto">
         SELECT
         g.title,
-        g.group_date AS date,
-        g.party_member AS participants
+        g.group_date,         <!-- 별칭 제거 -->
+        g.party_member
         FROM group_members gm
         JOIN groups g ON gm.group_idx = g.group_idx
-        WHERE gm.user_idx = #{userIdx}
+        WHERE gm.user_idx     = #{userIdx}
         AND gm.is_confirmed = 'Y'
         ORDER BY g.group_date DESC
     </select>
+
 </mapper>
