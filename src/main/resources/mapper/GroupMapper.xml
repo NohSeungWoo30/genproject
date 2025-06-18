@@ -177,7 +177,7 @@
         #{naverPlaceUrl},
         #{latitude},
         #{longitude},
-        #{groupImgUrl},
+        #{groupImgUrl, jdbcType=VARCHAR},
         SYSDATE
         )
     </insert>
@@ -339,4 +339,156 @@
     g.group_date ASC
     FETCH FIRST 10 ROWS ONLY;
     </select>
+
+    <!--<select id="getfiterGroupList" parameterType="generationgap.co.kr.domain.group.SearchFilterRequest" resultMap="Groups">
+        <![CDATA[
+        SELECT
+        g.group_idx,
+        g.owner_idx,
+        g.title,
+        cm.category_main_name,
+        g.group_date,
+        g.place_address,
+        g.group_img_url
+        FROM
+        groups g
+        LEFT JOIN
+        group_category_main cm ON g.category_main_idx = cm.category_main_idx
+        WHERE
+        g.groups_status = 'RECRUITING' &#45;&#45; ⭐ 모집 중인 모임만 검색 (필수) ⭐
+        AND 1 = 1 &lt;!&ndash;항상 참인 조건(where 동적 활용)으로 시작&ndash;&gt;
+        ]]>
+        &lt;!&ndash;:groupDate는 'YYYY/MM/DD' 형식의 문자열. 해당 날짜 모임을 찾음.
+        (클라이언트에서 특정 날짜를 선택하지 않았을 경우 null 또는 빈 문자열이 올 수 있음을 가정)&ndash;&gt;
+        <if test="groupDate != null and groupDate != ''">
+            <![CDATA[
+            AND TRUNC(g.group_date) >= TO_DATE(#{groupDate}, 'YYYY/MM/DD')
+            ]]>
+        </if>
+
+        &lt;!&ndash;:region 값에 '전체 지역'이 오거나 빈 문자열이 오면 이 조건 건너뜀
+        :region 값이 실제 검색 키워드일 경우 place_address에 해당 키워드가 포함된 것을 찾음&ndash;&gt;
+        <if test="region != null and region != '' and region != '전체 지역'">
+            <![CDATA[
+        AND g.place_address LIKE '%' || #{region} || '%'
+            ]]>
+        </if>
+
+        &lt;!&ndash;사용자가 검색한 나이 범위 (:minAge, :maxAge)가 모임의 허용 나이 범위 (g.age_min, g.age_max)와 겹치는지 확인
+        만약 DTO의 minAge, maxAge가 0, 100이라면 전체 나이대로 간주&ndash;&gt;
+        <if test="minAge != null and maxAge != null">
+            <![CDATA[
+        AND (
+        &lt;!&ndash;검색 범위가 전체 연령일 경우 (20-50세)&ndash;&gt;
+            (#{minAge} = 20 AND #{maxAge} = 50)
+            OR (
+            g.age_min <= #{maxAge}
+            AND g.age_max >= #{minAge}
+            )
+        )
+            ]]>
+        </if>
+
+        <if test="minParticipants != null and maxParticipants != null">
+            <![CDATA[
+            AND (
+                   (#{minParticipants} <= 0 AND #{maxParticipants} >= 9999)
+                OR (
+                       g.members_min <= #{maxParticipants}
+                   AND g.members_max >= #{minParticipants}
+                )
+            )
+            ]]>
+        </if>
+
+        &lt;!&ndash;:categoryMainIdx가 0 또는 특정 '전체' 값을 의미하면 이 조건 건너뜀&ndash;&gt;
+        AND (
+        &lt;!&ndash;0을 '전체 카테고리'로 간주&ndash;&gt;
+        <if test="categoryMainIdx != null and categoryMainIdx != 0">
+            <![CDATA[
+            AND g.category_main_idx = #{categoryMainIdx}
+            ]]>
+        </if>
+        <![CDATA[
+        ORDER BY
+            g.group_date ASC, g.created_at DESC
+        ]]>
+    </select>-->
+
+    <resultMap id="GroupSearchResponse" type="generationgap.co.kr.domain.group.GroupSearchResponseDTO">
+        <id property="groupIdx" column="group_idx"/>
+        <result property="title" column="title"/>
+        <result property="categoryMainName" column="category_main_name"/>
+        <result property="groupDate" column="group_date"/>
+        <result property="placeAddress" column="place_address"/>
+        <result property="groupImgUrl" column="group_img_url"/>
+    </resultMap>
+
+    <select id="getfiterGroupList" parameterType="generationgap.co.kr.domain.group.SearchFilterRequest" resultMap="GroupSearchResponse">
+        <![CDATA[
+        SELECT
+            g.group_idx,
+            g.title,
+            cm.category_main_name as categoryMainName,
+            g.group_date,
+            g.place_address,
+            g.group_img_url
+        FROM
+            groups g
+        LEFT JOIN group_category_main cm ON g.category_main_idx = cm.category_main_idx
+        WHERE
+            g.groups_status = 'RECRUITING'
+            AND 1 = 1
+        ]]>
+        <if test="groupDate != null and groupDate != ''">
+            <![CDATA[
+        AND TRUNC(g.group_date) >= TO_DATE(#{groupDate}, 'YYYY/MM/DD')
+        ]]>
+        </if>
+
+        <if test="region != null and region != '' and region != '전체 지역'">
+            <![CDATA[
+        AND g.place_address LIKE '%' || #{region} || '%'
+        ]]>
+        </if>
+
+        <if test="minAge != null and maxAge != null">
+            <![CDATA[
+        AND (
+            (#{minAge} = 20 AND #{maxAge} = 50)
+            OR (
+                g.age_min <= #{maxAge}
+                AND g.age_max >= #{minAge}
+            )
+        )
+        ]]>
+        </if>
+
+        <if test="minParticipants != null and maxParticipants != null">
+            <![CDATA[
+        AND (
+               (#{minParticipants} <= 0 AND #{maxParticipants} >= 9999)
+            OR (
+                   g.members_min <= #{maxParticipants}
+               AND g.members_max >= #{minParticipants}
+            )
+        )
+        ]]>
+        </if>
+
+        <if test="categoryMainIdx != null and categoryMainIdx != 0">
+            <![CDATA[
+        AND g.category_main_idx = #{categoryMainIdx}
+        ]]>
+        </if>
+        <![CDATA[
+    ORDER BY
+        g.group_date ASC, g.created_at DESC
+    ]]>
+    </select>
 </mapper>
+
+<!--
+<mapper namespace="generationgap.co.kr.mapper.group.GroupsMapper">
+
+</mapper>-->

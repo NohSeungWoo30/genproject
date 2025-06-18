@@ -1,9 +1,6 @@
 package generationgap.co.kr.mapper.group;
 
-import generationgap.co.kr.domain.group.CategoryMain;
-import generationgap.co.kr.domain.group.CategorySub;
-import generationgap.co.kr.domain.group.GroupMembers;
-import generationgap.co.kr.domain.group.Groups;
+import generationgap.co.kr.domain.group.*;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -29,5 +26,11 @@ public interface GroupsMapper {
     List<Groups> getGroupByCategory();
     // 최근 생성날 기준 모임
     List<Groups> getGroupByCreateDate();
+    // 모임일 시작 일 임박 기준
     List<Groups> getGroupByGroupDate();
+
+    // 모임리스트 필터 리스트
+    List<Groups> getfiterGroupList(SearchFilterRequest request);
+
+
 }

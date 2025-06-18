@@ -23,7 +23,16 @@
         <img class="logo" src="/img/icons/MT5.png" alt="M 로고" />
       </a>
     </div>
-    <div class="nav-right">
+
+    <div class="nav-center">
+      <img src="/img/봄.png" class="nav-img" alt="그림10">
+      <img src="/img/여름.png" class="nav-img" alt="그림10">
+      <img src="/img/가을.png" class="nav-img" alt="그림10">
+      <img src="/img/겨울.png" class="nav-img" alt="그림10">
+    </div>
+
+    <div class="nav-right" id="navRight">
+      <!-- 로그인 전 기본 표시 → 스크립트에서 교체 -->
       <a href="user/login" class="login-link">로그인ㆍ회원가입</a>
     </div>
   </header>
@@ -79,7 +88,7 @@
       <label for="count-select" style="font-size: 14px; color: #333;">최대참가인원수</label><br />
       <select id="count-select" style="padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;">
         <option value="" selected>선택</option>
-        <option value="">전체</option>
+        <option value="0-9999">전체</option>
         <option value="2-10">2~10명</option>
         <option value="11-20">11~20명</option>
         <option value="21-30">21~30명</option>
@@ -186,7 +195,8 @@
 </div>
 
 <!-- ───regionData.js 파일을 동일 경로에 두고 호출하세요 ─── -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!--<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="/js/regionData.js"></script>
   <script src="/js/meetinglist.js"></script>
   <!--<script src="/js/meetingcreate.js"></script>-->

@@ -1,37 +1,12 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- 1. 데이터 준비 (시안에 맞게 수정) ---
-    const currentLoggedInUser = { name: '프로트런트', avatar: 'https://i.pravatar.cc/150?u=me' };
+    /*const currentLoggedInUser = { name: '프로트런트', avatar: 'https://i.pravatar.cc/150?u=me' };*/
 
     // 모임 시간을 동적으로 설정 (현재로부터 1시간 30분 뒤)
     const meetingDate = new Date();
     meetingDate.setHours(meetingDate.getHours() + 1);
     meetingDate.setMinutes(meetingDate.getMinutes() + 30);
-
-    const room = {
-        title: '감자탕 맛있다 ~ 모임',
-        hostName: '장규진 귀엽다',
-        hostAvatar: 'https://i.pravatar.cc/150?u=jangkyujin',
-        foodImage: 'https://images.unsplash.com/photo-1627041541484-2353f5556658?q=80&w=1964&auto=format&fit=crop',
-        content: `맛있는 감자탕 먹어용
-아들,아들 감칠맛 쩌는
-고기 먹고, 국물 머금은
-시래기 먹다가, 어느 정도
-먹었을때 라면 사리 넣어
-서 또 다른 재미를 챙겨주고
-볶음밥으로 마무리~~`,
-        tags: ['식사'],
-        participants: [
-            { name: '장규진 귀엽다', avatar: 'https://i.pravatar.cc/150?u=jangkyujin' },
-            { name: '이순신', avatar: 'https://i.pravatar.cc/150?u=leesoonsin' },
-            { name: '김프로', avatar: 'https://i.pravatar.cc/150?u=kimpro' },
-        ],
-        age_min: 20,
-        age_max: 29,
-        group_date_obj: meetingDate, // Date 객체로 저장
-        members_max: 4,
-        place_name: '참이맛 감자탕',
-    };
 
     // --- 2. UI 요소 가져오기 ---
     const detailCardContainer = document.getElementById('roomDetailCard');
@@ -74,43 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${hours > 0 ? hours + '시간 ' : ''}${minutes}분`;
     }
 
-    function displayRoomDetails() {
-        const allTags = [...room.tags];
-        if(room.age_min >= 20 && room.age_max < 30) allTags.push('20대');
-        else if(room.age_min >= 30 && room.age_max < 40) allTags.push('30대');
 
-        detailCardContainer.innerHTML = `
-            <div class="live-card">
-                <div class="card-top-banner">
-                    <img src="${room.foodImage}" alt="모임 대표 이미지" class="food-image">
-                    <div class="host-info">
-                        <img src="${room.hostAvatar}" alt="${room.hostName}">
-                        <span>${room.hostName}</span>
-                    </div>
-                </div>
-                <div class="card-content">
-                    <div class="tag-list">${allTags.map(tag => `<span>${tag}</span>`).join('')}</div>
-                    <h3>${room.title}</h3>
-                    <div class="content-body">
-                        <div class="left-col">${room.content}</div>
-                        <div class="right-col">
-                            <div id="detailMap"></div>
-                             <ul class="details-list">
-                                <li><span class="label">모임 시간</span> <span>${formatTime(room.group_date_obj)}</span></li>
-                                <li><span class="label">남은 시간</span> <span>${getTimeRemaining(room.group_date_obj)}</span></li>
-                                <li><span class="label">현재 인원</span> <span>${room.participants.length} / ${room.members_max}</span></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="card-actions" id="cardActions"></div>
-                </div>
-            </div>`;
-
-        // 지도 생성 (Naver Maps API가 로드된 경우)
-        setTimeout(() => { if (window.naver && window.naver.maps) { new naver.maps.Map('detailMap', { center: new naver.maps.LatLng(37.5665, 126.9780), zoom: 15 }); }}, 100);
-
-        updateMainButtons();
-    }
 
     function updateMainButtons() {
         const cardActionsContainer = document.getElementById('cardActions');

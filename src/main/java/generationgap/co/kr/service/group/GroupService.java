@@ -1,10 +1,7 @@
 package generationgap.co.kr.service.group;
 
 
-import generationgap.co.kr.domain.group.CategoryMain;
-import generationgap.co.kr.domain.group.CategorySub;
-import generationgap.co.kr.domain.group.GroupMembers;
-import generationgap.co.kr.domain.group.Groups;
+import generationgap.co.kr.domain.group.*;
 import generationgap.co.kr.mapper.group.GroupsMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -152,6 +149,29 @@ public class GroupService {
 
         if (fullGroupByGroupDate != null && !fullGroupByGroupDate.isEmpty()) {
             List<Groups> processedList = fullGroupByGroupDate.stream()
+                    .filter(java.util.Objects::nonNull)
+                    .limit(10) // 뽑아온 리스트중 최대10까지만 가져옴
+                    .map(group -> {
+                        // 각 그룹 객체에 대해 주소에서 지역구를 추출하여 설정
+                        String address = group.getPlaceAddress();
+                        if (address != null) {
+                            group.setDistrict(extractDistrict(address));
+                        }
+                        return group;
+                    })
+                    .collect(Collectors.toList());
+            return processedList;
+
+        } else {
+            return new java.util.ArrayList<>();
+        }
+    }
+
+    public List<Groups> getfiterGroupList(SearchFilterRequest request){
+        List<Groups> fullFiterGroupList = groupsMapper.getfiterGroupList(request);
+
+        if (fullFiterGroupList != null && !fullFiterGroupList.isEmpty()) {
+            List<Groups> processedList = fullFiterGroupList.stream()
                     .filter(java.util.Objects::nonNull)
                     .limit(10) // 뽑아온 리스트중 최대10까지만 가져옴
                     .map(group -> {

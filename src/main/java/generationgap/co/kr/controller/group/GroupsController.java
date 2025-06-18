@@ -1,9 +1,6 @@
 package generationgap.co.kr.controller.group;
 
-import generationgap.co.kr.domain.group.CategoryMain;
-import generationgap.co.kr.domain.group.CategorySub;
-import generationgap.co.kr.domain.group.GroupMembers;
-import generationgap.co.kr.domain.group.Groups;
+import generationgap.co.kr.domain.group.*;
 import generationgap.co.kr.domain.user.UserDTO;
 import generationgap.co.kr.security.CustomUserDetails;
 import generationgap.co.kr.service.group.GroupService;
@@ -23,7 +20,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -62,6 +61,29 @@ public class GroupsController {
         model.addAttribute("groupsList",groupsList);
 
         return "group/Meeting-list";
+    }
+
+    @PostMapping("/api/search")
+    public ResponseEntity<Map<String, Object>> searchMeetings(
+            // @Valid @RequestBody SearchFilterRequest request // 유효성 검사 필요 시 @Valid 추가
+            @RequestBody SearchFilterRequest request
+    ) {
+        System.out.println("Received search request: " + request);
+        System.out.println("날짜: " + request.getGroupDate());
+        System.out.println("날짜: " + request.getRegion());
+        System.out.println("최소인수: " + request.getMinParticipants());
+        System.out.println("최대인수: " + request.getMaxParticipants());
+
+
+        // request 객체의 값들을 사용하여 DB 조회 로직 실행
+        List<Groups> searchResults = groupService.getfiterGroupList(request);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "필터 검색 요청 성공!");
+        response.put("receivedFilters", request); // 테스트 목적으로 받은 필터값 반환
+        response.put("searchResults", searchResults); // DB 결과 리스트 반환
+
+        return ResponseEntity.ok(response);
     }
 
 
@@ -168,7 +190,7 @@ public class GroupsController {
     public String detail(@RequestParam("groupId") int groupId,
                          @AuthenticationPrincipal CustomUserDetails userDetails,
                          Model model) {
-
+        // 그룹 번호를 받아와서 해당 그룹의 정보 반환
         Groups groupDetail = groupService.getGroupById(groupId);
         int hostIndex = groupDetail.getOwnerIdx().intValue();
         System.out.println("Owner Index: " + hostIndex);
@@ -178,9 +200,15 @@ public class GroupsController {
         if (groupDetail != null || hostData != null) {
             model.addAttribute("groupDetail", groupDetail);
             model.addAttribute("hostData", hostData);
+
+            /* 그룹정보 로그*/
             System.out.println("그룹 ID (groupIdx): " + groupDetail.getGroupIdx());
             System.out.println("그룹 제목 (title): " + groupDetail.getTitle());
             System.out.println("모임장 인덱스 (ownerIdx): " + groupDetail.getOwnerIdx());
+            /* 호스트 프로필 */
+            System.out.println("모임장 인덱스 (ownerIdx): " + hostData.getUserIdx());
+            System.out.println("모임장 인덱스 (ownerIdx): " + hostData.getNickname());
+            System.out.println("모임장 인덱스 (ownerIdx): " + hostData.getProfileName());
         } else {
             // 그룹을 찾을 수 없는 경우 처리
             model.addAttribute("errorMessage", "요청하신 모임을 찾을 수 없습니다.");

@@ -108,32 +108,73 @@ document.addEventListener('DOMContentLoaded', function() {
                 category: selectedCategory
             });
 
-            // 3. TODO: 이 데이터를 사용하여 실제 검색 (예: AJAX 요청, 페이지 리로드 등)
-            // 예를 들어, 폼 제출 또는 AJAX 요청을 보낼 수 있습니다.
-            // fetch('/api/search', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json'
-            //     },
-            //     body: JSON.stringify({
-            //         groupDate: selectedDate,
-            //         region: selectedRegion, // 실제 지역 값이 필요
-            //         minAge: minAge,
-            //         maxAge: maxAge,
-            //         maxParticipants: selectedCount,
-            //         categoryMainIdx: selectedCategory
-            //     })
-            // })
-            // .then(response => response.json())
-            // .then(data => {
-            //     console.log('검색 결과:', data);
-            //     // 검색 결과를 페이지에 표시하는 로직
-            // })
-            // .catch(error => {
-            //     console.error('검색 중 오류 발생:', error);
-            // });
+            const parts = selectedCount.split('-');
 
-            alert('필터가 적용되었습니다! (콘솔 확인)');
+            // 이 데이터를 사용하여 실제 검색 (예: AJAX 요청, 페이지 리로드 등)
+            $.ajax({
+                url: '/group/api/search',
+                type: 'POST', // 'POST' 또는 'GET'
+                contentType: 'application/json', // JSON
+                data: JSON.stringify({ // JavaScript 객체를 JSON 문자열로 변환
+                    groupDate: selectedDateValue,
+                    region: selectedRegionText,
+                    minAge: minAge,
+                    maxAge: maxAge,
+                    minParticipants: parseInt(parts[0]),
+                    maxParticipants: parseInt(parts[1]),
+                    categoryMainIdx: selectedCategory
+                }),
+                dataType: 'json', // 서버로부터 받을 응답 데이터 타입
+                success: function(response) {
+                    console.log('Success:', response);
+                    // 서버에서 받은 검색 결과에 접근
+                    const searchResults = response.searchResults;
+
+                    const meetingGrid = document.querySelector('.meeting-grid');
+                    meetingGrid.innerHTML = ''; // 기존 모임 카드 비우기
+
+                    if (searchResults && searchResults.length > 0) {
+                        searchResults.forEach(group => {
+
+                        const imageUrl = (group.groupImgUrl && group.groupImgUrl.trim() !== '') ? group.groupImgUrl : '/img/noImage.jpg';
+                        const categoryName = group.categoryMain ? group.categoryMain.categoryMainName : 'N/A';
+
+                        const groupDate = new Date(group.groupDate); // ISO 8601 문자열 (YYYY-MM-DDTHH:mm:ss)로 온다면 Date 객체로 변환
+                        const options = {
+                            year: 'numeric', month: '2-digit', day: '2-digit',
+                            weekday: 'short', // 요일 (Mon, Tue 등)
+                            hour: '2-digit', minute: '2-digit', hour12: false // 24시간 형식
+                        };
+                        // 한국어 요일을 위해 'ko-KR' 로케일 사용
+                        const formattedDate = groupDate.toLocaleDateString('ko-KR', options).replace(/\./g, '.').replace('요일', ''); // '.MM.dd(요일)' 형태
+
+                        const groupCard = `
+                            <div data-group-idx="${group.groupIdx}" class="card">
+                                <div class="card-thumb">
+                                    <img src="${imageUrl}" alt="${group.title} 이미지" />
+                                </div>
+                            <div class="card-info">
+                                <div class="card-category">
+                                    <span>${group.district || '지역 미지정'}</span> · <span>${categoryName}</span>
+                                </div>
+                                    <div class="card-title">${group.title}</div>
+                                    <div class="card-date">${formattedDate}</div>
+                                </div>
+                            </div>
+                            `;
+                            meetingGrid.innerHTML += groupCard; // 새 카드 추가
+                        });
+                    }else {
+                        console.log("검색 결과 없음.");
+                        const meetingGrid = document.querySelector('.meeting-grid');
+                        meetingGrid.innerHTML = '<p>해당 필터에 맞는 모임이 없습니다.</p>';
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error('Error:', textStatus, errorThrown, jqXHR.responseText);
+                }
+            });
+            /*alert('필터가 적용되었습니다! (콘솔 확인)');*/
         });
 
 

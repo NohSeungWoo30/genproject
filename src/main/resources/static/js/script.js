@@ -453,6 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 사진 업로드
     roomImageInput.addEventListener('change', (event) => {
       const file = event.target.files[0];
+
       if (file) {
         const reader = new FileReader();
         reader.onload = e => {
@@ -462,6 +463,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         reader.readAsDataURL(file);
       } else {
+      // 파일이 첨부되지 않았거나 선택이 취소된 경우
         liveRoomImage.src = '';
         liveRoomPlaceholder.classList.remove('hidden');
         liveRoomImage.classList.add('hidden');
