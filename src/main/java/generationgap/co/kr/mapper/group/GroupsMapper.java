@@ -70,5 +70,7 @@ public interface GroupsMapper {
 
     GroupDto findCurrentGroup(@Param("userId") long userId);
 
+    void decreasePartyMember(Long groupIdx);
+
 }
 

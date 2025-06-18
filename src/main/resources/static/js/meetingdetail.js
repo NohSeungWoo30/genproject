@@ -73,7 +73,7 @@ function displayRoomDetails() {
     groupDate
   } = room;
 
-  detailCardContainer.innerHTML = /* html */`
+  detailCardContainer.innerHTML = /* html */
     <div class="live-card">
       <div class="card-top-banner">
         <img src="${groupImgUrl}" alt="대표 이미지" class="food-image">
@@ -103,7 +103,7 @@ function displayRoomDetails() {
         </div>
         <div class="card-actions" id="cardActions"></div>
       </div>
-    </div>`;
+    </div>;
 
     updateMainButtons();
 
@@ -182,7 +182,7 @@ async function joinChat() {
     }
 
     try {
-      const response = await fetch(`/group/api/groups/${window.groupId}/join`, {
+      const response = await fetch(/group/api/groups/${window.groupId}/join, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -191,22 +191,30 @@ async function joinChat() {
         })
       });
 
-      if (!response.ok) throw new Error("서버 응답 오류");
+      /* ───── 실패(401·403·500…) 처리 ───── */
+            if (!response.ok) {
+              // 서버가 text/plain 을 주므로 text()로 읽는다
+              const msg = await response.text();
 
-      // ✅ 서버 응답은 단순 메시지임 → 별도 그룹 정보 다시 요청해야 함
-      /*const groupRes = await fetch(`/group/api/groups/${window.groupId}`);
-      if (!groupRes.ok) throw new Error("❌ 그룹 정보 불러오기 실패");
+              switch (response.status) {
+                case 401:
+                  alert("로그인이 필요합니다.");
+                  break;
+                case 403:
+                  alert(msg || "이용권 잔여 횟수가 없습니다.");
+                  break;
+                default:
+                  alert(오류(${response.status}) : ${msg});
+              }
+              return;           // 실패 시 이후 로직 중단
+            }
 
-      const groupData = await groupRes.json();*/
       const groupData  = await response.json();
       console.log("🎯 join 후 groupData 다시 로드:", groupData);
 
       window.room = groupData;
       window.groupId = groupData.groupIdx;
       isChatJoined = true;
-
-      if (!room.participants) room.participants = [];
-      room.participants.push(currentLoggedInUser);
 
       localStorage.setItem('joinedGroupId', window.groupId);
       await updateFloatingButton();
@@ -245,7 +253,7 @@ async function updateFloatingButton () {
     /* 1) 로컬스토리지 우선 */
     const stored = localStorage.getItem('joinedGroupId');
     if (stored) {
-      const r = await fetch(`/group/api/groups/${stored}`);
+      const r = await fetch(/group/api/groups/${stored});
       if (r.ok) {
         window.room  = await r.json();
         window.groupId = room.groupIdx;
@@ -258,7 +266,7 @@ async function updateFloatingButton () {
     }
 
     /* 2) 서버에 현재 참가 방 질의 */
-    const res = await fetch(`/group/api/current-group?userId=${window.userId}`);
+    const res = await fetch(/group/api/current-group?userId=${window.userId});
     console.log('📡 status', res.status);
 
     if (res.status === 200) {
@@ -285,37 +293,39 @@ async function updateFloatingButton () {
 
 async function leaveChat() {
   try {
-    const res = await fetch(`/group/api/groups/${window.groupId}/leave?userId=${window.userId}`, {
-      method: 'POST'
-    });
+    // 1. 서버에 “나가기” 요청
+    const res = await fetch(
+      /group/api/groups/${window.groupId}/leave?userId=${window.userId},
+      { method: 'POST' }
+    );
     const result = await res.json();
-    console.log("🚪 나가기 성공:", result);
+    console.log('🚪 나가기 성공:', result);
 
-    // 상태 초기화
+    // 2. 클라이언트 상태 초기화
     localStorage.removeItem('joinedGroupId');
     updateFloatingButton();
-
     isChatJoined = false;
 
-    // ✅ room 및 participants 방어 처리
-    if (typeof room === 'object' && room !== null) {
-      if (Array.isArray(room.participants)) {
-        room.participants = room.participants.filter(p => p.nickname !== currentLoggedInUser.nickname);
-      } else {
-        console.warn("⚠ room.participants가 비어있거나 배열이 아님:", room.participants);
-        room.participants = []; // 안전 초기화
-      }
-    } else {
-      console.warn("❗ room 자체가 null이거나 객체가 아님:", room);
+    // 3. participants 배열에서 내 정보 제거
+    if (room && Array.isArray(room.participants)) {
+      room.participants = room.participants.filter(
+        p => p.nickname !== currentLoggedInUser.nickname
+      );
     }
 
+    // 4. ★ DB에서 최신 값 다시 받아오기 ★
+    const fresh = await fetch(/group/api/groups/detail/${window.groupId})
+                          .then(r => r.json());
+    window.room = fresh;
+
+    // 5. 화면 갱신
     displayRoomDetails();
     inlineChatWrapper.style.display = 'none';
     roomPanel.classList.remove('active');
     if (ws) ws.close();
+
   } catch (e) {
-    console.error("❌ 나가기 실패:", e);
-   /* alert("방 나가기 중 오류가 발생했습니다.");*/
+    console.error('❌ 나가기 실패:', e);
   }
 }
 
@@ -330,7 +340,7 @@ function connectWebSocket() {
 
   const groupId = window.groupId; // 이걸 함수 안에서 다시 선언
 
-  const url = `ws://${location.hostname}:8080/ws/chat?groupId=${encodeURIComponent(groupId)}`;
+  const url = ws://${location.hostname}:8080/ws/chat?groupId=${encodeURIComponent(groupId)};
   ws = new WebSocket(url);
 
   ws.onopen = () => console.log('✅ WebSocket 연결됨');
@@ -362,12 +372,12 @@ function connectWebSocket() {
 
 
       if (data.type === 'EDIT') {
-        const target = document.getElementById(`message-${data.messageId}`);
+        const target = document.getElementById(message-${data.messageId});
         const edited = String(data.isEdited).toUpperCase() === 'Y';
         if (target) {
           const bubble = target.querySelector('.bubble');
           if (bubble) {
-            bubble.innerHTML = `${escapeHTML(data.newContent)}${edited ? ' <span class="edited-label">(수정됨)</span>' : ''}`;
+            bubble.innerHTML = ${escapeHTML(data.newContent)}${edited ? ' <span class="edited-label">(수정됨)</span>' : ''};
           }
         }
         return;
@@ -454,21 +464,21 @@ function addMessage(msgData) {
 
   // 삭제된 메시지 처리
   if (isDeleted === 'Y') {
-    let target = document.getElementById(`message-${messageId}`);
+    let target = document.getElementById(message-${messageId});
     const editedText = edited ? ' <span class="edited-label">(수정됨)</span>' : '';
     if (!target) {
       const group = document.createElement('div');
       group.className = 'message-group';
-      group.id = `message-${messageId}`;
+      group.id = message-${messageId};
       const messageDiv = document.createElement('div');
-      messageDiv.className = `message ${type} deleted`;
-      messageDiv.innerHTML = `
+      messageDiv.className = message ${type} deleted;
+      messageDiv.innerHTML =
         <div class="content-container">
           <div class="bubble-container">
             <div class="bubble">삭제된 메시지입니다.${editedText}</div>
             <span class="timestamp"></span>
           </div>
-        </div>`;
+        </div>;
       group.appendChild(messageDiv);
       chatMessages.appendChild(group);
       chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -476,7 +486,7 @@ function addMessage(msgData) {
     }
     const bubble = target.querySelector('.bubble');
     if (bubble) {
-      bubble.innerHTML = `삭제된 메시지입니다.${editedText}`;
+      bubble.innerHTML = 삭제된 메시지입니다.${editedText};
       bubble.classList.add('deleted');
     }
     return;
@@ -485,12 +495,12 @@ function addMessage(msgData) {
   // 일반 메시지
   const group = document.createElement('div');
   group.className = 'message-group';
-  group.id = `message-${messageId}`;
+  group.id = message-${messageId};
 
 
   const messageDiv = document.createElement('div');
-  messageDiv.className = `message ${type}`;
-  /*messageDiv.innerHTML = `
+  messageDiv.className = message ${type};
+  /*messageDiv.innerHTML =
     <img class="avatar" src="${avatar}" alt="avatar">
     <div class="content-container">
       <span class="nickname">${nickname}</span>
@@ -501,10 +511,10 @@ function addMessage(msgData) {
         <span class="timestamp">${formatTime(date)}</span>
       </div>
     </div>
-  `;*/
+  ;*/
 
-  messageDiv.innerHTML = `
-      ${type === 'self' ? '' : `<img class="avatar" src="${avatar}" alt="avatar">`}
+  messageDiv.innerHTML =
+      ${type === 'self' ? '' : <img class="avatar" src="${avatar}" alt="avatar">}
       <div class="content-container">
         <span class="nickname">${nickname}</span>
         <div class="bubble-container">
@@ -514,7 +524,7 @@ function addMessage(msgData) {
           <span class="timestamp">${formatTime(date)}</span>
         </div>
       </div>
-    `;
+    ;
   group.appendChild(messageDiv);
   chatMessages.appendChild(group);
   chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -528,10 +538,10 @@ function showInlineChat(isFirstTime) {
   if (isFirstTime) {
     chatMessages.innerHTML = '';
     lastMessageInfo = null;
-    addSystemMessage(`${currentLoggedInUser.nickname}님이 채팅방에 입장하셨습니다.`);
+    addSystemMessage(${currentLoggedInUser.nickname}님이 채팅방에 입장하셨습니다.);
 
   // ✅ 초기 채팅 메시지 불러오기
-  fetch(`/api/chat/messages?groupId=${groupId}`)
+  fetch(/api/chat/messages?groupId=${groupId})
 
     .then(res => res.json())
     .then(messages => {
@@ -567,7 +577,7 @@ function getTimeRemaining(endtime) {
   const hours = Math.floor((total / (1000 * 60 * 60)) % 24);
   const minutes = Math.floor((total / 1000 / 60) % 60);
   if (total <= 0) return '모임 시간 종료';
-  return `${hours > 0 ? hours + '시간 ' : ''}${minutes}분`;
+  return ${hours > 0 ? hours + '시간 ' : ''}${minutes}분;
 }
 
 function formatTime(date) {
@@ -578,7 +588,7 @@ function formatTime(date) {
   const minutes = String(d.getMinutes()).padStart(2, '0');
   const ampm = hours >= 12 ? '오후' : '오전';
   const displayHour = hours % 12 || 12;
-  return `${month}월 ${day}일 ${ampm} ${displayHour}시 ${minutes}분`;
+  return ${month}월 ${day}일 ${ampm} ${displayHour}시 ${minutes}분;
 }
 // ✅ 이벤트 연결 ──────────────────────────
 if (sendBtn)   sendBtn.addEventListener('click', sendMessage);
@@ -593,11 +603,11 @@ if (roomBtn) {
     participantsList.innerHTML = room.participants.map(p => {
       let tag = p.nickname;
       if (p.nickname === room.hostNickname) tag += ' (방장)';
-      return `
+      return
         <div class="participant" data-nickname="${p.nickname}" data-avatar="${p.avatar}">
           <img src="${p.avatar}" alt="${p.nickname}">
           <span class="name">${tag}</span>
-        </div>`;
+        </div>;
     }).join('');
 
     updateSidePanelFooter();
@@ -639,7 +649,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   if (storedGroupId) {
     try {
-      const res = await fetch(`/group/api/groups/${storedGroupId}`);
+      const res = await fetch(/group/api/groups/${storedGroupId});
       if (!res.ok) throw new Error("방 정보 로딩 실패");
 
       const joinedRoom = await res.json();
@@ -680,10 +690,10 @@ window.addEventListener('DOMContentLoaded', async () => {
       participantsList.innerHTML = room.participants.map(p => {
         let nameTag = p.nickname;
         if (p.nickname === room.hostNickname) nameTag += ' (방장)';
-        return `<div class="participant" data-nickname="${p.nickname}" data-avatar="${p.avatar}">
+        return <div class="participant" data-nickname="${p.nickname}" data-avatar="${p.avatar}">
                   <img src="${p.avatar}" alt="${p.nickname}">
                   <span class="name">${nameTag}</span>
-                </div>`;
+                </div>;
       }).join('');
       updateSidePanelFooter();
       roomPanel.classList.add('active');
@@ -755,15 +765,15 @@ function addContextMenuHandler(messageDiv, msgData) {
     if (top + maxH > vh) top = vh - maxH - 8;
 
     contextMenu.style.position = 'fixed'; // ✅ body 기준 위치 고정
-    contextMenu.style.left = `${left}px`;
-    contextMenu.style.top = `${top}px`;
+    contextMenu.style.left = ${left}px;
+    contextMenu.style.top = ${top}px;
 
     // 🔸 메뉴 구성
     const isSelf = msgData.type === 'self';
     contextMenu.innerHTML = isSelf
-      ? `<div class="menu-item" onclick="handleEdit(${msgData.messageId})">✏ 수정</div>
-         <div class="menu-item" onclick="handleDelete(${msgData.messageId})">🗑 삭제</div>`
-      : `<div class="menu-item" onclick="handleReport(${msgData.messageId}, ${msgData.userIdx})">🚨 신고</div>`;
+      ? <div class="menu-item" onclick="handleEdit(${msgData.messageId})">✏ 수정</div>
+         <div class="menu-item" onclick="handleDelete(${msgData.messageId})">🗑 삭제</div>
+      : <div class="menu-item" onclick="handleReport(${msgData.messageId}, ${msgData.userIdx})">🚨 신고</div>;
 
     document.body.appendChild(contextMenu);
 
@@ -782,7 +792,7 @@ function handleEdit(messageId) {
   console.log("✏ 수정 요청:", messageId);
   document.querySelectorAll('.custom-context-menu').forEach(menu => menu.remove());
 
-const messageEl = document.getElementById(`message-${messageId}`);
+const messageEl = document.getElementById(message-${messageId});
   if (!messageEl) return;
 
   const bubble = messageEl.querySelector('.bubble');
@@ -837,7 +847,7 @@ function restoreBubble(bubble, newContent, isEdited = true) {
   const container = bubble.parentNode;
   container.querySelectorAll('.edit-input, .edit-actions').forEach(el => el.remove());
 
-  bubble.innerHTML = `${escapeHTML(newContent)}${isEdited ? ' <span class="edited-label">(수정됨)</span>' : ''}`;
+  bubble.innerHTML = ${escapeHTML(newContent)}${isEdited ? ' <span class="edited-label">(수정됨)</span>' : ''};
 
   bubble.style.display = '';
 }
@@ -968,3 +978,29 @@ fetch('/group/api/current-group?userId=' + window.userId)
     return res.text();                     // 바디도 확인
   })
   .then(console.log);
+
+
+/** 메인·리스트·디테일 페이지 어디서든 같은 방식으로 모달을 띄운다 */
+document.addEventListener('open-group-detail', async ({ detail }) => {
+  const { groupIdx } = detail;
+  try {
+    /* 최신 그룹 정보 가져오기 */
+    const data = await fetch(/group/api/groups/detail/${groupIdx})
+                         .then(r => r.json());
+
+    /* 전역 상태 갱신 – meetingdetail.js 가 이미 쓰는 변수들 */
+    window.groupId   = groupIdx;
+    window.room      = data;
+    window.isChatJoined = false;   // 아직 입장 안한 상태
+
+    /* 모달 콘텐츠 렌더링 */
+    if (typeof displayRoomDetails === 'function') displayRoomDetails();
+
+    /* 모달 열기 */
+    document.getElementById('group-detail-modal')
+            .classList.remove('hidden');
+  } catch (err) {
+    console.error('그룹 데이터 로드 실패', err);
+    alert('모임 정보를 불러오지 못했습니다.');
+  }
+});

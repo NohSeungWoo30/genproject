@@ -269,6 +269,10 @@ public class GroupService {
 
         groupsMapper.deleteGroupMember(groupIdx, userIdx);
         System.out.println("🚪 유저가 방에서 나감: groupIdx = " + groupIdx + ", userIdx = " + userIdx);
+
+        // 2) 인원 차감
+        groupsMapper.decreasePartyMember(groupIdx);
+
     }
 
 

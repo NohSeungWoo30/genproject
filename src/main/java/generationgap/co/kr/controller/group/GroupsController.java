@@ -4,9 +4,11 @@ import generationgap.co.kr.domain.group.CategoryMain;
 import generationgap.co.kr.domain.group.CategorySub;
 import generationgap.co.kr.domain.group.GroupMembers;
 import generationgap.co.kr.domain.group.Groups;
+import generationgap.co.kr.domain.payment.UserMemberships;
 import generationgap.co.kr.domain.user.UserDTO;
 import generationgap.co.kr.dto.group.GroupDto;
 import generationgap.co.kr.mapper.group.GroupsMapper;
+import generationgap.co.kr.repository.payment.UserMembershipsRepository;
 import generationgap.co.kr.security.CustomUserDetails;
 import generationgap.co.kr.service.group.GroupService;
 import generationgap.co.kr.service.user.UserService;
@@ -28,6 +30,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Controller
@@ -40,6 +43,8 @@ public class GroupsController {
     private UserService userService;
     @Autowired
     private GroupsMapper groupsMapper;
+    @Autowired // 회원가입, 첫 구글로그인 횟수를 위한
+    private UserMembershipsRepository userMembershipsRepository;
     // 이미지 저장 경로를 상수로 정의하여 관리 용이성 높임
     private static final String UPLOAD_DIR = "src/main/resources/static/upload/groupImg/";
 
@@ -303,17 +308,35 @@ public class GroupsController {
 
     @PostMapping("/api/groups/{groupId}/join")
     @ResponseBody
-    public ResponseEntity<GroupDto> joinGroup(@PathVariable Long groupId,
+    public ResponseEntity<?> joinGroup(@PathVariable Long groupId,
                                               @AuthenticationPrincipal CustomUserDetails user) {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+
+        UserDTO currentUserDTO = user.getUserDTO();
+        long userIdx = currentUserDTO.getUserIdx();
+
+        Optional<UserMemberships> userMembershipOptional = userMembershipsRepository.findByUserIdx(userIdx);
+        if(userMembershipOptional.isEmpty() || userMembershipOptional.get().getRemainingUses() == 0){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("이용권 잔여 횟수가 없습니다.");
+        }
+
 
         /* 1) 참가 + 최신 정보까지 한 번에 받아오기 */
         GroupDto groupDto = groupService.joinGroup(
                 groupId,                 // 방 번호
                 user.getUserIdx(),       // 호출자 PK
                 user.getNickname());     // 호출자 닉네임
+
+        // Optional에서 실제 UserMemberships 객체를 추출
+        UserMemberships userMembership = userMembershipOptional.get();
+
+        // 남은 사용 횟수 감소 및 저장
+        if (userMembership.getRemainingUses() > 0) {
+            userMembership.setRemainingUses(userMembership.getRemainingUses() - 1);
+            userMembershipsRepository.save(userMembership); // DB에 변경사항 반영
+        }
 
         /* 2) 그대로 반환 */
         return ResponseEntity.ok(groupDto);

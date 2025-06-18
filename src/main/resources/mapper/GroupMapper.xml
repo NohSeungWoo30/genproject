@@ -338,9 +338,7 @@
         u.nickname AS hostNickname,
         u.profile_name AS hostAvatar,
         g.members_max AS membersMax,
-        (
-        SELECT COUNT(*) FROM group_members gm WHERE gm.group_idx = g.group_idx
-        ) AS party_member
+        g.party_member AS partyMember
         FROM groups g
         JOIN users u ON g.owner_idx = u.user_idx
         WHERE g.group_idx = #{groupIdx}
@@ -375,9 +373,7 @@
         /* 인원 */
         g.members_min     AS membersMin,
         g.members_max     AS membersMax,
-        ( SELECT COUNT(*) FROM group_members gm
-        WHERE gm.group_idx = g.group_idx
-        AND gm.is_confirmed = 'Y') AS partyMember
+        g.party_member    AS partyMember
 
         FROM groups g
         JOIN group_members gm ON gm.group_idx = g.group_idx
@@ -413,10 +409,8 @@
         /* 인원 */
         g.members_min          AS membersMin,     -- ★ 추가
         g.members_max          AS membersMax,
-        NVL(g.party_member,
-        (SELECT COUNT(*) FROM group_members gm
-        WHERE gm.group_idx = g.group_idx
-        AND gm.is_confirmed = 'Y'))       AS partyMember
+        g.party_member         AS partyMember
+        <!--NVL(g.party_member,0) AS partyMember  -->
 
         FROM groups g
         JOIN users u ON u.user_idx = g.owner_idx
@@ -426,7 +420,18 @@
 
     <update id="increasePartyMember" parameterType="long">
         UPDATE groups
-        SET party_member = NVL(party_member,0) + 1
+        SET party_member = COALESCE(party_member,0) + 1
+        WHERE group_idx = #{groupIdx}
+    </update>
+
+    <update id="decreasePartyMember" parameterType="long">
+        UPDATE groups
+        SET party_member =
+        CASE
+        WHEN party_member IS NULL OR party_member &lt;= 1
+        THEN NULL          <!-- 0 으로 둘 수도 있음 -->
+        ELSE party_member - 1
+        END
         WHERE group_idx = #{groupIdx}
     </update>
 
@@ -538,9 +543,7 @@
         g.place_name      AS placeName,
         g.members_min     AS membersMin,
         g.members_max     AS membersMax,
-        ( SELECT COUNT(*) FROM group_members gm
-        WHERE gm.group_idx = g.group_idx
-        )                  AS partyMember
+        g.party_member    AS partyMember
 
         FROM groups g
         JOIN users u          ON u.user_idx  = g.owner_idx
