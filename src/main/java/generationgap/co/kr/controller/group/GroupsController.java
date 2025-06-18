@@ -4,8 +4,10 @@ import generationgap.co.kr.domain.group.CategoryMain;
 import generationgap.co.kr.domain.group.CategorySub;
 import generationgap.co.kr.domain.group.GroupMembers;
 import generationgap.co.kr.domain.group.Groups;
+import generationgap.co.kr.domain.payment.UserMemberships;
 import generationgap.co.kr.dto.group.GroupDto;
 import generationgap.co.kr.domain.user.UserDTO;
+import generationgap.co.kr.repository.payment.UserMembershipsRepository;
 import generationgap.co.kr.security.CustomUserDetails;
 import generationgap.co.kr.service.group.GroupService;
 import org.springframework.http.HttpStatus;
@@ -34,6 +36,8 @@ import java.util.UUID;
 @RequestMapping("/group")  // 그룹에 해당하는 모든 경로
 @RequiredArgsConstructor
 public class GroupsController {
+    @Autowired // 회원가입, 첫 구글로그인 횟수를 위한
+    private UserMembershipsRepository userMembershipsRepository;
 
     private final GroupService groupService;
     @Autowired
@@ -133,32 +137,52 @@ public class GroupsController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/group/create";
         }
+        UserDTO currentUserDTO = userDetails.getUserDTO();
+        long userIdx = currentUserDTO.getUserIdx();
+
+        Optional<UserMemberships> userMembershipOptional = userMembershipsRepository.findByUserIdx(userIdx);
+        if(userMembershipOptional.isEmpty() || userMembershipOptional.get().getRemainingUses() == 0){
+            redirectAttributes.addFlashAttribute("errorMessage", "이용권 횟수가 없습니다.");
+            return "redirect:/group/create";
+        }
+
+        // Optional에서 실제 UserMemberships 객체를 추출
+        UserMemberships userMembership = userMembershipOptional.get();
         // 그룹 저장 로직 호출
-        try {
-            // 그룹방 생성과 동시에 해당 그룹번호 리턴
-            int createdGroupId = groupService.groupCreate(groupData);
+            try {
+                // 남은 사용 횟수 감소 및 저장
+                if (userMembership.getRemainingUses() > 0) {
+                    userMembership.setRemainingUses(userMembership.getRemainingUses() - 1);
+                    userMembershipsRepository.save(userMembership); // DB에 변경사항 반영
+                    System.err.println("그룹매퍼전 확인 용");
+                }
+                // 그룹방 생성과 동시에 해당 그룹번호 리턴
+                int createdGroupId = groupService.groupCreate(groupData);
+                System.err.println("그룹매퍼후 확인 용");
+                int newGroupIdx = groupData.getGroupIdx(); // 생선된 그룹번호
+                int HostIdx = groupData.getOwnerIdx().intValue(); // 호스트 유저 인덱스
+                String HostNickName = ownerNickname; // 닉네임
 
-            int newGroupIdx = groupData.getGroupIdx(); // 생선된 그룹번호
-            int HostIdx = groupData.getOwnerIdx().intValue(); // 호스트 유저 인덱스
-            String HostNickName = ownerNickname; // 닉네임
+                GroupMembers hostMember = new GroupMembers();
+                hostMember.setGroupIdx(newGroupIdx);
+                hostMember.setUserIdx(HostIdx);
+                hostMember.setNickName(HostNickName);
 
-            GroupMembers hostMember = new GroupMembers();
-            hostMember.setGroupIdx(newGroupIdx);
-            hostMember.setUserIdx(HostIdx);
-            hostMember.setNickName(HostNickName);
+                // 해당 그룹방 참여멤버가 들어갈 테이블 생성
+                groupService.insertHostMember(hostMember);
+                System.err.println("그룹매퍼후 확인 용");
+                redirectAttributes.addFlashAttribute("successMessage", "모임방 개설이 완료되었습니다!<br>이용권 1회 차감되었습니다.");
 
-            // 해당 그룹방 참여멤버가 들어갈 테이블 생성
-            groupService.insertHostMember(hostMember);
-            redirectAttributes.addFlashAttribute("successMessage", "모임방 개설이 완료되었습니다!");
 
-            // 성공적으로 생성이 되면 스크립트를 통해 디테일 페이지로 방생성번호와 함께 이동
-            //return "redirect:/group/detail/" + createdGroupId;
-            return "redirect:/group/detail?groupId=" + createdGroupId;
-        } catch (Exception e) {
-            System.err.println("그룹 저장 실패: " + e.getMessage());
-            e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage", "그룹 생성에 실패했습니다: " + e.getMessage());
-            return "redirect:/group/create"; // 실패 페이지로 리다이렉트
+                // 성공적으로 생성이 되면 스크립트를 통해 디테일 페이지로 방생성번호와 함께 이동
+                //return "redirect:/group/detail/" + createdGroupId;
+                return "redirect:/group/detail?groupId=" + createdGroupId;
+            } catch (Exception e) {
+                System.err.println("그룹 저장 실패: " + e.getMessage());
+                e.printStackTrace();
+                redirectAttributes.addFlashAttribute("errorMessage", "그룹 생성에 실패했습니다: " + e.getMessage());
+                return "redirect:/group/create"; // 실패 페이지로 리다이렉트
+
         }
     }
 

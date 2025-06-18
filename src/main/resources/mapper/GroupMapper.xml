@@ -181,7 +181,7 @@
         #{naverPlaceUrl},
         #{latitude},
         #{longitude},
-        #{groupImgUrl},
+        #{groupImgUrl, jdbcType=VARCHAR},
         SYSDATE
         )
     </insert>

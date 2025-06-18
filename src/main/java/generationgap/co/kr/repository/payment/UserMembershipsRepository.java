@@ -1,9 +1,10 @@
-// src/main/java/generationgap/co/kr/repository/payment/UserMembershipsRepository.java
+
 package generationgap.co.kr.repository.payment;
 
 import generationgap.co.kr.domain.payment.UserMemberships;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional; // java.util.Optional을 import 해야 합니다.
+
 
 public interface UserMembershipsRepository extends JpaRepository<UserMemberships, Long> {
 
