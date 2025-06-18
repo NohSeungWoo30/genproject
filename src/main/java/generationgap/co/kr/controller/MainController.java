@@ -68,5 +68,9 @@ public class MainController {
 
         return "main/main";
     }
+    @GetMapping("/main/login")
+    public String login2() {
+        return "main/login"; // main.html 템플릿 반환
+    }
 
 }

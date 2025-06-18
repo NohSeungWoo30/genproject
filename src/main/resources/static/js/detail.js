@@ -1,7 +1,5 @@
-
 document.addEventListener('DOMContentLoaded', () => {
     // --- 1. 데이터 준비 (시안에 맞게 수정) ---
-    /*const currentLoggedInUser = { name: '프로트런트', avatar: 'https://i.pravatar.cc/150?u=me' };*/
 
     // 모임 시간을 동적으로 설정 (현재로부터 1시간 30분 뒤)
     const meetingDate = new Date();

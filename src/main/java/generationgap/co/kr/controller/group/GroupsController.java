@@ -7,6 +7,10 @@ import generationgap.co.kr.service.group.GroupService;
 import generationgap.co.kr.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import generationgap.co.kr.service.user.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -20,7 +24,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -29,10 +32,12 @@ import java.util.UUID;
 @RequestMapping("/group")  // 그룹에 해당하는 모든 경로
 @RequiredArgsConstructor
 public class GroupsController {
-
+    @Autowired
     private final GroupService groupService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private GroupsMapper groupsMapper;
     // 이미지 저장 경로를 상수로 정의하여 관리 용이성 높임
     private static final String UPLOAD_DIR = "src/main/resources/static/upload/groupImg/";
 
@@ -47,6 +52,11 @@ public class GroupsController {
     public String meetinglist(Model model,
                              @RequestParam(value="mainCategoryId", required = false) String category,
                              @AuthenticationPrincipal CustomUserDetails userDetails){
+
+        if (userDetails != null) {
+            model.addAttribute("user", userDetails);
+        }
+
         // 카테고리 전체 리스트
         List<CategoryMain> categoryMainList = groupService.getAllMainCategory();
         model.addAttribute("categoryMainList",categoryMainList);
@@ -165,8 +175,7 @@ public class GroupsController {
             redirectAttributes.addFlashAttribute("successMessage", "모임방 개설이 완료되었습니다!");
 
             // 성공적으로 생성이 되면 스크립트를 통해 디테일 페이지로 방생성번호와 함께 이동
-            //return "redirect:/group/detail/" + createdGroupId;
-            return "redirect:/group/detail?groupId=" + createdGroupId;
+            return "redirect:/group/detail/" + createdGroupId;
         } catch (Exception e) {
             System.err.println("그룹 저장 실패: " + e.getMessage());
             e.printStackTrace();
@@ -200,15 +209,13 @@ public class GroupsController {
         if (groupDetail != null || hostData != null) {
             model.addAttribute("groupDetail", groupDetail);
             model.addAttribute("hostData", hostData);
-
-            /* 그룹정보 로그*/
             System.out.println("그룹 ID (groupIdx): " + groupDetail.getGroupIdx());
             System.out.println("그룹 제목 (title): " + groupDetail.getTitle());
             System.out.println("모임장 인덱스 (ownerIdx): " + groupDetail.getOwnerIdx());
             /* 호스트 프로필 */
             System.out.println("모임장 인덱스 (ownerIdx): " + hostData.getUserIdx());
-            System.out.println("모임장 인덱스 (ownerIdx): " + hostData.getNickname());
-            System.out.println("모임장 인덱스 (ownerIdx): " + hostData.getProfileName());
+            System.out.println("모임장 닉네임 (nickname): " + hostData.getNickname());
+            System.out.println("모임장 프로필 (profile): " + hostData.getProfileName());
         } else {
             // 그룹을 찾을 수 없는 경우 처리
             model.addAttribute("errorMessage", "요청하신 모임을 찾을 수 없습니다.");
@@ -278,4 +285,85 @@ public class GroupsController {
         return "/upload/groupImg/" + uuidFileName;
     }
 
+
+
+
+
+
+
+    @GetMapping("/match")
+    @ResponseBody
+    public List<Groups> getMatchedGroups(
+            @RequestParam List<Integer> categories,
+            @RequestParam int minAge,
+            @RequestParam int maxAge,
+            @RequestParam String gender
+    ) {
+        return groupService.getMatchedGroups(categories, minAge, maxAge, gender);
+    }
+
+
+    @GetMapping("/api/current-group")
+    @ResponseBody
+    public ResponseEntity<?> currentGroup(@RequestParam long userId) {
+        return groupService.findCurrentGroup(userId)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
+    @GetMapping("/api/groups/{id}")
+    @ResponseBody
+    public ResponseEntity<?> getGroupById(@PathVariable int id) {
+        Groups group = groupService.getGroupById(id);
+
+        if (group == null) {
+            return ResponseEntity.status(404).body("해당 그룹을 찾을 수 없습니다.");
+        }
+
+        // 프론트에서 필요한 필드만 가공하거나, DTO로 변환해서 반환하는 것이 이상적입니다.
+        return ResponseEntity.ok(group);
+    }
+
+
+    @PostMapping("/api/groups/{groupId}/join")
+    @ResponseBody
+    public ResponseEntity<GroupDto> joinGroup(@PathVariable Long groupId,
+                                              @AuthenticationPrincipal CustomUserDetails user) {
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        /* 1) 참가 + 최신 정보까지 한 번에 받아오기 */
+        GroupDto groupDto = groupService.joinGroup(
+                groupId,                 // 방 번호
+                user.getUserIdx(),       // 호출자 PK
+                user.getNickname());     // 호출자 닉네임
+
+        /* 2) 그대로 반환 */
+        return ResponseEntity.ok(groupDto);
+    }
+
+
+    @PostMapping("/api/groups/{groupIdx}/leave")
+    public ResponseEntity<?> leaveGroup(@PathVariable Long groupIdx, @RequestParam Long userId) {
+        groupService.leaveGroup(groupIdx, userId);
+        return ResponseEntity.ok(Map.of("message", "방 나가기 성공"));
+    }
+
+
+
+
+    @GetMapping("/api/groups/{groupIdx}")
+    public ResponseEntity<GroupDto> getGroupDetails(@PathVariable int groupIdx) {
+        GroupDto dto = groupService.getGroupDetails(groupIdx);
+        return ResponseEntity.ok(dto);
+    }
+
+
+    @GetMapping("/api/groups/detail/{groupIdx}")
+    public ResponseEntity<GroupDto> getGroupDetailJson(@PathVariable int groupIdx){
+        return ResponseEntity.ok(groupService.getGroupDetails(groupIdx));
+    }
+
 }
+

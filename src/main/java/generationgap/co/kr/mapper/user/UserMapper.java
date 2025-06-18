@@ -7,7 +7,6 @@ import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
-
 @Mapper
 public interface UserMapper {
 
@@ -74,10 +73,12 @@ public interface UserMapper {
     //테스트용 ksm
     List<UserDTO> findSuspendCandidates();
 
+    String findNicknameById(@Param("userIdx") Long userIdx);
+
+    //호현상
     // 호스트 유저 닉네임/프로필
     UserDTO getUserId_Nick(int hostIndex);
 
-    /*//user_idx로 조회하는 매서드 추가 ksm
-    UserDTO findByUserIdx(@Param("userIdx") Long userIdx);
-*/
+    void updateUserPassword(UserDTO userToUpdate);
+
 }

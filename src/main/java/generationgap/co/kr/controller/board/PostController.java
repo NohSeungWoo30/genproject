@@ -39,7 +39,13 @@ public class PostController {
     private final CommentService commentService;
 
     @GetMapping("/write")
-    public String showWriteForm(Model model){
+    public String showWriteForm(Model model,
+                                @AuthenticationPrincipal CustomUserDetails userDetails
+                                ){
+
+        if (userDetails != null) {
+            model.addAttribute("user", userDetails);
+        }
         model.addAttribute("post", new Post());
         return "board/write";
     }

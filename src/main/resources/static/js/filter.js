@@ -90,80 +90,126 @@ $(function () {
     // "Apply Filters" button click event
     $('#matchButton').on('click', function(e) {
         e.preventDefault();
-        if ($(this).is(':disabled')) return; // Do nothing if button is disabled
+        if ($(this).is(':disabled')) return;
 
-        // 1. Collect and display the applied filter information
-        const selectedTags = $('.tag-item.active').map((_, el) => $(el).data('tag')).get();
+        // 1. Collect filters
+        const selectedCategoryIds = $('.tag-item.active').map((_, el) => $(el).data('id')).get();
         const ageRange = ageSlider.noUiSlider.get();
-        const gender = $('input[name="gender"]:checked').val();
+        const rawGender = $('input[name="gender"]:checked').val();
 
+        // ✅ gender 문자열 → 코드값 변환
+        const genderMap = {
+            '누구나': 'A',
+            '남자만': 'M',
+            '여자만': 'F'
+        };
+        const gender = genderMap[rawGender];
+
+        // 2. Display selected filters (문자 그대로)
         let filtersHtml = '';
-        selectedTags.forEach(tag => filtersHtml += `<span class="applied-filter-tag">${tag}</span>`);
+        $('.tag-item.active').each((_, el) => {
+            filtersHtml += `<span class="applied-filter-tag">${$(el).text()}</span>`;
+        });
         filtersHtml += `<span class="applied-filter-tag">${ageRange[0]}-${ageRange[1]}세</span>`;
-        filtersHtml += `<span class="applied-filter-tag">${gender}</span>`;
+        filtersHtml += `<span class="applied-filter-tag">${rawGender}</span>`;
         $('#applied-filters-display').html(filtersHtml);
 
-        // 2. Generate and render mock result data
-        // NOTE: In a real application, this would be an API call
-        const now = new Date();
-        const sampleRooms = [
-            { name: '저녁 함께 달릴 사람!', members: '5/8명', dateTime: new Date(now.getTime() + 3 * 60 * 60 * 1000) },
-            { name: '주말 보드게임 모임', members: '3/6명', dateTime: new Date(now.getTime() + 25 * 60 * 60 * 1000) },
-            { name: '코딩 스터디 모집해요', members: '2/5명', dateTime: new Date(now.getTime() + 30 * 60 * 1000) },
-            { name: '맛집 탐방하실 분 (마감)', members: '8/8명', dateTime: new Date(now.getTime() - 1 * 60 * 60 * 1000) },
-        ];
+        // 3. Build query string with category ID list
+        const queryParams = new URLSearchParams();
+        selectedCategoryIds.forEach(id => queryParams.append('categories', id));
+        queryParams.append('minAge', ageRange[0]);
+        queryParams.append('maxAge', ageRange[1]);
+        queryParams.append('gender', gender);
 
-        $('#results-list').empty(); // Clear previous results
-        sampleRooms.forEach(room => {
-            const meetingDate = new Date(room.dateTime);
-            const timeStatus = calculateTimeStatus(meetingDate);
-            const meetingTimeFormatted = formatMeetingTime(meetingDate);
+        // 4. Fetch request
+        fetch(`/group/match?${queryParams.toString()}`)
+            .then(res => res.json())
+            .then(data => {
+                $('#results-list').empty();
 
-            let timeStatusHtml;
-            if (timeStatus === '모집 마감') {
-                timeStatusHtml = `<div class="time-status text-gray-500">${timeStatus}</div>`;
-            } else if (timeStatus === '마감 임박') {
-                timeStatusHtml = `
-                    <div class="time-status flex items-center justify-end gap-1 text-gray-800">
-                        <ion-icon name="flame-outline" class="text-rose-500"></ion-icon>
-                        <span>${timeStatus}</span>
-                    </div>`;
-            } else {
-                timeStatusHtml = `<div class="time-status text-gray-800">${timeStatus}</div>`;
-            }
+                data.forEach(room => {
+                    const meetingDate = new Date(room.groupDate);
+                    const timeStatus = calculateTimeStatus(meetingDate);
+                    const meetingTimeFormatted = formatMeetingTime(meetingDate);
 
-            // Construct the HTML for each result item
-            const roomHtml = `
-              <div class="result-item-card" data-title="${room.name}">
-                <div class="flex items-start gap-4">
-                  <div class="card-img-placeholder"></div>
-                  <div class="flex-1">
-                    <h3 class="font-bold text-lg mb-1">${room.name}</h3>
-                    <div class="flex items-center gap-1 text-gray-500 text-sm">
-                      <ion-icon name="people"></ion-icon>
-                      <span>${room.members}</span>
-                    </div>
-                  </div>
-                  <div class="text-right flex-shrink-0">
-                      ${timeStatusHtml}
-                      <div class="meeting-time text-sm text-gray-500 mt-1">${meetingTimeFormatted}</div>
-                  </div>
-                </div>
-              </div>`;
-            $('#results-list').append(roomHtml);
-        });
+                    let timeStatusHtml = timeStatus === '모집 마감'
+                        ? `<div class="time-status text-gray-500">${timeStatus}</div>`
+                        : timeStatus === '마감 임박'
+                            ? `<div class="time-status flex items-center justify-end gap-1 text-gray-800">
+                                  <ion-icon name="flame-outline" class="text-rose-500"></ion-icon>
+                                  <span>${timeStatus}</span>
+                               </div>`
+                            : `<div class="time-status text-gray-800">${timeStatus}</div>`;
 
-        // 3. Switch views from filters to results
-        $filterContent.addClass('hidden');
-        $resultsContent.removeClass('hidden');
+                    const roomHtml = `
+                      <div class="result-item-card" data-title="${room.title}" data-group-id="${room.groupIdx}">
+                        <div class="flex items-start gap-4">
+                          <div class="card-img-placeholder"></div>
+                          <div class="flex-1">
+                            <h3 class="font-bold text-lg mb-1">${room.title}</h3>
+                            <div class="flex items-center gap-1 text-gray-500 text-sm">
+                              <ion-icon name="people"></ion-icon>
+                              <span>${room.partyMember} / ${room.membersMax}명</span>
+                            </div>
+                          </div>
+                          <div class="text-right flex-shrink-0">
+                            ${timeStatusHtml}
+                            <div class="meeting-time text-sm text-gray-500 mt-1">${meetingTimeFormatted}</div>
+                          </div>
+                        </div>
+                      </div>`;
+                    $('#results-list').append(roomHtml);
+                });
+
+                $filterContent.addClass('hidden');
+                $resultsContent.removeClass('hidden');
+            })
+            .catch(err => {
+                console.error("매칭 결과 조회 실패:", err);
+                alert("조건에 맞는 모임을 찾는 데 실패했습니다.");
+            });
     });
 
-    // Open detail modal when a result item is clicked
-    $('#results-list').on('click', '.result-item-card', function() {
-        const title = $(this).data('title');
-        openRoomDetail(title);
+    // 결과 목록에서 항목 클릭 시 상세 모달 오픈
+    $('#results-list').on('click', '.result-item-card', function () {
+        const groupId = $(this).data('group-id');
+
+        // 👉 필터 모달 먼저 닫기
+        $('#filter-modal').addClass('hidden');
+
+        // 1. 상세 모달 열기
+        $('#group-detail-modal').removeClass('hidden');
+
+        // 2. groupId 전역 저장
+        window.groupId = groupId;
+
+        // 3. 그룹 정보 요청
+        fetch(`/group/api/groups/detail/${groupId}`)
+            .then(res => {
+                if (!res.ok) throw new Error("❌ 그룹 데이터 응답 실패");
+                return res.json(); // 여기서 실제 groupData를 받음
+            })
+            .then(groupData => {
+                console.log("✅ groupData 수신", groupData);
+
+                // 방 정보 저장
+                window.room = groupData;
+
+                // ✅ 참가 여부 판단해서 저장
+                window.isChatJoined = groupData.participants?.some(p => p.name === window.currentLoggedInUser?.name);
+
+                // 상세 내용 렌더링
+               // ✅ 함수 존재 여부 확인 후 안전하게 실행
+                 if (typeof displayRoomDetails === 'function') {
+                   displayRoomDetails();
+                 } else {
+                   console.warn("⚠ displayRoomDetails 함수가 아직 정의되지 않았습니다.");
+                 }
+            });
     });
 
     // Close the detail modal
     $('#close-room-detail-btn').on('click', closeRoomDetail);
 });
+
+

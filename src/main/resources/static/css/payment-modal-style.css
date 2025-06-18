@@ -1,0 +1,149 @@
+/* src/main/resources/static/css/payment-modal-style.css */
+
+.payment-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* 반투명 검정색 */
+    z-index: 999; /* 다른 요소들 위에 오도록 */
+    display: none; /* JS로 'flex'로 변경 */
+    justify-content: center; /* 중앙 정렬 */
+    align-items: center; /* 중앙 정렬 */
+    transition: opacity 0.3s ease; /* 부드러운 전환 효과 */
+    opacity: 0; /* 초기 투명도 (애니메이션용) */
+}
+
+/* JS에서 display:flex 로 변경 시 opacity도 함께 변경하여 애니메이션 */
+.payment-modal-backdrop[style*="display: flex"] {
+    opacity: 1;
+}
+
+.payment-widget-container {
+    background-color: white;
+    padding: 30px; /* 패딩 증가 */
+    border-radius: 12px; /* 모서리 둥글게 */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25); /* 그림자 강화 */
+    max-width: 550px; /* 모달의 최대 너비 */
+    width: 90%; /* 화면 너비에 따라 조절 */
+    max-height: 90%; /* 화면 높이에 따라 조절 */
+    overflow-y: auto; /* 내용이 많아지면 스크롤 */
+    display: flex; /* 내부 요소 정렬 */
+    flex-direction: column; /* 세로 정렬 */
+    position: relative; /* X 버튼 위치 지정을 위해 */
+    transform: translateY(20px); /* 초기 위치 (애니메이션용) */
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out; /* 애니메이션 */
+    opacity: 0; /* 초기 투명도 */
+}
+
+/* 모달이 나타날 때의 애니메이션 */
+.payment-modal-backdrop[style*="display: flex"] .payment-widget-container {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+.modal-title {
+    font-size: 1.8em; /* 제목 크기 */
+    color: #222;
+    text-align: center;
+    border-bottom: 1px solid #eee; /* 하단 구분선 */
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+    font-weight: 600;
+}
+
+.agreement-div {
+    margin-top: 20px; /* 약관 동의 영역 상단 마진 */
+    padding-top: 15px;
+    border-top: 1px dashed #eee; /* 약관 상단 점선 구분 */
+}
+
+.modal-button-group {
+    display: flex;
+    justify-content: space-around;
+    gap: 15px; /* 버튼 간 간격 */
+    margin-top: 30px; /* 버튼 그룹 상단 마진 */
+}
+
+.card-button { /* 기존 버튼 스타일 활용 */
+    padding: 12px 25px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    flex: 1; /* flex item으로 공간 균등 분할 */
+    min-width: 120px; /* 최소 너비 */
+}
+
+.card-button:hover {
+    transform: translateY(-2px); /* 호버 시 약간 위로 */
+}
+
+/* 주요 액션 버튼 (결제하기) */
+.primary-button {
+    background-color: #007bff; /* 토스페이먼츠 브랜드 컬러에 가깝게 */
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+}
+
+.primary-button:hover {
+    background-color: #0056b3;
+}
+
+/* 보조 액션 버튼 (닫기) */
+.secondary-button {
+    background-color: #6c757d;
+    color: white;
+    box-shadow: 0 4px 10px rgba(108, 117, 125, 0.2);
+}
+
+.secondary-button:hover {
+    background-color: #5a6268;
+}
+
+/* 모달 우측 상단 X 버튼 */
+.modal-close-x-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 2em; /* 크기 키우기 */
+    line-height: 1;
+    color: #999;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s ease;
+}
+
+.modal-close-x-button:hover {
+    color: #333;
+    transform: rotate(90deg); /* 호버 시 회전 */
+}
+
+/* 반응형 디자인 (선택 사항) */
+@media (max-width: 600px) {
+    .payment-widget-container {
+        padding: 20px;
+        border-radius: 0; /* 모바일에서 전체 화면에 가깝게 */
+        max-width: 100%;
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        margin: 0;
+        box-shadow: none;
+    }
+
+    .modal-title {
+        font-size: 1.5em;
+        margin-bottom: 15px;
+    }
+
+    .card-button {
+        padding: 10px 15px;
+        font-size: 1em;
+    }
+}

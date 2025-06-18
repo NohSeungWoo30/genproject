@@ -1,7 +1,16 @@
+console.log("📦 meetingdetail.js 로딩됨");
+
+
 // ✅ 전역 변수
 let ws = null;
 const userId = window.userId;
+/*
 const groupId = window.groupId;
+*/
+let isChatJoined = false;
+let lastMessageInfo = null;
+window.room = window.room || null;
+
 
 // --- 신고 모달 전역 변수 ---
 let currentTargetType = null;
@@ -9,42 +18,10 @@ let currentTargetId = null;
 let currentReportedUserId = null;
 let currentReportCategoryId = null;
 
-// ✅ 로그인 유저 정보 (가짜 데이터)
-const currentLoggedInUser = {
-  name: '프로트런트',
-  avatar: 'https://i.pravatar.cc/150?u=me'
-};
-
-// ✅ 모임 방 정보 (가짜 데이터)
-const meetingDate = new Date();
-meetingDate.setHours(meetingDate.getHours() + 1);
-meetingDate.setMinutes(meetingDate.getMinutes() + 30);
-
-const room = {
-  title: '감자탕 맛있다 ~ 모임',
-  hostName: '장규진 귀엽다',
-  hostAvatar: 'https://i.pravatar.cc/150?u=jangkyujin',
-  foodImage: 'https://images.unsplash.com/photo-1627041541484-2353f5556658?q=80&w=1964&auto=format&fit=crop',
-  content: '맛있는 감자탕 먹어용\n고기 먹고 라면 먹고 볶음밥까지!',
-  tags: ['식사'],
-  participants: [
-    { name: '장규진 귀엽다', avatar: 'https://i.pravatar.cc/150?u=jangkyujin' },
-    { name: '이순신', avatar: 'https://i.pravatar.cc/150?u=leesoonsin' },
-    { name: '김프로', avatar: 'https://i.pravatar.cc/150?u=kimpro' },
-  ],
-  age_min: 20,
-  age_max: 29,
-  group_date_obj: meetingDate,
-  members_max: 4,
-  place_name: '참이맛 감자탕'
-};
-
-let isChatJoined = room.participants.some(p => p.name === currentLoggedInUser.name);
-let lastMessageInfo = null;
 
 // ✅ DOM 요소
-const detailCardContainer = document.getElementById('roomDetailCard');
-const inlineChatWrapper = document.getElementById('inline-chat-wrapper');
+const detailCardContainer = document.querySelector('#group-detail-modal #roomDetailCard');
+const inlineChatWrapper = document.querySelector('#group-detail-modal #inline-chat-wrapper');
 const chatRoomTitleText = document.getElementById('chatRoomTitleText');
 const chatMessages = document.getElementById('chatMessages');
 const chatInput = document.getElementById('chatInput');
@@ -59,42 +36,117 @@ const profileCloseBtn = document.getElementById('profileCloseBtn');
 const profilePanelAvatar = document.getElementById('profilePanelAvatar');
 const profilePanelNickname = document.getElementById('profilePanelNickname');
 
+
+
+function applyGroupButtonUI() {
+  console.log('[BTN] applyGroupButtonUI');   // ← ②
+
+  const btn  = document.getElementById('open-filter-btn');
+  if (!btn) return;
+
+  // ↙︎ 방어: room 또는 groupIdx 없으면 실행하지 말고 리턴
+  if (!window.room || !window.room.groupIdx) return;
+  const icon = btn.querySelector('ion-icon');
+  const text = btn.querySelector('span');
+
+  icon.setAttribute('name', 'chatbubble-ellipses-outline');
+  text.textContent = '그룹방';
+  btn.onclick = () => {
+    document.getElementById('group-detail-modal')?.classList.remove('hidden');
+    displayRoomDetails();
+    showInlineChat(false);
+    connectWebSocket();
+  };
+}
+
+
 // ✅ 초기화
 function displayRoomDetails() {
-  const allTags = [...room.tags];
-  if (room.age_min >= 20 && room.age_max < 30) allTags.push('20대');
-  else if (room.age_min >= 30 && room.age_max < 40) allTags.push('30대');
+  if (!window.room) return;
 
-  detailCardContainer.innerHTML = `
+  // 구조 분해로 깔끔하게 꺼내 씀
+  const {
+    title, content, groupImgUrl,
+    hostNickname, hostAvatar,
+    placeAddress, placeName,
+    membersMin, membersMax, partyMember,
+    groupDate
+  } = room;
+
+  detailCardContainer.innerHTML = /* html */`
     <div class="live-card">
       <div class="card-top-banner">
-        <img src="${room.foodImage}" alt="모임 대표 이미지" class="food-image">
+        <img src="${groupImgUrl}" alt="대표 이미지" class="food-image">
         <div class="host-info">
-          <img src="${room.hostAvatar}" alt="${room.hostName}">
-          <span>${room.hostName}</span>
+          <img src="${hostAvatar || '/img/default-avatar.jpg'}" alt="${hostNickname}">
+          <span>${hostNickname}</span>
         </div>
       </div>
+
       <div class="card-content">
-        <div class="tag-list">${allTags.map(tag => `<span>${tag}</span>`).join('')}</div>
-        <h3>${room.title}</h3>
+        <h3>${title}</h3>
+
         <div class="content-body">
-          <div class="left-col">${room.content}</div>
+          <div class="left-col">
+            ${content ?? ''}
+          </div>
+
+          <!-- ★ 지도 div 사라지고, 주소·장소·인원으로 대체 -->
           <div class="right-col">
-            <div id="detailMap"></div>
             <ul class="details-list">
-              <li><span class="label">모임 시간</span> <span>${formatTime(room.group_date_obj)}</span></li>
-              <li><span class="label">남은 시간</span> <span>${getTimeRemaining(room.group_date_obj)}</span></li>
-              <li><span class="label">현재 인원</span> <span>${room.participants.length} / ${room.members_max}</span></li>
+              <li><span class="label">주소</span> <span>${placeAddress}</span></li>
+              <li><span class="label">장소명</span> <span>${placeName}</span></li>
+              <li><span class="label">모임 시간</span> <span>${formatTime(groupDate)}</span></li>
+              <li><span class="label">인원</span> <span>${partyMember} / ${membersMin}~${membersMax}</span></li>
             </ul>
           </div>
         </div>
         <div class="card-actions" id="cardActions"></div>
       </div>
-    </div>
-  `;
+    </div>`;
 
-  updateMainButtons();
+    updateMainButtons();
+
 }
+
+window.displayRoomDetails = displayRoomDetails;
+console.log("✅ displayRoomDetails 함수 전역 등록 완료");
+
+
+
+
+if (!window.groupId && room && room.groupIdx) {
+  window.groupId = room.groupIdx;
+  console.log("✅ 동적으로 groupId 설정됨:", window.groupId);
+}
+
+// ① 모달 열기·닫기 함수
+function openJoinConfirmModal() {
+  const modal = document.getElementById('join-confirm-modal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+
+  const okBtn = document.getElementById('joinConfirmBtn');
+  const cancelBtn = document.getElementById('joinCancelBtn');
+
+  // 중복 바인딩 방지용 기존 리스너 제거
+  okBtn.replaceWith(okBtn.cloneNode(true));
+  cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+
+  // 새 요소 다시 가져오기
+  const ok = document.getElementById('joinConfirmBtn');
+  const cancel = document.getElementById('joinCancelBtn');
+
+  ok.onclick = () => {          // 확인 → 실제 joinChat 호출
+    modal.classList.add('hidden');
+    joinChat();
+  };
+  cancel.onclick = () => {      // 취소 → 그냥 닫기
+    modal.classList.add('hidden');
+  };
+}
+
+
 
 function updateMainButtons() {
   const cardActionsContainer = document.getElementById('cardActions');
@@ -102,7 +154,7 @@ function updateMainButtons() {
   cardActionsContainer.innerHTML = '';
 
   if (isChatJoined) {
-    if (room.hostName !== currentLoggedInUser.name) {
+    if (room.hostNickname !== currentLoggedInUser.nickname) {
       const leaveBtn = document.createElement('button');
       leaveBtn.className = 'detail-btn delete';
       leaveBtn.textContent = '방 나가기';
@@ -113,31 +165,171 @@ function updateMainButtons() {
     const joinBtn = document.createElement('button');
     joinBtn.className = 'detail-btn';
     joinBtn.textContent = '방 참여';
-    joinBtn.onclick = joinChat;
+    joinBtn.onclick = openJoinConfirmModal;
     cardActionsContainer.appendChild(joinBtn);
   }
 }
+async function joinChat() {
 
-function joinChat() {
+  window.groupId = room?.groupIdx ?? groupData?.groupIdx ?? null;
+  if (!window.groupId) console.warn("⚠ groupId 설정 실패");
+
+
   if (!isChatJoined) {
-    room.participants.push(currentLoggedInUser);
-    isChatJoined = true;
-    displayRoomDetails();
-    showInlineChat(true);
-    connectWebSocket();
+    if (!window.groupId || !window.userId) {
+      alert("채팅방 정보 오류");
+      return;
+    }
+
+    try {
+      const response = await fetch(`/group/api/groups/${window.groupId}/join`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          groupId: window.groupId,
+          userId: window.userId
+        })
+      });
+
+      if (!response.ok) throw new Error("서버 응답 오류");
+
+      // ✅ 서버 응답은 단순 메시지임 → 별도 그룹 정보 다시 요청해야 함
+      /*const groupRes = await fetch(`/group/api/groups/${window.groupId}`);
+      if (!groupRes.ok) throw new Error("❌ 그룹 정보 불러오기 실패");
+
+      const groupData = await groupRes.json();*/
+      const groupData  = await response.json();
+      console.log("🎯 join 후 groupData 다시 로드:", groupData);
+
+      window.room = groupData;
+      window.groupId = groupData.groupIdx;
+      isChatJoined = true;
+
+      if (!room.participants) room.participants = [];
+      room.participants.push(currentLoggedInUser);
+
+      localStorage.setItem('joinedGroupId', window.groupId);
+      await updateFloatingButton();
+
+      connectWebSocket();
+      showInlineChat(true);
+      displayRoomDetails();
+    } catch (err) {
+      console.error("❌ 참가 실패:", err);
+    }
   }
 }
 
-function leaveChat() {
-  room.participants = room.participants.filter(p => p.name !== currentLoggedInUser.name);
-  isChatJoined = false;
-  displayRoomDetails();
-  inlineChatWrapper.style.display = 'none';
-  roomPanel.classList.remove('active');
-  if (ws) ws.close();
+async function updateFloatingButton () {
+  console.log('🔍 updateFloatingButton 실행됨');
+
+  const btn = document.getElementById('open-filter-btn');
+  if (!btn) return;
+
+  /* ① ───── setToMatching 정의(함수 선언) ───── */
+  const setToMatching = () => {
+    console.log('[BTN] setToMatching');          // ← 한 번만 찍히면 성공
+    const icon = btn.querySelector('ion-icon');
+    const text = btn.querySelector('span');
+    icon.setAttribute('name', 'options-outline');
+    text.textContent = '간편 매칭';
+    btn.onclick = () =>
+      document.getElementById('filter-modal')?.classList.remove('hidden');
+  };
+
+  /* ② ───── ‘기본값’ 으로 한 번만 호출 ───── */
+  setToMatching();      // ★ 여기 1회만!
+
+  /* ③ ───── 서버 & 로컬스토리지 확인 ───── */
+  try {
+    /* 1) 로컬스토리지 우선 */
+    const stored = localStorage.getItem('joinedGroupId');
+    if (stored) {
+      const r = await fetch(`/group/api/groups/${stored}`);
+      if (r.ok) {
+        window.room  = await r.json();
+        window.groupId = room.groupIdx;
+        isChatJoined = true;
+        applyGroupButtonUI();       // ← 그룹방 UI 로 덮어쓰기
+        return;                     // 더 이상 진행 X
+      }
+        localStorage.removeItem('joinedGroupId');
+
+    }
+
+    /* 2) 서버에 현재 참가 방 질의 */
+    const res = await fetch(`/group/api/current-group?userId=${window.userId}`);
+    console.log('📡 status', res.status);
+
+    if (res.status === 200) {
+      const group = await res.json();
+      if (group && group.groupIdx) {
+        window.room    = group;
+        window.groupId = group.groupIdx;
+        isChatJoined   = true;
+        localStorage.setItem('joinedGroupId', group.groupIdx);
+        applyGroupButtonUI();       // ← 그룹방 UI 로 교체
+
+      }
+    }
+
+    /* 3) 204이거나 데이터 없으면 그대로 ‘간편 매칭’ 유지 */
+  } catch (err) {
+    console.warn('❌ current-group 요청 실패', err);
+    // 네트워크 장애 시에도 기존 UI(간편 매칭) 유지
+  }
 }
 
+
+
+
+async function leaveChat() {
+  try {
+    const res = await fetch(`/group/api/groups/${window.groupId}/leave?userId=${window.userId}`, {
+      method: 'POST'
+    });
+    const result = await res.json();
+    console.log("🚪 나가기 성공:", result);
+
+    // 상태 초기화
+    localStorage.removeItem('joinedGroupId');
+    updateFloatingButton();
+
+    isChatJoined = false;
+
+    // ✅ room 및 participants 방어 처리
+    if (typeof room === 'object' && room !== null) {
+      if (Array.isArray(room.participants)) {
+        room.participants = room.participants.filter(p => p.nickname !== currentLoggedInUser.nickname);
+      } else {
+        console.warn("⚠ room.participants가 비어있거나 배열이 아님:", room.participants);
+        room.participants = []; // 안전 초기화
+      }
+    } else {
+      console.warn("❗ room 자체가 null이거나 객체가 아님:", room);
+    }
+
+    displayRoomDetails();
+    inlineChatWrapper.style.display = 'none';
+    roomPanel.classList.remove('active');
+    if (ws) ws.close();
+  } catch (e) {
+    console.error("❌ 나가기 실패:", e);
+   /* alert("방 나가기 중 오류가 발생했습니다.");*/
+  }
+}
+
+
 function connectWebSocket() {
+
+  if (!window.groupId) {
+    alert("⚠ 그룹 ID가 없습니다. 채팅방을 열 수 없습니다.");
+    return;
+  }
+
+
+  const groupId = window.groupId; // 이걸 함수 안에서 다시 선언
+
   const url = `ws://${location.hostname}:8080/ws/chat?groupId=${encodeURIComponent(groupId)}`;
   ws = new WebSocket(url);
 
@@ -214,7 +406,14 @@ function sendMessage() {
   const text = chatInput.value.trim();
   if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
 
-  ws.send(JSON.stringify({ msg: text }));
+  const payload = {
+    type: "CHAT",
+    msg: text,
+    userId: window.userId  // ✅ 클라이언트가 보낼 수 있으면 넣고, 없어도 서버에서 인증으로 커버 가능
+  };
+
+  console.log("📤 보내는 메시지:", payload);
+  ws.send(JSON.stringify(payload));
   chatInput.value = '';
 }
 
@@ -329,7 +528,7 @@ function showInlineChat(isFirstTime) {
   if (isFirstTime) {
     chatMessages.innerHTML = '';
     lastMessageInfo = null;
-    addSystemMessage(`${currentLoggedInUser.name}님이 채팅방에 입장하셨습니다.`);
+    addSystemMessage(`${currentLoggedInUser.nickname}님이 채팅방에 입장하셨습니다.`);
 
   // ✅ 초기 채팅 메시지 불러오기
   fetch(`/api/chat/messages?groupId=${groupId}`)
@@ -358,6 +557,9 @@ function showInlineChat(isFirstTime) {
   }
 
 inlineChatWrapper.style.display = 'block';
+
+
+setupChatEvents();
 }
 
 function getTimeRemaining(endtime) {
@@ -369,45 +571,60 @@ function getTimeRemaining(endtime) {
 }
 
 function formatTime(date) {
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  const hours = date.getHours();
-  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const d = new Date(date); // ← 이걸 추가
+  const month = d.getMonth() + 1;
+  const day = d.getDate();
+  const hours = d.getHours();
+  const minutes = String(d.getMinutes()).padStart(2, '0');
   const ampm = hours >= 12 ? '오후' : '오전';
   const displayHour = hours % 12 || 12;
   return `${month}월 ${day}일 ${ampm} ${displayHour}시 ${minutes}분`;
-
 }
-
-// ✅ 이벤트 연결
-sendBtn.addEventListener('click', sendMessage);
-chatInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
-roomBtn.addEventListener('click', () => {
-  participantsList.innerHTML = room.participants.map(p => {
-    let nameTag = p.name;
-    if (p.name === room.hostName) nameTag += ' (방장)';
-    return `<div class="participant" data-nickname="${p.name}" data-avatar="${p.avatar}">
-      <img src="${p.avatar}" alt="${p.name}">
-      <span class="name">${nameTag}</span>
-    </div>`;
-  }).join('');
-  updateSidePanelFooter();
-  roomPanel.classList.add('active');
+// ✅ 이벤트 연결 ──────────────────────────
+if (sendBtn)   sendBtn.addEventListener('click', sendMessage);
+if (chatInput) chatInput.addEventListener('keypress', e => {
+  if (e.key === 'Enter') sendMessage();
 });
-roomCloseBtn.addEventListener('click', () => roomPanel.classList.remove('active'));
+// ▼ ▼ 1) roomBtn이 있을 때만 사이드패널 열기 ▼ ▼
+if (roomBtn) {
+  roomBtn.addEventListener('click', () => {
+    if (!room || !Array.isArray(room.participants)) return;
+
+    participantsList.innerHTML = room.participants.map(p => {
+      let tag = p.nickname;
+      if (p.nickname === room.hostNickname) tag += ' (방장)';
+      return `
+        <div class="participant" data-nickname="${p.nickname}" data-avatar="${p.avatar}">
+          <img src="${p.avatar}" alt="${p.nickname}">
+          <span class="name">${tag}</span>
+        </div>`;
+    }).join('');
+
+    updateSidePanelFooter();
+    roomPanel.classList.add('active');
+  });
+}
+if (roomCloseBtn) {
+  roomCloseBtn.addEventListener('click', () => roomPanel.classList.remove('active'));
+}
 chatMessages.addEventListener('click', (e) => {
   if (e.target.classList.contains('avatar')) {
     showProfile(e.target.dataset.nickname, e.target.dataset.avatar);
   }
 });
-participantsList.addEventListener('click', (e) => {
-  const participant = e.target.closest('.participant');
-  if (participant) {
-    showProfile(participant.dataset.nickname, participant.dataset.avatar);
-  }
-});
-profileCloseBtn.addEventListener('click', () => profilePanel.classList.remove('active'));
-
+if (participantsList) {
+  participantsList.addEventListener('click', (e) => {
+    const participant = e.target.closest('.participant');
+    if (participant) {
+      showProfile(participant.dataset.nickname, participant.dataset.avatar);
+    }
+  });
+}
+if (profileCloseBtn) {
+  profileCloseBtn.addEventListener('click', () => {
+    profilePanel.classList.remove('active');
+  });
+}
 function showProfile(nickname, avatarSrc) {
   profilePanelAvatar.src = avatarSrc;
   profilePanelNickname.textContent = nickname;
@@ -415,10 +632,95 @@ function showProfile(nickname, avatarSrc) {
 }
 
 // ✅ 초기 실행
-window.addEventListener('DOMContentLoaded', () => {
-  displayRoomDetails();
+window.addEventListener('DOMContentLoaded', async () => {
+
+  /* ① 로컬스토리지 먼저 → UI 고정 */
+  const storedGroupId = localStorage.getItem('joinedGroupId');
+
+  if (storedGroupId) {
+    try {
+      const res = await fetch(`/group/api/groups/${storedGroupId}`);
+      if (!res.ok) throw new Error("방 정보 로딩 실패");
+
+      const joinedRoom = await res.json();
+      window.room = joinedRoom;
+      window.groupId = joinedRoom.groupIdx;
+      isChatJoined = true;
+
+      applyGroupButtonUI();
+      displayRoomDetails();
+      showInlineChat(false);
+      connectWebSocket();
+    } catch (e) {
+      console.warn("⚠ 저장된 방 로딩 실패, 초기화함");
+      localStorage.removeItem('joinedGroupId');
+      displayRoomDetails();
+    }
+  } else {
+    displayRoomDetails(); // 기본 카드 렌더링
+  }
+
+
+
+  // ✅ 안전한 이벤트 연결 (null 체크)
+  if (sendBtn) {
+    sendBtn.addEventListener('click', sendMessage);
+  }
+
+  if (chatInput) {
+    chatInput.addEventListener('keypress', e => {
+      if (e.key === 'Enter') sendMessage();
+    });
+  }
+
+  if (roomBtn) {
+    roomBtn.addEventListener('click', () => {
+      if (!room || !room.participants) return;
+
+      participantsList.innerHTML = room.participants.map(p => {
+        let nameTag = p.nickname;
+        if (p.nickname === room.hostNickname) nameTag += ' (방장)';
+        return `<div class="participant" data-nickname="${p.nickname}" data-avatar="${p.avatar}">
+                  <img src="${p.avatar}" alt="${p.nickname}">
+                  <span class="name">${nameTag}</span>
+                </div>`;
+      }).join('');
+      updateSidePanelFooter();
+      roomPanel.classList.add('active');
+    });
+  }
+
+  if (roomCloseBtn) {
+    roomCloseBtn.addEventListener('click', () => roomPanel.classList.remove('active'));
+  }
+
+  if (chatMessages) {
+    chatMessages.addEventListener('click', (e) => {
+      if (e.target.classList.contains('avatar')) {
+        showProfile(e.target.dataset.nickname, e.target.dataset.avatar);
+      }
+    });
+  }
+
+  if (participantsList) {
+    participantsList.addEventListener('click', (e) => {
+      const participant = e.target.closest('.participant');
+      if (participant) {
+        showProfile(participant.dataset.nickname, participant.dataset.avatar);
+      }
+    });
+  }
+
+  if (profileCloseBtn) {
+    profileCloseBtn.addEventListener('click', () => profilePanel.classList.remove('active'));
+  }
+
+  // ✅ 1분마다 갱신
   setInterval(displayRoomDetails, 60000);
-  if (isChatJoined) showInlineChat(false);
+
+
+  /* ② 그다음 서버에 한 번 더 물어봐서 동기화 */
+    await updateFloatingButton();
 });
 
 
@@ -433,41 +735,39 @@ function addContextMenuHandler(messageDiv, msgData) {
   bubble.addEventListener('contextmenu', (e) => {
     e.preventDefault();
 
-    console.log("👉 우클릭 감지됨");
-
-
-    // 🔸 기존 모든 context menu 제거
+    // 🔸 기존 메뉴 제거
     document.querySelectorAll('.custom-context-menu').forEach(menu => menu.remove());
 
-    // ✅ 사용자 구분
-    const isSelf = msgData.type === 'self';
-
-    // 🔸 메뉴 요소 생성
     const contextMenu = document.createElement('div');
     contextMenu.className = 'custom-context-menu';
-    contextMenu.style.position = 'absolute';
-    contextMenu.style.left = `${e.pageX}px`;
-    contextMenu.style.top = `${e.pageY}px`;
-    contextMenu.style.background = '#fff';
-    contextMenu.style.border = '1px solid #ccc';
-    contextMenu.style.boxShadow = '0 2px 6px rgba(0,0,0,0.15)';
-    contextMenu.style.zIndex = 1000;
 
-    if (isSelf) {
-      contextMenu.innerHTML = `
-        <div class="menu-item" onclick="handleEdit(${msgData.messageId})">✏ 수정</div>
-        <div class="menu-item" onclick="handleDelete(${msgData.messageId})">🗑 삭제</div>
-      `;
-    } else {
-      contextMenu.innerHTML = `
-        <div class="menu-item" onclick="handleReport(${msgData.messageId}, ${msgData.userIdx})">🚨 신고</div>
-      `;
-    }
+    // ✅ 기본 위치
+    let left = e.clientX;
+    let top = e.clientY;
 
-    // 🔸 메뉴 삽입
+    // ✅ 화면 밖 방지 (기본 크기 150x80 기준)
+    const maxW = 150;
+    const maxH = 80;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    if (left + maxW > vw) left = vw - maxW - 8;
+    if (top + maxH > vh) top = vh - maxH - 8;
+
+    contextMenu.style.position = 'fixed'; // ✅ body 기준 위치 고정
+    contextMenu.style.left = `${left}px`;
+    contextMenu.style.top = `${top}px`;
+
+    // 🔸 메뉴 구성
+    const isSelf = msgData.type === 'self';
+    contextMenu.innerHTML = isSelf
+      ? `<div class="menu-item" onclick="handleEdit(${msgData.messageId})">✏ 수정</div>
+         <div class="menu-item" onclick="handleDelete(${msgData.messageId})">🗑 삭제</div>`
+      : `<div class="menu-item" onclick="handleReport(${msgData.messageId}, ${msgData.userIdx})">🚨 신고</div>`;
+
     document.body.appendChild(contextMenu);
 
-    // 🔸 클릭 시 메뉴 제거
+    // 🔸 외부 클릭 시 제거
     const removeMenu = (ev) => {
       if (!contextMenu.contains(ev.target)) {
         contextMenu.remove();
@@ -633,3 +933,38 @@ function submitReport() {
       "'": '&#39;'
     }[tag]));
   }
+
+function closeGroupDetailModal() {
+  const modal = document.getElementById('group-detail-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function setupChatEvents() {
+  // 기존 바인딩 제거 (중복 방지)
+  sendBtn?.removeEventListener('click', sendMessage);
+  chatInput?.removeEventListener('keypress', handleKeyPress);
+
+  // 다시 연결
+  sendBtn?.addEventListener('click', sendMessage);
+  chatInput?.addEventListener('keypress', handleKeyPress);
+}
+
+function handleKeyPress(e) {
+  if (e.key === 'Enter') {
+    sendMessage();
+  }
+}
+
+if (typeof displayRoomDetails === 'function') {
+  console.log("✅ displayRoomDetails 전역 등록 확인됨");
+} else {
+  console.error("❌ displayRoomDetails 전역 등록 실패");
+}
+
+
+fetch('/group/api/current-group?userId=' + window.userId)
+  .then(res => {
+    console.log('status =', res.status);   // ← 200? 204? 500?
+    return res.text();                     // 바디도 확인
+  })
+  .then(console.log);

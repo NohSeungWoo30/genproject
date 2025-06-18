@@ -1,76 +1,82 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!--CSS파일 링크-->
-  <link rel="stylesheet" href="/css/meetingdetail.css" />
+    <!--CSS파일 링크-->
+    <link rel="stylesheet" href="/css/meetingdetail.css" />
 
-  <title>채팅 최종 완성본</title>
+    <title>채팅 최종 완성본</title>
+
 </head>
-
+<script th:inline="javascript">
+    <!--그룹 상세 정보-->
+    const serverGroupDetail = [[${groupDetail}]] {};
+    <!--호스트 데이터 (UserDTO)-->
+    const serverHostData = /*[[${hostData}]]*/ {}
+</script>
 <body>
 <section class="room-detail-section">
-  <div id="roomDetailCard"></div>
-  <div class="live-card">
-    <div class="card-top-banner">
-      <img th:src="@{${groupDetail.groupImgUrl}}" alt="모임대표이미지" class="food-image">
-      <div class="host-info">
-        <img th:src="" alt="프로필 이미지"> &lt;!&ndash;프로필이미지&ndash;&gt;
-        <span th:text="${hostData.nickName}"></span>&lt;!&ndash;유저닉네임&ndash;&gt;
-      </div>
-    </div>
-    <div class="card-content">
-      <div class="tag-list"><span>&lt;!&ndash;카테고리 연령 등 태그&ndash;&gt;</span></div>
-      <h3></h3>
-      <div class="content-body">
-        <div class="left-col">&lt;!&ndash; 방상세내용 &ndash;&gt;</div>
-        <div class="right-col">
-          <div id="detailMap"></div>
-          <ul class="details-list">
-            <li><span class="label">모임 시간</span> <span></span></li>
-            <li><span class="label">남은 시간</span> <span></span></li>
-            <li><span class="label">현재 인원</span> <span></span></li>
-          </ul>
+    <div id="roomDetailCard"></div>
+    <!--<div class="live-card">
+      <div class="card-top-banner">
+        <img th:src="@{${groupDetail.groupImgUrl}}" alt="모임대표이미지" class="food-image">
+        <div class="host-info">
+          <img th:src="" alt="프로필 이미지"> &lt;!&ndash;프로필이미지&ndash;&gt;
+          <span th:text="${hostData.nickName}"></span>&lt;!&ndash;유저닉네임&ndash;&gt;
         </div>
       </div>
-      <div class="card-actions" id="cardActions"></div>
+      <div class="card-content">
+        <div class="tag-list"><span>&lt;!&ndash;카테고리 연령 등 태그&ndash;&gt;</span></div>
+        <h3></h3>
+        <div class="content-body">
+          <div class="left-col">&lt;!&ndash; 방상세내용 &ndash;&gt;</div>
+          <div class="right-col">
+            <div id="detailMap"></div>
+            <ul class="details-list">
+              <li><span class="label">모임 시간</span> <span></span></li>
+              <li><span class="label">남은 시간</span> <span></span></li>
+              <li><span class="label">현재 인원</span> <span></span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="card-actions" id="cardActions"></div>
+      </div>
+    </div>-->
+    <div id="inline-chat-wrapper">
+        <div class="chat-container">
+            <header class="chat-header">
+                <div class="title">
+                    <div class="chat-title" id="chatRoomTitleText"></div>
+                </div>
+                <div class="header-buttons">
+                    <button class="header-menu-btn" id="roomBtn">⋮</button>
+                </div>
+            </header>
+            <main class="chat-messages" id="chatMessages"></main>
+            <footer class="chat-input-wrapper">
+                <div class="chat-input">
+                    <button>➕</button>
+                    <input type="text" id="chatInput" placeholder="메시지 보내기" />
+                    <button id="sendBtn">➤</button>
+                </div>
+            </footer>
+            <aside class="side-panel" id="roomPanel">
+                <div class="side-panel-header"> <button class="close-btn" id="roomCloseBtn">✕</button> <span class="title">대화 상대</span> </div>
+                <div class="participants" id="participantsList"></div>
+                <footer class="side-panel-footer" id="roomPanelFooter"></footer>
+            </aside>
+            <aside class="side-panel" id="profilePanel">
+                <div class="side-panel-header"> <button class="close-btn" id="profileCloseBtn">✕</button> <span class="title">프로필</span> </div>
+                <div class="profile-body">
+                    <img id="profilePanelAvatar" class="avatar" src="">
+                    <div id="profilePanelNickname" class="nickname"></div>
+                </div>
+            </aside>
+        </div>
     </div>
-  </div>
-  <div id="inline-chat-wrapper">
-    <div class="chat-container">
-      <header class="chat-header">
-        <div class="title">
-          <div class="chat-title" id="chatRoomTitleText"></div>
-        </div>
-        <div class="header-buttons">
-          <button class="header-menu-btn" id="roomBtn">⋮</button>
-        </div>
-      </header>
-      <main class="chat-messages" id="chatMessages"></main>
-      <footer class="chat-input-wrapper">
-        <div class="chat-input">
-          <button>➕</button>
-          <input type="text" id="chatInput" placeholder="메시지 보내기" />
-          <button id="sendBtn">➤</button>
-        </div>
-      </footer>
-      <aside class="side-panel" id="roomPanel">
-        <div class="side-panel-header"> <button class="close-btn" id="roomCloseBtn">✕</button> <span class="title">대화 상대</span> </div>
-        <div class="participants" id="participantsList"></div>
-        <footer class="side-panel-footer" id="roomPanelFooter"></footer>
-      </aside>
-      <aside class="side-panel" id="profilePanel">
-        <div class="side-panel-header"> <button class="close-btn" id="profileCloseBtn">✕</button> <span class="title">프로필</span> </div>
-        <div class="profile-body">
-          <img id="profilePanelAvatar" class="avatar" src="">
-          <div id="profilePanelNickname" class="nickname"></div>
-        </div>
-      </aside>
-    </div>
-  </div>
 </section>
 <script src="/js/meetingdetail.js"></script>
 </body>

@@ -13,6 +13,7 @@
     .btn-primary { width: 100%; margin-top: 20px; }
     .alert { margin-top: 20px; text-align: center; }
     .found-id { font-size: 1.2rem; font-weight: bold; color: #28a745; margin-top: 20px; text-align: center; }
+    .hidden { display: none; } /* 요소를 숨기기 위한 스타일 */
   </style>
 </head>
 <body>
@@ -27,7 +28,7 @@
     찾으시는 아이디는 '<span th:text="${foundUserId}"></span>' 입니다.
   </div>
 
-  <form th:action="@{/user/find-id}" method="post">
+  <form id="findIdForm" th:action="@{/user/find-id}" method="post">
     <div class="form-group">
       <label for="userName">이름</label>
       <input type="text" class="form-control" id="userName" name="userName" required autofocus>
@@ -36,12 +37,30 @@
       <label for="phone">전화번호</label>
       <input type="tel" class="form-control" id="phone" name="phone" placeholder="예: 01012345678" required>
     </div>
-    <button type="submit" class="btn btn-primary">아이디 찾기</button>
+    <button type="submit" class="btn btn-primary" id="findIdButton">아이디 찾기</button>
   </form>
+
+  <button type="button" class="btn btn-primary hidden" id="findPasswordButton" onclick="location.href='/user/forgot-password'">비밀번호 찾기</button>
 
   <div class="text-center mt-3">
     <a th:href="@{/user/login}">로그인 페이지로 돌아가기</a>
   </div>
 </div>
+
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  const foundUserId = /*[[${foundUserId}]]*/ null;
+  const findIdForm = document.getElementById('findIdForm');
+  const findIdButton = document.getElementById('findIdButton');
+  const findPasswordButton = document.getElementById('findPasswordButton');
+
+  // foundUserId 값이 존재하면 아이디 찾기 폼과 버튼을 숨기고 비밀번호 찾기 버튼을 보여줍니다.
+  if (foundUserId) {
+    findIdForm.classList.add('hidden'); // 폼 전체를 숨김
+    findIdButton.classList.add('hidden'); // 아이디 찾기 버튼 숨김 (폼을 숨기므로 사실상 불필요할 수 있지만 명시적으로)
+    findPasswordButton.classList.remove('hidden'); // 비밀번호 찾기 버튼 보여줌
+  }
+  /*]]>*/
+</script>
 </body>
 </html>

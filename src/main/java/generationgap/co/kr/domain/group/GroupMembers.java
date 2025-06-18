@@ -1,5 +1,6 @@
 package generationgap.co.kr.domain.group;
 
+import generationgap.co.kr.domain.user.UserDTO;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,4 +17,9 @@ public class GroupMembers {
     String isConfirmed; // Y or N
     LocalDateTime joinedAt; // 날짜
 
+
+
+    private UserDTO user; //GroupMembers에 UserDTO user를 조인해서 받아오기 위해 추가
+
 }
+

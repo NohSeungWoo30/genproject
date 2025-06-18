@@ -3,125 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <title>로그인</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!--토스트(우측하단 실시간 알림) 추가 모든 페이지에 꼭 추가하기-->
+    <link rel="stylesheet" href="/css/toast.css" />
+    <!--알림(종모양)기능 css추가 알림기능이 포함되는 모든 곳에 추가하기-->
+    <link rel="stylesheet" href="/css/notify.css" />
+    <link rel="stylesheet" href="/css/mainstyle.css" />
+
+    <!--로그인 세션관련 계속 추가하기-->
+    <th:block th:replace="fragments/user-session :: sessionScript"></th:block>
+
+    <!-- 1. 필수 라이브러리: SockJS, STOMP -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+
+    <!-- ===== 외부 라이브러리 ===== -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- ionicons: main, simple 둘 다 필요 -->
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <!-- noUiSlider: simple.html용 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.js"></script>
+
+
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: #f8f9fa; /* profile-edit.html과 일관된 배경색 */
+            margin: 0;
+            display: flex;
+            flex-direction: column; /* 헤더, 콘텐츠, 푸터 세로 정렬 */
+            min-height: 100vh;
+        }
+
+
+
+        /* --- Login Container Styles (기존 유지 + margin-top 조정) --- */
+        .login-wrapper { /* 로그인 컨테이너를 감싸는 새로운 래퍼 */
+            flex-grow: 1; /* 남은 공간을 채우도록 설정 */
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
+            padding: 20px; /* 상하 패딩 추가 */
         }
         .login-container {
             background-color: #fff;
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05); /* profile-edit.html과 유사한 그림자 */
+            width: 100%;
+            max-width: 380px; /* 너비 약간 늘림 */
             text-align: center;
         }
         h2 {
-            margin-bottom: 20px;
-            color: #333;
+            margin-bottom: 25px; /* 간격 조정 */
+            color: #343a40; /* profile-edit.html과 유사한 색상 */
         }
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 18px; /* 간격 조정 */
             text-align: left;
         }
         label {
             display: block;
-            margin-bottom: 5px;
-            color: #555;
+            margin-bottom: 6px; /* 간격 조정 */
+            color: #343a40; /* profile-edit.html과 유사한 색상 */
             font-weight: bold;
         }
         input[type="text"],
         input[type="password"] {
-            width: calc(100% - 20px); /* 패딩 값만큼 너비 조정 */
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
+            width: 100%; /* calc(100%) 대신 100% */
+            padding: 12px 15px; /* 패딩 조정 */
+            border: 1px solid #ced4da; /* profile-edit.html과 유사한 테두리 */
+            border-radius: .25rem; /* profile-edit.html과 유사한 둥근 모서리 */
+            box-sizing: border-box;
+            font-size: 1rem;
         }
-        button {
+        button[type="submit"] {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             background-color: #007bff;
             color: white;
             border: none;
-            border-radius: 4px;
-            font-size: 16px;
+            border-radius: .25rem; /* 둥근 모서리 */
+            font-size: 1.1em;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            margin-top: 10px; /* 로그인 버튼 상단 여백 */
         }
-        button:hover {
+        button[type="submit"]:hover {
             background-color: #0056b3;
         }
         /* 소셜 로그인 버튼 스타일 */
         .social-login-group {
-            margin-top: 20px;
-            padding-top: 20px;
+            margin-top: 25px; /* 간격 조정 */
+            padding-top: 25px; /* 간격 조정 */
             border-top: 1px solid #eee;
         }
         .social-login-button {
-            display: block; /* 블록 요소로 만들어 줄바꿈 */
+            display: block;
             width: 100%;
-            padding: 10px;
+            padding: 12px; /* 패딩 조정 */
             border: none;
-            border-radius: 4px;
-            font-size: 15px;
+            border-radius: .25rem; /* 둥근 모서리 */
+            font-size: 1em;
             cursor: pointer;
             transition: background-color 0.3s ease;
-            text-decoration: none; /* 링크의 밑줄 제거 */
-            color: white; /* 텍스트 색상 */
-            margin-bottom: 10px; /* 버튼 간 간격 */
-            line-height: 1.5; /* 텍스트 정렬을 위해 */
+            text-decoration: none;
+            color: white;
+            margin-bottom: 12px; /* 간격 조정 */
+            line-height: 1.5;
+            text-align: center;
+            box-sizing: border-box;
         }
         .social-login-button.google {
-            background-color: #db4437; /* Google 브랜드 색상 */
+            background-color: #db4437;
         }
         .social-login-button.google:hover {
             background-color: #c0392b;
         }
         .message {
-            margin-top: 15px;
+            margin-bottom: 20px; /* 메시지 간격 조정 */
             font-weight: bold;
             padding: 10px;
             border-radius: 4px;
         }
         .message.error {
-            color: #d9534f; /* 붉은색 계열 */
-            background-color: #f2dede; /* 연한 붉은색 배경 */
-            border: 1px solid #ebccd1;
+            color: #dc3545; /* Bootstrap danger color */
+            background-color: #f8d7da; /* Bootstrap danger background */
+            border: 1px solid #f5c6cb; /* Bootstrap danger border */
         }
         .message.success {
-            color: #5cb85c; /* 초록색 계열 */
-            background-color: #dff0d8; /* 연한 초록색 배경 */
-            border: 1px solid #d6e9c6;
+            color: #28a745; /* Bootstrap success color */
+            background-color: #d4edda; /* Bootstrap success background */
+            border: 1px solid #c3e6cb; /* Bootstrap success border */
         }
         .link-container {
-            margin-top: 20px;
-            font-size: 14px;
+            margin-top: 25px; /* 간격 조정 */
+            font-size: 15px;
+            display: flex; /* 링크들을 flex로 정렬 */
+            justify-content: center; /* 가운데 정렬 */
+            align-items: center;
         }
         .link-container a {
             color: #007bff;
             text-decoration: none;
-            margin: 0 5px; /* 링크 간 간격 */
-        }
-        .link-container a {
-            color: #007bff;
-            text-decoration: none;
+            margin: 0 8px; /* 간격 조정 */
         }
         .link-container a:hover {
             text-decoration: underline;
         }
         .link-container span {
-            color: #ccc;
+            color: #adb5bd; /* 구분자 색상 변경 */
         }
+
     </style>
 </head>
 <body>
-<div class="login-container">
+<!-- ─── 상단 네비게이션 ─── -->
+<header class="container-nav">
+    <div class="nav-left">
+        <a th:href="@{/main}"><img class="logo" src="/img/icons/Group 17.png" alt="M 로고"></a>
+    </div>
+
+    <div class="nav-center">
+        <img src="/img/봄.png" class="nav-img" alt="그림10">
+        <img src="/img/여름.png" class="nav-img" alt="그림10">
+        <img src="/img/가을.png" class="nav-img" alt="그림10">
+        <img src="/img/겨울.png" class="nav-img" alt="그림10">
+    </div>
+
+    <!-- ** navRight: 로그인/알림/프로필 영역(동적) ** -->
+    <div class="nav-right" id="navRight">
+        <a href="/user/login" class="login-link">로그인ㆍ회원가입</a>
+    </div>
+</header>
+
+<!-- ─── 하단 고정 네비 (모바일 bottom‑nav 스타일) ─── -->
+<section class="bottom-nav-wrapper">
+    <nav class="bottom-nav">
+        <a th:href="@{/group/create}" class="bottom-link">모임 생성</a>
+        <a th:href="@{/group/meetinglist}" class="bottom-link">모임 목록</a>
+        <a th:href="@{/product-list}" class="bottom-link">상품 목록</a>
+        <a th:href="@{/posts}" class="bottom-link">자유 게시판</a>
+    </nav>
+</section>
+
+<div class="login-wrapper"> <div class="login-container">
     <h2>로그인</h2>
 
     <div th:if="${param.error}" class="message error">
@@ -148,8 +219,33 @@
         </a>
     </div>
     <div class="link-container">
-        <a th:href="@{/user/signup}">회원가입</a>
+        <a th:href="@{/user/signup}">회원가입</a> <span>·</span>
+        <a th:href="@{/user/find-id}">아이디 찾기</a> <span>·</span>
+        <a th:href="@{/user/forgot-password}">비밀번호 찾기</a>
     </div>
 </div>
+</div>
+
+<!-- ─── Footer ─── -->
+<footer class="footer">
+    <div class="footer-links">
+        <a href="about.html" class="footer-link">회사소개</a><span class="footer-divider"></span>
+        <a href="partnership.html" class="footer-link">제휴안내</a><span class="footer-divider"></span>
+        <a href="advertising.html" class="footer-link">광고안내</a><span class="footer-divider"></span>
+        <a href="terms.html" class="footer-link">이용약관</a><span class="footer-divider"></span>
+        <a href="privacy.html" class="footer-link">개인정보처리방침</a><span class="footer-divider"></span>
+        <a href="youth-policy.html" class="footer-link">청소년보호정책</a>
+    </div>
+    <div class="footer-copyright">© 1999 – 2025 dcinside. All rights reserved.</div>
+</footer>
+
+
+
+<!--꼭 notify.js나 notification.js 보다 위에-->
+<th:block th:replace="fragments/notification-templates :: notiTemplates"></th:block>
+
+
+<script src="/js/notify.js" defer></script>
+<script src="/js/notification.js" defer></script>
 </body>
 </html>

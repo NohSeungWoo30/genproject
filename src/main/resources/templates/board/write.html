@@ -2,11 +2,30 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>게시글 작성</title>
   <link rel="stylesheet" th:href="@{/css/vars.css}" />
   <link rel="stylesheet" th:href="@{/css/boardstyle.css}" />
   <link rel="stylesheet" th:href="@{/css/mainstyle.css}" />
   <link rel="stylesheet" href="/css/toast.css" />
+  <!--알림(종모양)기능 css추가 알림기능이 포함되는 모든 곳에 추가하기-->
+  <link rel="stylesheet" href="/css/notify.css" />
+
+  <!--로그인 세션관련 계속 추가하기-->
+  <th:block th:replace="fragments/user-session :: sessionScript"></th:block>
+
+  <!--알림 아이콘관련 계속 추가하기-->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+  <!-- 1. 필수 라이브러리: SockJS, STOMP -->
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
 
 
   <style>
@@ -113,25 +132,34 @@
 </head>
 <body>
 
-<!-- 상단 네비게이션 바 -->
-<nav class="container-nav">
+<!-- ─── 상단 네비게이션 ─── -->
+<header class="container-nav">
   <div class="nav-left">
-    <a th:href="@{/}">
-      <img class="logo" src="/img/icons/MT5.png" alt="M 로고" />
-    </a>
+    <a th:href="@{/main}"><img class="logo" src="/img/icons/Group 17.png" alt="M 로고"></a>
   </div>
-  <div class="nav-right">
-    <a th:href="@{/login}">로그인·회원가입</a>
-  </div>
-</nav>
 
-<!-- 하단 서브 네비게이션 바 -->
-<nav class="sub-nav">
-  <a th:href="@{/meeting-create}">모임생성</a>
-  <a th:href="@{/meeting-list}">모임목록</a>
-  <a th:href="@{/product-list}">상품목록</a>
-  <a th:href="@{/posts}">자유 게시판</a>
-</nav>
+  <div class="nav-center">
+    <img src="/img/봄.png" class="nav-img" alt="그림10">
+    <img src="/img/여름.png" class="nav-img" alt="그림10">
+    <img src="/img/가을.png" class="nav-img" alt="그림10">
+    <img src="/img/겨울.png" class="nav-img" alt="그림10">
+  </div>
+
+  <!-- ** navRight: 로그인/알림/프로필 영역(동적) ** -->
+  <div class="nav-right" id="navRight">
+    <a href="/user/login" class="login-link">로그인ㆍ회원가입</a>
+  </div>
+</header>
+
+<!-- ─── 하단 고정 네비 (모바일 bottom‑nav 스타일) ─── -->
+<section class="bottom-nav-wrapper">
+  <nav class="bottom-nav">
+    <a th:href="@{/group/create}" class="bottom-link">모임 생성</a>
+    <a th:href="@{/group/meetinglist}" class="bottom-link">모임 목록</a>
+    <a th:href="@{/product-list}" class="bottom-link">상품 목록</a>
+    <a th:href="@{/posts}" class="bottom-link">자유 게시판</a>
+  </nav>
+</section>
 
 <!-- 글 작성 폼 -->
 <section class="write-container">
@@ -220,6 +248,9 @@
 
 </script>
 
+
+<!--꼭 notify.js나 notification.js 보다 위에-->
+<th:block th:replace="fragments/notification-templates :: notiTemplates"></th:block>
 
 
 <script src="/js/notify.js" defer></script>

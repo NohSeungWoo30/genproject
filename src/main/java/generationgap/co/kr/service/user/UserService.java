@@ -163,9 +163,9 @@ public class UserService {
             // CustomOAuth2UserService에서 People API를 통해 가져온 최신 정보를 existingUser에 반영
             existingUser.setUserName(userDTO.getUserName());
             existingUser.setEmail(userDTO.getEmail());
-            existingUser.setNickname(userDTO.getNickname());
+            //existingUser.setNickname(userDTO.getNickname());
             existingUser.setProfileName(userDTO.getProfileName()); // ✅ 프로필 이미지 URL 업데이트
-            existingUser.setPhone(userDTO.getPhone());             // ✅ 전화번호 업데이트
+            //existingUser.setPhone(userDTO.getPhone());             // ✅ 전화번호 업데이트
             existingUser.setGender(userDTO.getGender());           // ✅ 성별 업데이트
             existingUser.setBirthDate(userDTO.getBirthDate());     // ✅ 생년월일 업데이트
             existingUser.setLastLoginAt(LocalDate.now());          // 마지막 로그인 시간 업데이트
@@ -456,6 +456,90 @@ public class UserService {
         return userMapper.findByEmail(email);
     }
 
+    // ⭐ 프로필 수정 처리 메서드 (이미지 첨부 및 삭제 기능 포함) ⭐
+    @Transactional
+    public void updateUserProfile(UserDTO user, MultipartFile profileImageFile, boolean deleteProfileImage) {
+        log.info("회원 프로필 업데이트 요청: userIdx={}, userId={}", user.getUserIdx(), user.getUserId());
+
+        // 1. 기존 사용자 정보 조회 (현재 프로필 이미지 경로를 얻기 위해)
+        UserDTO existingUser = userMapper.findByUserIdx(user.getUserIdx());
+        if (existingUser == null) {
+            throw new IllegalArgumentException("존재하지 않는 사용자입니다.");
+        }
+
+        // 2. 프로필 이미지 처리 로직
+        try {
+            if (deleteProfileImage) {
+                // 이미지 삭제 요청이 있을 경우
+                deleteExistingProfileImage(existingUser.getProfileName()); // 기존 이미지 파일 삭제
+                user.setProfileName("/images/profile_upload/default_profile.jpg"); // 기본 이미지로 설정
+                log.info("프로필 이미지 삭제 및 기본 이미지 설정: userIdx={}", user.getUserIdx());
+            } else if (profileImageFile != null && !profileImageFile.isEmpty()) {
+                // 새로운 이미지 파일이 첨부된 경우 (기존 이미지 대체)
+                validateProfileImageFile(profileImageFile); // 파일 유효성 검사
+
+                // 기존 이미지 파일이 default가 아니면 삭제
+                if (existingUser.getProfileName() != null && !existingUser.getProfileName().equals("/images/profile_upload/default_profile.jpg")) {
+                    deleteExistingProfileImage(existingUser.getProfileName());
+                }
+
+                String originalFilename = profileImageFile.getOriginalFilename();
+                String fileExtension = "";
+                if (originalFilename != null && originalFilename.contains(".")) {
+                    fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+                }
+                String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
+                Path uploadPath = Paths.get(uploadDir);
+                String dbPath = "/profile_images/" + uniqueFileName; // 웹 접근 경로
+
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+                Path targetPath = uploadPath.resolve(uniqueFileName);
+                Files.copy(profileImageFile.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+
+                user.setProfileName(dbPath); // 업로드된 파일 경로로 profileName 설정
+                log.info("프로필 이미지 업로드 성공: userIdx={}, originalName={}, savedPath={}", user.getUserIdx(), originalFilename, dbPath);
+            } else {
+                // 파일이 첨부되지 않았고 삭제 요청도 없는 경우: 기존 이미지 유지
+                user.setProfileName(existingUser.getProfileName());
+                log.info("프로필 이미지 변경 없음. 기존 이미지 유지: userIdx={}", user.getUserIdx());
+            }
+        } catch (IOException e) {
+            log.error("프로필 이미지 파일 저장/삭제 실패: userIdx={}, Error: {}", user.getUserIdx(), e.getMessage(), e);
+            throw new RuntimeException("프로필 이미지 처리 중 오류 발생", e);
+        } catch (IllegalArgumentException e) {
+            log.error("프로필 이미지 유효성 검사 실패: userIdx={}, Error: {}", user.getUserIdx(), e.getMessage());
+            throw e;
+        }
+
+        // 3. 사용자 정보 업데이트 (Mapper 호출)
+        try {
+            userMapper.updateUserInfo(user); // UserMapper에 updateUser 메서드가 있다고 가정
+            log.info("회원 정보(이미지 포함) 업데이트 성공: userIdx={}", user.getUserIdx());
+        } catch (Exception e) {
+            log.error("회원 정보 업데이트 실패: userIdx={}, Error: {}", user.getUserIdx(), e.getMessage(), e);
+            throw new RuntimeException("회원 정보 업데이트 중 오류 발생", e);
+        }
+    }
+    // ⭐ 기존 프로필 이미지 파일 삭제 로직
+    private void deleteExistingProfileImage(String profilePath) throws IOException {
+        // 기본 이미지는 삭제하지 않음
+        if (profilePath == null || profilePath.equals("/images/profile_upload/default_profile.jpg")) {
+            return;
+        }
+
+        // 웹 접근 경로를 실제 파일 시스템 경로로 변환
+        // 예: "/profile_images/abc.jpg" -> "uploadDir/profile_images/abc.jpg"
+        Path filePath = Paths.get(uploadDir + profilePath); // 이 경로가 정확해야 합니다.
+        if (Files.exists(filePath)) {
+            Files.delete(filePath);
+            log.info("기존 프로필 이미지 파일 삭제 성공: {}", filePath);
+        } else {
+            log.warn("삭제하려는 프로필 이미지 파일이 존재하지 않습니다: {}", filePath);
+        }
+    }
+
     /**
      * 사용자 프로필 사진을 업로드하고 DB에 경로를 업데이트합니다.
      * 로컬 유저에게만 허용됩니다.
@@ -589,3 +673,4 @@ public class UserService {
         return userMapper.getUserId_Nick(hostIndex);
     }
 }
+

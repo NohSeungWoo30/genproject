@@ -34,11 +34,11 @@
 
     <insert id="insertUser" parameterType="generationgap.co.kr.domain.user.UserDTO">
         INSERT INTO users (
-        user_id, provider, user_name, nickname, birth_date, gender,
-        user_ci, password_hash, email, phone, profile_name, introduction
+        user_id, provider, user_name, nickname, birth_date, gender, user_ci, password_hash,
+        email, phone, profile_name, introduction, last_login_at, update_at, ghost
         ) VALUES (
-        #{userId}, #{provider}, #{userName}, #{nickname}, #{birthDate}, #{gender},
-        #{userCi, jdbcType=VARCHAR}, #{passwordHash}, #{email}, #{phone}, #{profileName, jdbcType=VARCHAR}, #{introduction}
+        #{userId}, #{provider}, #{userName}, #{nickname}, #{birthDate, jdbcType=DATE}, #{gender, jdbcType=CHAR}, #{userCi, jdbcType=VARCHAR}, #{passwordHash},
+        #{email}, #{phone, jdbcType=VARCHAR}, #{profileName}, #{introduction, jdbcType=VARCHAR}, #{lastLoginAt, jdbcType=DATE}, #{updateAt, jdbcType=DATE}, #{ghost, jdbcType=DATE}
         )
     </insert>
 
@@ -87,11 +87,11 @@
         WHERE email = #{email} AND user_status = 'ACTIVE'
     </select>
 
-    <select id="findByUserNameAndPhone" parameterType="map" resultMap="userResultMap">
+    <select id="findByUserNameAndPhone" parameterType="generationgap.co.kr.domain.user.UserDTO" resultType="java.lang.String">
         SELECT
         user_id
         FROM users
-        WHERE user_name = #{userName} AND phone = #{phone, jdbcType=VARCHAR} AND user_status = 'ACTIVE'
+        WHERE user_name = #{userName} AND phone = #{phone} AND user_status = 'ACTIVE'
         FETCH FIRST 1 ROW ONLY
     </select>
 
@@ -190,7 +190,12 @@
         ]]>
     </select>
 
-    <!-- 유저 번호 닉네임 프로필 이미지 -->
+    <!--ksm 추가-->
+    <select id="findNicknameById" resultType="String">
+        SELECT nickname FROM users WHERE user_idx = #{userIdx}
+    </select>
+
+    <!-- 유저 번호 닉네임 프로필 이미지 호현상 -->
     <select id="getUserId_Nick" resultMap="userResultMap">
         SELECT
         U.user_idx,
@@ -203,4 +208,13 @@
         WHERE
         G.group_idx = #{groupIdx}
     </select>
+
+    <update id="updateUserProfileImage" parameterType="generationgap.co.kr.domain.user.UserDTO">
+        UPDATE users
+        SET profile_name = #{profileName},
+        update_at = SYSDATE
+        WHERE user_idx = #{userIdx}
+    </update>
+
+
 </mapper>
