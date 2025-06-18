@@ -4,8 +4,10 @@ import generationgap.co.kr.domain.group.CategoryMain;
 import generationgap.co.kr.domain.group.CategorySub;
 import generationgap.co.kr.domain.group.GroupMembers;
 import generationgap.co.kr.domain.group.Groups;
+import generationgap.co.kr.dto.group.GroupDto;
 import generationgap.co.kr.security.CustomUserDetails;
 import generationgap.co.kr.service.group.GroupService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -20,6 +22,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Controller
@@ -230,5 +234,87 @@ public class GroupsController {
         // 6. 웹에서 접근할 수 있는 URL 반환
         return "/upload/groupImg/" + uuidFileName;
     }
+
+
+
+
+
+
+
+    @GetMapping("/match")
+    @ResponseBody
+    public List<Groups> getMatchedGroups(
+            @RequestParam List<Integer> categories,
+            @RequestParam int minAge,
+            @RequestParam int maxAge,
+            @RequestParam String gender
+    ) {
+        return groupService.getMatchedGroups(categories, minAge, maxAge, gender);
+    }
+
+
+    @GetMapping("/api/current-group")
+    @ResponseBody
+    public ResponseEntity<GroupDto> getCurrentGroup(@RequestParam Long userId) {
+        Optional<GroupDto> group = groupService.findActiveGroupForUser(userId);
+        return group.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
+    }
+
+    @GetMapping("/api/groups/{id}")
+    @ResponseBody
+    public ResponseEntity<?> getGroupById(@PathVariable int id) {
+        Groups group = groupService.getGroupById(id);
+
+        if (group == null) {
+            return ResponseEntity.status(404).body("해당 그룹을 찾을 수 없습니다.");
+        }
+
+        // 프론트에서 필요한 필드만 가공하거나, DTO로 변환해서 반환하는 것이 이상적입니다.
+        return ResponseEntity.ok(group);
+    }
+
+
+    @PostMapping("/api/groups/{groupId}/join")
+    @ResponseBody
+    public ResponseEntity<GroupDto> joinGroup(@PathVariable Long groupId,
+                                              @AuthenticationPrincipal CustomUserDetails user) {
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        /* 1) 참가 + 최신 정보까지 한 번에 받아오기 */
+        GroupDto groupDto = groupService.joinGroup(
+                groupId,                 // 방 번호
+                user.getUserIdx(),       // 호출자 PK
+                user.getNickname());     // 호출자 닉네임
+
+        /* 2) 그대로 반환 */
+        return ResponseEntity.ok(groupDto);
+    }
+
+
+    @PostMapping("/api/groups/{groupIdx}/leave")
+    public ResponseEntity<?> leaveGroup(@PathVariable Long groupIdx, @RequestParam Long userId) {
+        groupService.leaveGroup(groupIdx, userId);
+        return ResponseEntity.ok(Map.of("message", "방 나가기 성공"));
+    }
+
+
+
+
+    @GetMapping("/api/groups/{groupIdx}")
+    public ResponseEntity<GroupDto> getGroupDetails(@PathVariable int groupIdx) {
+        GroupDto dto = groupService.getGroupDetails(groupIdx);
+        return ResponseEntity.ok(dto);
+    }
+
+
+    @GetMapping("/api/groups/detail/{groupIdx}")
+    public ResponseEntity<GroupDto> getGroupDetailJson(@PathVariable int groupIdx){
+        return ResponseEntity.ok(groupService.getGroupDetails(groupIdx));
+    }
+
+
 
 }

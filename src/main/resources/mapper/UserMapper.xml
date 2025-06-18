@@ -191,4 +191,14 @@
     </select>
 
 
+
+
+
+
+    <!--ksm 추가-->
+    <select id="findNicknameById" resultType="String">
+        SELECT nickname FROM users WHERE user_idx = #{userIdx}
+    </select>
+
+
 </mapper>

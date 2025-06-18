@@ -12,6 +12,7 @@
   <!--알림(종모양)기능 css추가 알림기능이 포함되는 모든 곳에 추가하기-->
   <link rel="stylesheet" href="/css/notify.css" />
   <link rel="stylesheet" href="/css/mainstyle.css" />
+  <link rel="stylesheet" href="/css/meetingdetail.css" />
   <link rel="stylesheet" href="/css/filter.css" />
 
   <!--로그인 세션관련 계속 추가하기-->
@@ -33,6 +34,9 @@
   <!-- noUiSlider: simple.html용 -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.css">
   <script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.js"></script>
+
+
+
 
 </head>
 
@@ -130,15 +134,15 @@
       </div>
       <div class="filter-modal-content p-8 pt-4">
         <div class="tags-container">
-          <div class="tag-item" data-tag="운동/액티비티"><span class="label">운동/액티비티</span></div>
-          <div class="tag-item" data-tag="문화/예술"><span class="label">문화/예술</span></div>
-          <div class="tag-item" data-tag="지식/스터디"><span class="label">지식/스터디</span></div>
-          <div class="tag-item" data-tag="음식/카페"><span class="label">음식/카페</span></div>
-          <div class="tag-item" data-tag="여행/탐험"><span class="label">여행/탐험</span></div>
-          <div class="tag-item" data-tag="게임/오락"><span class="label">게임/오락</span></div>
-          <div class="tag-item" data-tag="반려동물"><span class="label">반려동물</span></div>
-          <div class="tag-item" data-tag="만들기/공예"><span class="label">만들기/공예</span></div>
-          <div class="tag-item" data-tag="소셜/친목"><span class="label">소셜/친목</span></div>
+          <div class="tag-item" data-id="1"><span class="label">운동/액티비티</span></div>
+          <div class="tag-item" data-id="2"><span class="label">문화/예술</span></div>
+          <div class="tag-item" data-id="3"><span class="label">지식/스터디</span></div>
+          <div class="tag-item" data-id="4"><span class="label">음식/카페</span></div>
+          <div class="tag-item" data-id="5"><span class="label">여행/탐험</span></div>
+          <div class="tag-item" data-id="6"><span class="label">게임/오락</span></div>
+          <div class="tag-item" data-id="7"><span class="label">반려동물</span></div>
+          <div class="tag-item" data-id="8"><span class="label">만들기/공예</span></div>
+          <div class="tag-item" data-id="9"><span class="label">소셜/친목</span></div>
         </div>
         <hr class="filter-divider">
         <div class="text-center">
@@ -176,20 +180,70 @@
   </div>
 </div>
 <!-- 3. 상세 모달 -->
-<div id="room-detail-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-  <div class="bg-white rounded-2xl w-full max-w-lg p-8 relative">
-    <button id="close-room-detail-btn" class="absolute top-4 right-4 w-10 h-10 rounded-full text-gray-500 hover:bg-gray-100 flex items-center justify-center">
-      <ion-icon name="close-outline" class="text-2xl"></ion-icon>
-    </button>
-    <h2 id="room-detail-title" class="text-2xl font-bold mb-4"></h2>
-    <p class="text-gray-600 mb-6">모임 상세 내용이 여기에 표시됩니다. (예: 장소, 시간, 소개, 참여 멤버 등)</p>
-    <div class="bg-gray-100 p-4 rounded-lg mb-6">
-      <p><strong>주최자:</strong> 김모임</p>
-      <p><strong>참여인원:</strong> 3 / 8 명</p>
+<!-- ✅ 그룹 상세 모달 (meetingdetail.js가 조작하는 대상) -->
+<div id="group-detail-modal" class="fixed hidden inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center">
+  <div class="bg-white rounded-xl shadow-lg w-full max-w-3xl relative overflow-y-auto max-h-[90vh]">
+    <button onclick="closeGroupDetailModal()" class="absolute top-2 right-2 text-2xl text-gray-500 hover:text-black">✕</button>
+
+    <section class="room-detail-section">
+      <!-- 모임 정보 카드 -->
+      <div id="roomDetailCard"></div>
+
+      <!-- ✅ 인라인 채팅 영역 교체 -->
+      <div id="inline-chat-wrapper" style="display: none;">
+        <div class="chat-container">
+          <header class="chat-header">
+            <div class="title">
+              <div class="chat-title" id="chatRoomTitleText"></div>
+            </div>
+          </header>
+          <main class="chat-messages" id="chatMessages"></main>
+          <footer class="chat-input-wrapper">
+            <div class="chat-input">
+              <button>➕</button>
+              <input type="text" id="chatInput" placeholder="메시지 보내기" />
+              <button id="sendBtn">➤</button>
+            </div>
+          </footer>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 신고 모달 (기존 방식 유지) -->
+    <div id="report-modal" style="display:none; position:fixed; top:20%; left:40%; background:white; padding:20px; border:1px solid #ccc; z-index:9999;">
+      <h3>🚨 메시지 신고</h3>
+      <label>신고 사유
+        <select id="report-reason">
+          <option value="1">욕설/비방/혐오 표현</option>
+          <option value="2">음란/선정적인 콘텐츠</option>
+          <option value="3">도배/스팸/광고</option>
+          <option value="4">개인 정보 노출</option>
+          <option value="5">사칭/허위 정보</option>
+          <option value="6">부적절한 내용</option>
+          <option value="7">모임 운영 방해</option>
+          <option value="8">기타</option>
+        </select>
+      </label><br><br>
+      <textarea id="report-comment" placeholder="신고 내용을 입력하세요" rows="4" cols="40"></textarea><br><br>
+      <button onclick="submitReport()">🚨 신고 제출</button>
+      <button onclick="closeReportModal()">❌ 닫기</button>
     </div>
-    <button class="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-600">참여하기</button>
   </div>
 </div>
+
+
+
+
+<script th:inline="javascript">
+  // 로그인한 사용자 정보가 필요할 때 대비
+  window.currentLoggedInUser = {
+    userIdx: [[${currentUser != null ? currentUser.userIdx : -1}]],
+    nickname: [[${currentUser != null ? currentUser.nickname : "'비회원'"}]]
+  };
+</script>
+
+
 
 <!--꼭 notify.js나 notification.js 보다 위에-->
 <th:block th:replace="fragments/notification-templates :: notiTemplates"></th:block>
@@ -197,6 +251,7 @@
 
 <script src="/js/notify.js" defer></script>
 <script src="/js/notification.js" defer></script>
+<script src="/js/meetingdetail.js" defer></script>
 <script src="/js/filter.js" defer></script>
 
 
