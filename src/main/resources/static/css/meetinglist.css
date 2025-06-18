@@ -1,3 +1,61 @@
+.modal {
+  display: none; /* 기본적으로 숨김 */
+  position: fixed; /* 화면에 고정 */
+  z-index: 1000; /* 다른 요소 위에 표시 */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto; /* 내용이 넘칠 경우 스크롤 */
+  background-color: rgba(0, 0, 0, 0.7); /* 반투명 검은색 배경 */
+  justify-content: center; /* 수평 중앙 정렬 */
+  align-items: center; /* 수직 중앙 정렬 */
+}
+
+/* JavaScript에서 추가될 클래스 */
+.modal.show-modal {
+  display: flex; /* 이 클래스가 추가될 때만 모달이 보이도록 */
+}
+
+/* 모달 내용 컨테이너 */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto; /* flexbox 사용 시 auto margin은 필요 없음 */
+  padding: 30px;
+  border: 1px solid #888;
+  width: 80%; /* 모달 너비 */
+  max-width: 800px; /* 최대 너비 */
+  border-radius: 8px;
+  position: relative; /* 닫기 버튼 위치 지정을 위해 */
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+  animation-name: animatetop;
+  animation-duration: 0.4s
+}
+
+/* 닫기 버튼 */
+.close-button {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  position: absolute;
+  top: 10px;
+  right: 20px;
+}
+
+.close-button:hover,
+.close-button:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* 모달 나타나는 애니메이션 */
+@keyframes animatetop {
+  from {top: -300px; opacity: 0}
+  to {top: 0; opacity: 1}
+}
+
 /* region-selector 상자 모양 */
     .region-selector-container {
       padding: 12px 0;
@@ -31,7 +89,7 @@
       color: #fff;
       border-color: #007BFF;
     }
-    .region-header .search-box {
+    /*.region-header .search-box {
       flex-grow: 1;
       position: relative;
     }
@@ -49,7 +107,7 @@
       transform: translateY(-50%);
       font-size: 16px;
       color: #aaa;
-    }
+    }*/
     .region-content {
       display: flex;
       padding: 8px;
@@ -198,7 +256,18 @@
     }
 
 /* 필터 관련 CSS 설정 끝 */
-
+    .filter-and-sort-area{
+        display: flex; /* 자식 요소들을 가로로 나열 */
+            justify-content: flex-end; /* 기본적으로 오른쪽 정렬 (버튼이 오른쪽에 있다면) */
+            /* 또는 justify-content: flex-start; 로 왼쪽 정렬 (버튼이 왼쪽에 있다면) */
+            /* 또는 justify-content: space-between; 으로 양쪽 끝에 배치 (필터 버튼과 정렬 옵션이 있다면) */
+            align-items: center; /* 수직 중앙 정렬 */
+            margin-bottom: 20px; /* 모임 카드 그리드와의 간격 */
+            padding: 0 15px; /* meeting-list-container의 좌우 패딩과 맞춤 */
+            max-width: 1200px; /* meeting-list-container의 max-width와 동일하게 설정 */
+            margin-left: auto; /* 좌우 마진 auto로 중앙 정렬 (max-width 사용 시) */
+            margin-right: auto;
+    }
     #meeting-list-container {
         max-width: 1200px;
         margin: 0 auto 20px auto;
@@ -276,5 +345,297 @@
       color: #888;
     }
 
+/* ─── 0. 공통 리셋 ─── */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
+    /* ─── 1. 최상위(_1920-w-light) ─── */
+    ._1920-w-light {
+      background: #ffffff; /* 흰색 배경 */
+      position: relative;
+      min-height: 3100px;
+      width: 100%;
+      overflow-x: hidden;
+    }
+
+    /* ─── 2. 상단 내비게이션 바 ─── */
+    .container-nav {
+      width: 100%;
+      height: 106px; /* 원래 디자인 높이 */
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      border-bottom: 1px solid #dbdbdb;
+    }
+
+    /* 좌측 로고 */
+    .nav-left .logo {
+      width: 300px;
+      height: 60px;
+      object-fit: contain;
+    }
+
+    /* 우측 로그인·회원가입 */
+    .nav-right {
+      display: flex;
+      align-items: center;
+    }
+
+    /* 로그인·회원가입 링크 스타일 */
+    .login-link {
+      display: inline-block;
+      width: 112px;
+      height: 21px;
+      color: #383535;
+      font-size: 15px;
+      font-family: Pretendard, sans-serif;
+      font-weight: 400;
+      line-height: 24px;
+      text-decoration: none;
+      word-wrap: break-word;
+    }
+
+    /* 로그인·회원가입 호버 효과 (원한다면 추가) */
+    .login-link:hover {
+      color: #000000;
+    }
+
+    /* ─── 3. 메인 배너 ─── */
+    .main-banner {
+      width: 100%;
+      max-width: 1200px;
+      margin: 20px auto 0 auto;
+      padding: 0;
+      overflow: hidden;  /* 배너 이미지가 넘칠 경우 숨김 처리 */
+    }
+    .banner-image {
+      display: block;
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+    }
+
+    /* ─── 4. 모임 카드 래퍼 (세로 간격) ─── */
+    .container2 {
+      width: 100%;
+      max-width: 1200px;
+      margin: 30px auto 0 auto;
+      padding: 0 10px;
+    }
+
+    /* ─── 5. Flexbox: 한 줄(가로 스크롤) ─── */
+    .flex-row {
+      display: flex;
+      gap: 17px;           /* 카드 사이 간격 */
+      overflow-x: auto;    /* 가로 스크롤바 생성 */
+      padding-bottom: 10px;/* 스크롤바가 카드와 겹치지 않도록 여유 공간 */
+      scroll-behavior: smooth;
+    }
+    .flex-row::-webkit-scrollbar {
+      height: 6px;
+    }
+    .flex-row::-webkit-scrollbar-thumb {
+      background: #999696;
+      border-radius: 3px;
+    }
+    .flex-row::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    /* ─── 6. 카드 공통 스타일 ─── */
+    .card {
+      flex: 0 0 auto;      /* 폭 고정, 다음 줄로 넘어가지 않음 */
+      width: 282px;        /* 디자인 가이드와 동일 */
+      background: #f4f4f4;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+    }
+
+    /* 6-1. 카드 내부 썸네일(이미지) */
+    .card-thumb img {
+      display: block;
+      width: 100%;
+      height: 211px;     /* 디자인 비율과 동일 */
+      object-fit: cover;
+    }
+
+    /* 6-2. 카드 정보 영역 */
+    .card-info {
+      padding: 10px;
+    }
+
+    /* 6-2-1. 카테고리(작은 글씨) */
+    .card-category {
+      font-family: Pretendard, sans-serif;
+      font-size: 14.875px;
+      color: #383535;
+      margin-bottom: 6px;
+    }
+
+    /* 6-2-2. 카드 제목(중간 크기) */
+    .card-title {
+      font-family: Pretendard, sans-serif;
+      font-size: 16.875px;
+      color: #383535;
+      line-height: 1.4;
+      margin-bottom: 8px;
+      word-break: keep-all;
+    }
+
+    /* 6-2-3. 카드 날짜(연한 회색) */
+    .card-date {
+      font-family: Pretendard, sans-serif;
+      font-size: 15px;
+      color: #999696;
+    }
+
+    /* ─── 7. 중간 카테고리 링크 (아이콘 버전) ─── */
+    .category-links {
+      width: 100%;
+      max-width: 1200px;
+      margin: 40px auto 0 auto;
+      padding: 0 10px;
+      display: flex;
+      gap: 40px;                /* 아이템 간 간격 */
+      flex-wrap: wrap;          /* 화면이 좁아지면 줄바꿈 */
+      justify-content: center;  /* 가로 가운데 정렬 */
+    }
+
+    .category-links .cat-link {
+      display: flex;
+      flex-direction: column;   /* 아이콘 위, 텍스트 아래 정렬 */
+      align-items: center;      /* 가로 가운데 정렬 */
+      text-decoration: none;    /* 밑줄 제거 */
+      color: #383535;           /* 텍스트 색상 */
+      font-family: Pretendard, sans-serif;
+      font-size: 13px;
+    }
+
+    /* ─── 카테고리 아이콘 기본/호버 스타일 (방안 1) ─── */
+    .category-links .cat-icon {
+      width: 65px;              /* 기존 80px → 70px로 축소 */
+      height: 65px;             /* 기존 80px → 70px로 축소 */
+      object-fit: contain;
+      margin-bottom: 12px;
+      transition: transform 0.2s ease-out; /* 0.15s → 0.2s로 부드럽게 */
+    }
+
+    /* 마우스가 아이콘 위에 있을 때만 확대 */
+    .category-links .cat-icon:hover {
+      transform: scale(1.2);     /* 기존 1.1 → 1.2로 강조 비율 증가 */
+    }
+
+    .category-links .cat-text {
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    /* ─── 8. 중간 배너 ─── */
+    .mid-banner {
+      width: 100%;
+      max-width: 1200px;
+      margin: 40px auto 0 auto;
+      padding: 0 10px;
+    }
+    .mid-banner-img {
+      display: block;
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    /* ─── 9. 하단 네비게이션 바 ─── */
+    .bottom-nav-wrapper {
+      width: 100%;
+      background: #7BC8FF;
+      border-top: 1px solid #7BC8FF;
+
+    }
+    .bottom-nav {
+      width: 100%;
+      max-width: 1920px;
+      margin: 0 auto;
+      display: flex;
+      gap: 40px;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 0;
+    }
+    .bottom-nav .bottom-link {
+      font-family: Pretendard;
+      font-size: 24px;
+      font-weight: 700;
+      color: #ffffff;
+      text-decoration: none;
+      text-shadow:
+        0 0 2px rgba(0, 0, 0, 0.3),
+        0 1px 2px rgba(0, 0, 0, 0.4);
+    }
+
+    .bottom-nav .bottom-link:hover {
+      color: #003465; /* 짙은 파랑 or 선택 강조 색상 */
+      transform: translateY(-2px); /* 살짝 띄우기 */
+      text-shadow: none; /* hover 시 그림자 제거로 선명하게 */
+    }
+
+    /* 선택된 메뉴 예시 (active 상태라면) */
+    .bottom-nav .bottom-link.active {
+      color: #003465; /* 선택 강조 색 */
+      border-bottom: 3px solid #003465; /* 강조선으로 구분 */
+      text-shadow: none;
+    }
+
+
+    /* ─── 10. Footer ─── */
+    .footer {
+      width: 100%;
+      background: #ffffff;
+      padding: 40px 20px;
+      text-align: center;
+      font-family: Pretendard, sans-serif;
+      font-size: 12px;
+      color: #000000;
+      border-top: 1px solid #dbdbdb;
+      margin-top: 60px;
+    }
+    .footer-links {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .footer-link {
+      color: #000000;
+      text-decoration: none;
+    }
+    .footer-divider {
+      display: inline-block;
+      width: 1px;
+      height: 11px;
+      background: #dbdbdb;
+      vertical-align: middle;
+    }
+    .footer a:hover {
+      text-decoration: underline;
+    }
+    .footer a:visited {
+      color: #000000;
+    }
+    .footer a:active {
+      color: #999696;
+    }
+    .footer .footer-copyright {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #000000;
+    }
 

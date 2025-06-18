@@ -1,4 +1,13 @@
-/* 스크립트: region 토글, 듀얼 슬라이더, tag 관리*/
+document.addEventListener('DOMContentLoaded', function() {
+    // 필터 모달
+    const filterModal = document.getElementById('filter-modal');
+    const openFilterModalBtn = document.getElementById('open-filter-modal'); // 모달창 오픈 버튼
+    const closeButton = document.getElementById('close-button');
+    const applyFilterButton = document.getElementById('apply-filter-button');
+
+    console.log("Open button:", openFilterModalBtn);
+          console.log("Close button:", closeButton);
+          console.log("Apply button:", applyFilterButton);
  // region selector 토글
   const btnRegion = document.getElementById('btn-region');
   const panelRegion = document.getElementById('filter-region-panel');
@@ -6,16 +15,26 @@
     panelRegion.style.display = panelRegion.style.display === 'none' ? 'block' : 'none';
   });
 
-  // 캘린더 달력
-  const dateSelect = document.getElementById('date-input');
-
   // 듀얼 슬라이더 (나이)
-  const sliderMin = document.getElementById('age-min');
-  const sliderMax = document.getElementById('age-max');
-  const ageValueText = document.getElementById('age-value');
-  const STEP = 5;
+    const sliderMin = document.getElementById('age-min');
+    const sliderMax = document.getElementById('age-max');
+    const ageValueText = document.getElementById('age-value');
+    const STEP = 5;
+     // 인원 수
+     const selectedCountTag = document.getElementById('count-select');
+     // 카테고리
+     const selectedCategoryTag = document.getElementById('category-input');
 
-  function updateAgeText() {
+  // 캘린더 달력
+  const selectedDate = document.getElementById('date-input');
+
+    // 태그 관리(지역 필터에서 선택된 항목)
+      const sidoListEl = document.getElementById('sido-list');
+      const sigunguListEl = document.getElementById('sigungu-list');
+      const dongListEl = document.getElementById('dong-list');
+      const selectedTagsEl = document.getElementById('selected-tags');
+
+  function updateAgeDisplay() {
     const minVal = parseInt(sliderMin.value);
     const maxVal = parseInt(sliderMax.value);
     ageValueText.textContent = `${minVal}세 - ${maxVal}세`;
@@ -28,7 +47,7 @@
       minVal = maxVal - STEP;
       sliderMin.value = minVal;
     }
-    updateAgeText();
+    updateAgeDisplay();
   });
 
   sliderMax.addEventListener('input', () => {
@@ -38,18 +57,85 @@
       maxVal = minVal + STEP;
       sliderMax.value = maxVal;
     }
-    updateAgeText();
+    updateAgeDisplay();
   });
 
-  updateAgeText();
+  updateAgeDisplay();
 
-  // 태그 관리(지역 필터에서 선택된 항목)
+          // "검색 필터 열기" 버튼 클릭 시 모달 열기
+            openFilterModalBtn.addEventListener('click', function() {
+                filterModal.classList.add('show-modal');
+            });
 
-  const sidoListEl = document.getElementById('sido-list');
-  const sigunguListEl = document.getElementById('sigungu-list');
-  const dongListEl = document.getElementById('dong-list');
-  const selectedTagsEl = document.getElementById('selected-tags');
-  const searchInput = document.getElementById('search-input');
+        // 닫기 버튼 클릭 시 모달 닫기
+            closeButton.addEventListener('click', function() {
+                filterModal.classList.remove('show-modal');
+            });
+
+            // 모달 외부 클릭 시 모달 닫기
+            window.addEventListener('click', function(event) {
+                if (event.target == filterModal) {
+                    filterModal.classList.remove('show-modal');
+                }
+            });
+
+    // "필터 적용" 버튼 클릭 시 (여기서 실제 검색 로직을 구현)
+        applyFilterButton.addEventListener('click', function() {
+            // 1. 모달 닫기
+            filterModal.classList.remove('show-modal');
+
+            // 2. 선택된 필터 값 가져오기
+            const selectedDateValue = selectedDate.value;
+            /*const selectedRegion = currentSido || "전체 지역"; // 시도 시군구 동읍면*/
+            let selectedRegionText = '';
+            if (selectedFilters.size > 0) {
+                    selectedRegionText = Array.from(selectedFilters).join(', ');
+                } else {
+                    selectedRegionText = "전체 지역"; // 아무것도 선택되지 않았다면 "전체 지역"
+                }
+
+            const minAge = sliderMin.value;
+            const maxAge = sliderMax.value;
+            const selectedCount = selectedCountTag.value;
+            const selectedCategory = selectedCategoryTag.value; // 카테고리 ID
+
+            console.log('선택된 필터 값:', {
+                date: selectedDateValue,
+                region: selectedRegionText,   // 최종 지역 정보
+                minAge: minAge,
+                maxAge: maxAge,
+                count: selectedCount,
+                category: selectedCategory
+            });
+
+            // 3. TODO: 이 데이터를 사용하여 실제 검색 (예: AJAX 요청, 페이지 리로드 등)
+            // 예를 들어, 폼 제출 또는 AJAX 요청을 보낼 수 있습니다.
+            // fetch('/api/search', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json'
+            //     },
+            //     body: JSON.stringify({
+            //         groupDate: selectedDate,
+            //         region: selectedRegion, // 실제 지역 값이 필요
+            //         minAge: minAge,
+            //         maxAge: maxAge,
+            //         maxParticipants: selectedCount,
+            //         categoryMainIdx: selectedCategory
+            //     })
+            // })
+            // .then(response => response.json())
+            // .then(data => {
+            //     console.log('검색 결과:', data);
+            //     // 검색 결과를 페이지에 표시하는 로직
+            // })
+            // .catch(error => {
+            //     console.error('검색 중 오류 발생:', error);
+            // });
+
+            alert('필터가 적용되었습니다! (콘솔 확인)');
+        });
+
 
   let currentSido = null;
   let currentSigungu = null;
@@ -188,38 +274,11 @@
     });
   }
 
-  searchInput.addEventListener('input', () => {
-    const query = searchInput.value.trim();
-    if (!query) {
-      renderSidoList();
-      return;
-    }
-    sidoListEl.innerHTML = '';
-    Object.keys(regionData).forEach(sido => {
-      if (sido.includes(query)) {
-        const li = document.createElement('li');
-        li.textContent = sido;
-        li.addEventListener('click', () => selectSido(sido));
-        sidoListEl.appendChild(li);
-      } else {
-        let match = false;
-        Object.keys(regionData[sido]).forEach(sigungu => {
-          if (sigungu.includes(query)) match = true;
-          regionData[sido][sigungu].forEach(dong => {
-            if (dong.includes(query)) match = true;
-          });
-        });
-        if (match) {
-          const li = document.createElement('li');
-          li.textContent = sido;
-          li.addEventListener('click', () => selectSido(sido));
-          sidoListEl.appendChild(li);
-        }
-      }
-    });
-  });
+
 
   // 초기 지역 렌더링
   renderSidoList();
   sigunguListEl.innerHTML = '<li>시/도를 먼저 선택하세요</li>';
   dongListEl.innerHTML = '<li>시/구군을 먼저 선택하세요</li>';
+
+});

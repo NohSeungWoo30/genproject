@@ -7,7 +7,7 @@
 
   <!-- 기존 CSS 변수 파일/메인 스타일 -->
   <!--<link rel="stylesheet" href="/css/vars.css" />-->
-  <link rel="stylesheet" href="/css/mainstyle.css" />
+  <!--<link rel="stylesheet" href="/css/mainstyle.css" />-->
   <link rel="stylesheet" href="/css/meetinglist.css" />
 
   <title>모임목록 페이지</title>
@@ -38,7 +38,13 @@
     </nav>
   </section>
 
-  <!-- ─── 3. 필터 섹션 (이전 디자인 형태) ─── -->
+  <!-- ─── 필터 섹션 (이전 디자인 형태) ─── -->
+  <div class="filter-and-sort-area">
+  <button id="open-filter-modal" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">검색 필터 열기</button>
+  </div>
+  <div id="filter-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" id="close-button">&times;</span> <h2>모임 검색 필터</h2>
   <div style="max-width: 1200px; margin: 20px auto 0 auto; padding: 0 10px;">
 
     <!-- 날짜 선택 -->
@@ -96,19 +102,17 @@
       </select>
     </div>
   </div>
+
   <!-- ─── 4. region 필터가 펼쳐지는 영역 (초기 숨김) ─── -->
   <div id="filter-region-panel" style="display: none; margin-top: 8px; max-width: 1200px; margin-left: auto; margin-right: auto; padding: 0 10px;">
     <div class="region-selector-container">
       <div class="region-selector">
-        <div class="region-header">
-          <div class="btn active" data-tab="area">시·도</div>
+        <!--<div class="region-header">
+          <div class="btn" data-tab="area">시·도</div>
           <div class="btn" data-tab="sigungu">시·구·군</div>
           <div class="btn" data-tab="dong">동·읍·면</div>
-          <div class="search-box">
-            <input type="text" id="search-input" placeholder="지역명 검색 예) 서울특별시, 종로구" />
-            <span class="icon">🔍</span>
-          </div>
-        </div>
+
+        </div>-->
         <div class="region-content">
           <div class="region-pane" id="sido-pane">
             <h4>시·도</h4>
@@ -127,6 +131,11 @@
       </div>
     </div>
   </div>
+      <div style="text-align: right; margin-top: 20px;">
+        <button id="apply-filter-button" style="padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">필터 적용</button>
+      </div>
+    </div>
+  </div>  <!-- 모달창 검색 끝 -->
 
   <!-- ─── “모임 카드” ─── -->
   <div class="meeting-list-container">

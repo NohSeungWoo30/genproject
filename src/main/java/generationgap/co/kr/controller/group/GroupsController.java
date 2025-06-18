@@ -37,6 +37,12 @@ public class GroupsController {
     // 이미지 저장 경로를 상수로 정의하여 관리 용이성 높임
     private static final String UPLOAD_DIR = "src/main/resources/static/upload/groupImg/";
 
+    @GetMapping("/favicon.ico")
+    @ResponseBody
+    void returnNoFavicon() {
+        // 아무것도 반환하지 않음 favicon 에러 신경쓰여서 넣은거
+    }
+
     /*상단 메뉴 버튼 모임리스트*/
     @GetMapping("/meetinglist")
     public String meetinglist(Model model,
