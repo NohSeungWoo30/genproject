@@ -191,22 +191,30 @@ async function joinChat() {
         })
       });
 
-      if (!response.ok) throw new Error("서버 응답 오류");
+      /* ───── 실패(401·403·500…) 처리 ───── */
+            if (!response.ok) {
+              // 서버가 text/plain 을 주므로 text()로 읽는다
+              const msg = await response.text();
 
-      // ✅ 서버 응답은 단순 메시지임 → 별도 그룹 정보 다시 요청해야 함
-      /*const groupRes = await fetch(`/group/api/groups/${window.groupId}`);
-      if (!groupRes.ok) throw new Error("❌ 그룹 정보 불러오기 실패");
+              switch (response.status) {
+                case 401:
+                  alert("로그인이 필요합니다.");
+                  break;
+                case 403:
+                  alert(msg || "이용권 잔여 횟수가 없습니다.");
+                  break;
+                default:
+                  alert(`오류(${response.status}) : ${msg}`);
+              }
+              return;           // 실패 시 이후 로직 중단
+            }
 
-      const groupData = await groupRes.json();*/
       const groupData  = await response.json();
       console.log("🎯 join 후 groupData 다시 로드:", groupData);
 
       window.room = groupData;
       window.groupId = groupData.groupIdx;
       isChatJoined = true;
-
-      if (!room.participants) room.participants = [];
-      room.participants.push(currentLoggedInUser);
 
       localStorage.setItem('joinedGroupId', window.groupId);
       await updateFloatingButton();
@@ -285,37 +293,39 @@ async function updateFloatingButton () {
 
 async function leaveChat() {
   try {
-    const res = await fetch(`/group/api/groups/${window.groupId}/leave?userId=${window.userId}`, {
-      method: 'POST'
-    });
+    // 1. 서버에 “나가기” 요청
+    const res = await fetch(
+      `/group/api/groups/${window.groupId}/leave?userId=${window.userId}`,
+      { method: 'POST' }
+    );
     const result = await res.json();
-    console.log("🚪 나가기 성공:", result);
+    console.log('🚪 나가기 성공:', result);
 
-    // 상태 초기화
+    // 2. 클라이언트 상태 초기화
     localStorage.removeItem('joinedGroupId');
     updateFloatingButton();
-
     isChatJoined = false;
 
-    // ✅ room 및 participants 방어 처리
-    if (typeof room === 'object' && room !== null) {
-      if (Array.isArray(room.participants)) {
-        room.participants = room.participants.filter(p => p.nickname !== currentLoggedInUser.nickname);
-      } else {
-        console.warn("⚠ room.participants가 비어있거나 배열이 아님:", room.participants);
-        room.participants = []; // 안전 초기화
-      }
-    } else {
-      console.warn("❗ room 자체가 null이거나 객체가 아님:", room);
+    // 3. participants 배열에서 내 정보 제거
+    if (room && Array.isArray(room.participants)) {
+      room.participants = room.participants.filter(
+        p => p.nickname !== currentLoggedInUser.nickname
+      );
     }
 
+    // 4. ★ DB에서 최신 값 다시 받아오기 ★
+    const fresh = await fetch(`/group/api/groups/detail/${window.groupId}`)
+                          .then(r => r.json());
+    window.room = fresh;
+
+    // 5. 화면 갱신
     displayRoomDetails();
     inlineChatWrapper.style.display = 'none';
     roomPanel.classList.remove('active');
     if (ws) ws.close();
+
   } catch (e) {
-    console.error("❌ 나가기 실패:", e);
-   /* alert("방 나가기 중 오류가 발생했습니다.");*/
+    console.error('❌ 나가기 실패:', e);
   }
 }
 
@@ -366,7 +376,7 @@ function connectWebSocket() {
         const edited = String(data.isEdited).toUpperCase() === 'Y';
         if (target) {
           const bubble = target.querySelector('.bubble');
-          if (bubble) {
+          if (풍선껌) {
             bubble.innerHTML = `${escapeHTML(data.newContent)}${edited ? ' <span class="edited-label">(수정됨)</span>' : ''}`;
           }
         }
@@ -475,7 +485,7 @@ function addMessage(msgData) {
       return;
     }
     const bubble = target.querySelector('.bubble');
-    if (bubble) {
+    if (풍선껌) {
       bubble.innerHTML = `삭제된 메시지입니다.${editedText}`;
       bubble.classList.add('deleted');
     }
@@ -968,3 +978,29 @@ fetch('/group/api/current-group?userId=' + window.userId)
     return res.text();                     // 바디도 확인
   })
   .then(console.log);
+
+
+/** 메인·리스트·디테일 페이지 어디서든 같은 방식으로 모달을 띄운다 */
+document.addEventListener('open-group-detail', async ({ detail }) => {
+  const { groupIdx } = detail;
+  try {
+    /* 최신 그룹 정보 가져오기 */
+    const data = await fetch(`/group/api/groups/detail/${groupIdx}`)
+                         .then(r => r.json());
+
+    /* 전역 상태 갱신 – meetingdetail.js 가 이미 쓰는 변수들 */
+    window.groupId   = groupIdx;
+    window.room      = data;
+    window.isChatJoined = false;   // 아직 입장 안한 상태
+
+    /* 모달 콘텐츠 렌더링 */
+    if (typeof displayRoomDetails === 'function') displayRoomDetails();
+
+    /* 모달 열기 */
+    document.getElementById('group-detail-modal')
+            .classList.remove('hidden');
+  } catch (err) {
+    console.error('그룹 데이터 로드 실패', err);
+    alert('모임 정보를 불러오지 못했습니다.');
+  }
+});

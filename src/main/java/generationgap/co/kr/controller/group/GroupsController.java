@@ -2,11 +2,10 @@ package generationgap.co.kr.controller.group;
 
 import generationgap.co.kr.domain.group.*;
 import generationgap.co.kr.domain.user.UserDTO;
+import generationgap.co.kr.dto.group.GroupDto;
+import generationgap.co.kr.mapper.group.GroupsMapper;
 import generationgap.co.kr.security.CustomUserDetails;
 import generationgap.co.kr.service.group.GroupService;
-import generationgap.co.kr.service.user.UserService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import generationgap.co.kr.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +23,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -32,7 +32,7 @@ import java.util.UUID;
 @RequestMapping("/group")  // 그룹에 해당하는 모든 경로
 @RequiredArgsConstructor
 public class GroupsController {
-    @Autowired
+
     private final GroupService groupService;
     @Autowired
     private UserService userService;
