@@ -6,47 +6,188 @@
   <title>회원 정보</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
-    body { padding: 20px; }
-    .info-section { margin-bottom: 40px; border: 1px solid #eee; padding: 20px; border-radius: 5px; background-color: #f9f9f9;}
-    .info-section h3 { margin-bottom: 20px; color: #0056b3; }
-    .info-item { margin-bottom: 15px; }
-    .info-item label { font-weight: bold; display: block; margin-bottom: 5px; color: #555; }
-    .info-item p { margin: 0; padding: 8px 12px; background-color: #fff; border: 1px solid #ddd; border-radius: 4px; }
-    .btn-edit { background-color: #28a745; color: white; }
-    .btn-edit:hover { background-color: #218838; color: white; }
-    .btn-delete { background-color: #dc3545; color: white; margin-top: 10px; } /* 회원 탈퇴 버튼 스타일 */
-    .btn-delete:hover { background-color: #c82333; color: white; }
-    .user-actions { margin-top: 40px; } /* 회원 탈퇴 섹션 상단 여백 */
+    body {
+        /* 기존 padding: 20px; 삭제 */
+        background-color: #f8f9fa; /* 배경색 변경 */
+        font-family: Arial, sans-serif; /* 폰트 지정 */
+        margin: 0; /* 기본 마진 제거 */
+        display: flex; /* Flexbox 레이아웃 사용 */
+        flex-direction: column; /* 자식 요소들을 세로로 정렬 */
+        min-height: 100vh; /* 최소 높이를 뷰포트 높이의 100%로 설정 */
+    }
 
-    /* --- Custom Modal Styles (for Vanilla JS) --- */
+    /* --- Header Styles --- */
+    .container-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        background-color: #ffffff; /* 흰색 배경 */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        position: sticky; /* 스크롤 시 상단 고정 */
+        top: 0;
+        z-index: 1000; /* 다른 요소 위에 표시 */
+    }
+    .nav-left .logo {
+        height: 40px; /* 로고 크기 조정 */
+    }
+    .nav-center {
+        display: flex;
+        gap: 15px; /* 이미지 간 간격 */
+    }
+    .nav-center .nav-img {
+        height: 30px; /* nav 이미지 크기 조정 */
+        width: auto;
+    }
+    .nav-right .login-link {
+        text-decoration: none;
+        color: #007bff;
+        font-weight: bold;
+    }
+    .nav-right .login-link:hover {
+        text-decoration: underline;
+    }
+
+    /* --- Bottom Nav Styles --- */
+    .bottom-nav-wrapper {
+        background-color: #e9ecef; /* 연한 회색 배경 */
+        padding: 10px 0;
+        border-bottom: 1px solid #dee2e6;
+        /* margin-bottom: 20px; 로그인 컨테이너와의 간격 -> 메인 콘텐츠 래퍼의 패딩으로 대체 */
+    }
+    .bottom-nav {
+        display: flex;
+        justify-content: center;
+        gap: 30px; /* 링크 간 간격 */
+    }
+    .bottom-nav .bottom-link {
+        text-decoration: none;
+        color: #495057;
+        font-weight: 500;
+        padding: 5px 10px;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+    }
+    .bottom-nav .bottom-link:hover {
+        background-color: #dee2e6;
+    }
+
+    /* --- Main Content Wrapper --- */
+    .main-content-wrapper {
+        flex-grow: 1; /* 남은 공간을 모두 차지하여 푸터를 하단에 고정 */
+        padding: 20px; /* body의 기존 패딩을 이곳으로 이동 */
+        display: flex; /* 내부 컨테이너 중앙 정렬을 위해 flex 사용 */
+        justify-content: center; /* 수평 중앙 정렬 */
+        align-items: flex-start; /* 수직 상단 정렬 (콘텐츠가 위에서 시작하도록) */
+        min-height: calc(100vh - 60px - 45px - 40px); /* 헤더, 바텀 네비, 푸터 높이를 뺀 값 */
+        /* (헤더 높이 약 60px, 바텀 네비 약 45px, 푸터 약 40px) */
+    }
+
+    /* --- Container Styles (기존 유지) --- */
+    .container {
+      background-color: #ffffff; /* 배경색 변경 */
+      padding: 10px 200px; /* 패딩 조정 */
+      border-radius: 8px; /* 둥근 모서리 */
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.05); /* 그림자 효과 */
+      margin-top: 30px; /* 상단 여백 (이것은 main-content-wrapper 안에서 적용됨) */
+      width: 100%; /* 너비 100%로 설정하여 main-content-wrapper 안에서 공간 차지 */
+      max-width: 900px; /* 최대 너비 설정 */
+    }
+    .info-section {
+      margin-bottom: 40px;
+      border: 1px solid #eee;
+      padding: 20px;
+      border-radius: 5px;
+      background-color: #fdfdfd; /* 밝은 배경색으로 변경 */
+    }
+    .info-section h3 {
+      margin-bottom: 20px;
+      color: #343a40; /* 색상 변경 */
+      text-align: center; /* 제목 중앙 정렬 */
+    }
+    h1 {
+      text-align: center; /* h1 제목 중앙 정렬 */
+    }
+    .info-item { margin-bottom: 15px; }
+    .info-item label { font-weight: bold; display: block; margin-bottom: 5px; color: #343a40; /* 색상 변경 */ }
+    .info-item p {
+      margin: 0;
+      padding: 10px 15px; /* 패딩 조정 */
+      background-color: #e9ecef; /* input 필드와 유사한 배경색 */
+      border: 1px solid #ced4da; /* input 필드와 유사한 테두리 */
+      border-radius: .25rem; /* input 필드와 유사한 둥근 모서리 */
+      color: #495057; /* 텍스트 색상 */
+      font-size: 1rem; /* 폰트 크기 */
+    }
+    .info-item img {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%; /* 원형 이미지 */
+      object-fit: cover;
+      border: 3px solid #ced4da; /* 테두리 추가 */
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* 그림자 추가 */
+      margin-bottom: 15px;
+      display: block; /* 이미지 중앙 정렬을 위해 블록 요소로 */
+      margin-left: auto; /* 이미지 중앙 정렬 */
+      margin-right: auto; /* 이미지 중앙 정렬 */
+    }
+
+    /* 정보 수정, 비밀번호 변경 버튼 스타일과 유사하게 중앙 정렬 및 너비 축소 */
+    .btn-centered-reduced {
+      display: block;
+      margin: 0 auto;
+      width: 40%; /* 원본 HTML과 동일한 너비 적용 */
+      max-width: 200px; /* 원본 HTML과 동일한 최대 너비 적용 */
+      background-color: #007bff; /* 정보수정 버튼 색상 */
+      color: white;
+    }
+    .btn-centered-reduced:hover {
+      background-color: #0056b3;
+      color: white;
+    }
+
+    .btn-delete {
+      background-color: #dc3545;
+      color: white;
+      margin-top: 10px;
+      display: block; /* 삭제 버튼도 중앙 정렬을 위해 블록 요소로 */
+      margin-left: auto; /* 삭제 버튼 중앙 정렬 */
+      margin-right: auto; /* 삭제 버튼 중앙 정렬 */
+      width: 40%; /* 너비 조정 */
+      max-width: 200px; /* 최대 너비 조정 */
+    }
+    .btn-delete:hover { background-color: #c82333; color: white; }
+    .user-actions { margin-top: 40px; }
+
+    /* Custom Modal Styles (profile-edit.html과 일관성 유지) */
     .custom-modal {
-        display: none; /* Hidden by default */
-        position: fixed; /* Stay in place */
-        z-index: 1050; /* Sit on top */
+        display: none;
+        position: fixed;
+        z-index: 1050;
         left: 0;
         top: 0;
-        width: 100%; /* Full width */
-        height: 100%; /* Full height */
-        overflow: auto; /* Enable scroll if needed */
-        background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
-        align-items: center; /* Center vertically */
-        justify-content: center; /* Center horizontally */
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.5);
+        align-items: center;
+        justify-content: center;
     }
 
     .custom-modal.show {
-        display: flex; /* Show the modal */
+        display: flex;
     }
 
     .custom-modal-content {
         background-color: #fefefe;
-        margin: auto; /* Centered */
+        margin: auto;
         padding: 20px;
         border: 1px solid #888;
-        border-radius: 0.3rem; /* Match Bootstrap's modal-content border-radius */
-        width: 90%; /* Could be adjusted */
-        max-width: 500px; /* Max width for larger screens */
-        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15); /* Match Bootstrap's modal-content shadow */
-        position: relative; /* For close button positioning */
+        border-radius: 0.3rem;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+        position: relative;
     }
 
     .custom-modal-header {
@@ -54,7 +195,7 @@
         justify-content: space-between;
         align-items: center;
         padding-bottom: 15px;
-        border-bottom: 1px solid #dee2e6; /* Match Bootstrap's modal-header border */
+        border-bottom: 1px solid #dee2e6;
         margin-bottom: 15px;
     }
 
@@ -81,104 +222,160 @@
         display: flex;
         justify-content: flex-end;
         padding-top: 15px;
-        border-top: 1px solid #dee2e6; /* Match Bootstrap's modal-footer border */
+        border-top: 1px solid #dee2e6;
         margin-top: 15px;
     }
 
     .custom-modal-footer button + button {
-        margin-left: 0.5rem; /* Space between buttons */
+        margin-left: 0.5rem;
     }
     /* --- End Custom Modal Styles --- */
+
+    /* --- Footer Styles --- */
+    .footer {
+        background-color: #343a40; /* 어두운 배경색 */
+        color: #f8f9fa; /* 밝은 텍스트 색상 */
+        padding: 20px 0;
+        text-align: center;
+        margin-top: auto; /* 하단에 고정 */
+        font-size: 0.9em;
+    }
+    .footer-links {
+        margin-bottom: 10px;
+    }
+    .footer-link {
+        color: #f8f9fa;
+        text-decoration: none;
+        margin: 0 10px;
+        transition: color 0.2s ease;
+    }
+    .footer-link:hover {
+        color: #adb5bd;
+        text-decoration: underline;
+    }
+    .footer-divider {
+        color: #6c757d;
+        margin: 0 5px;
+    }
+    .footer-copyright {
+        color: #adb5bd;
+        font-size: 0.85em;
+    }
   </style>
 </head>
 <body>
-<div class="container">
-  <h1 class="my-4">내 회원 정보</h1>
 
-  <div th:if="${messageInfo}" class="alert alert-success" role="alert" th:text="${messageInfo}">
-    회원 정보가 성공적으로 수정되었습니다.
-  </div>
-  <div th:if="${errorMessageInfo01}" class="alert alert-danger" role="alert" th:text="${errorMessageInfo01}">
-    회원 정보 수정에 실패했습니다.
-  </div>
-  <div th:if="${errorMessageInfo02}" class="alert alert-danger" role="alert" th:text="${errorMessageInfo02}">
-    회원 정보가 수정 중 오류 발생.
-  </div>
-  <div th:if="${messagePass}" class="alert alert-success" role="alert" th:text="${messagePass}">
-    비밀번호가 변경되었습니다.
-  </div>
-  <div th:if="${errorMessagePass01}" class="alert alert-danger" role="alert" th:text="${errorMessagePass01}">
-    새 비밀번호가 일치하지 않습니다.
-  </div>
-  <div th:if="${errorMessagePass02}" class="alert alert-danger" role="alert" th:text="${errorMessagePass02}">
-    새 비밀번호는 최소 6자 이상이어야 합니다.
-  </div>
-  <div th:if="${errorMessagePass03}" class="alert alert-danger" role="alert" th:text="${errorMessagePass03}">
-    현재 비밀번호가 틀립니다.
-  </div>
-  <div th:if="${errorMessagePass04}" class="alert alert-danger" role="alert" th:text="${errorMessagePass04}">
-    비밀번호 변경 중 오류 발생
+<header class="container-nav">
+  <div class="nav-left">
+    <a href="main.html"><img class="logo" src="/img/icons/Group 17.png" alt="M 로고"></a>
   </div>
 
-  <div class="info-section">
-    <h3>회원 상세 정보</h3>
-    <div class="info-item">
-      <label>아이디</label>
-      <p th:text="${user.userId}">user123</p>
+  <div class="nav-center">
+    <img src="/img/봄.png" class="nav-img" alt="그림10">
+    <img src="/img/여름.png" class="nav-img" alt="그림10">
+    <img src="/img/가을.png" class="nav-img" alt="그림10">
+    <img src="/img/겨울.png" class="nav-img" alt="그림10">
+  </div>
+  <div class="nav-right" id="navRight">
+    <a href="login.html" class="login-link">로그인ㆍ회원가입</a>
+  </div>
+</header>
+<section class="bottom-nav-wrapper">
+  <nav class="bottom-nav">
+    <a href="#" class="bottom-link">모임 생성</a>
+    <a href="meeting-list.html" class="bottom-link">모임 목록</a>
+    <a href="#" class="bottom-link">상품 목록</a>
+    <a href="board.html" class="bottom-link">자유 게시판</a>
+  </nav>
+</section>
+
+<div class="main-content-wrapper">
+  <div class="container">
+    <h1 class="my-4">회원 상세 정보</h1>
+
+    <div th:if="${messageInfo}" class="alert alert-success" role="alert" th:text="${messageInfo}">
+      회원 정보가 성공적으로 수정되었습니다.
     </div>
-    <div class="info-item">
-      <label>이름</label>
-      <p th:text="${user.userName}">홍길동</p>
+    <div th:if="${errorMessageInfo01}" class="alert alert-danger" role="alert" th:text="${errorMessageInfo01}">
+      회원 정보 수정에 실패했습니다.
     </div>
-    <div class="info-item">
-      <label>닉네임</label>
-      <p th:text="${user.nickname}">홍길동</p>
+    <div th:if="${errorMessageInfo02}" class="alert alert-danger" role="alert" th:text="${errorMessageInfo02}">
+      회원 정보가 수정 중 오류 발생.
     </div>
-    <div class="info-item">
-      <label>생년월일</label>
-      <p th:text="${user.birthDate} ? ${#temporals.format(user.birthDate, 'yyyy-MM-dd')} : '미입력'">1990-01-01</p>
+    <div th:if="${messagePass}" class="alert alert-success" role="alert" th:text="${messagePass}">
+      비밀번호가 변경되었습니다.
     </div>
-    <div class="info-item">
-      <label>성별</label>
-      <p>
-        <span th:if="${user.gender != null and user.gender.toString().equals('M')}">남성</span>
-        <span th:if="${user.gender != null and user.gender.toString().equals('F')}">여성</span>
-        <span th:if="${user.gender != null and user.gender.toString().equals('O')}">기타</span>
-        <span th:if="${user.gender == null or (user.gender != null and !(user.gender.toString().equals('M') or user.gender.toString().equals('F') or user.gender.toString().equals('O')))}">미입력</span>
-      </p>
+    <div th:if="${errorMessagePass01}" class="alert alert-danger" role="alert" th:text="${errorMessagePass01}">
+      새 비밀번호가 일치하지 않습니다.
     </div>
-    <div class="info-item">
-      <label>이메일</label>
-      <p th:text="${user.email}">user@example.com</p>
+    <div th:if="${errorMessagePass02}" class="alert alert-danger" role="alert" th:text="${errorMessagePass02}">
+      새 비밀번호는 최소 6자 이상이어야 합니다.
     </div>
-    <div class="info-item">
-      <label>전화번호</label>
-      <p th:text="${user.phone} ? ${user.phone} : '미입력'">010-1234-5678</p>
+    <div th:if="${errorMessagePass03}" class="alert alert-danger" role="alert" th:text="${errorMessagePass03}">
+      현재 비밀번호가 틀립니다.
     </div>
-    <div class="info-item">
-      <label>프로필 이미지</label>
-      <div>
-        <img th:src="${user.profileName != null} ? ${user.profileName} : '@{/images/default-profile.png}'"
-             alt="프로필 이미지"
-             style="width:150px; height:150px; object-fit:cover; border-radius:50%;">
+    <div th:if="${errorMessagePass04}" class="alert alert-danger" role="alert" th:text="${errorMessagePass04}">
+      비밀번호 변경 중 오류 발생
+    </div>
+
+    <div class="info-section">
+      <div class="info-item" style="text-align: center;"> <label>프로필 이미지</label>
+        <div>
+          <img th:src="${user.profileName}"
+               alt="프로필 이미지"> </div>
       </div>
+      <div class="info-item">
+        <label>아이디</label>
+        <p th:text="${user.userId}">user123</p>
+      </div>
+      <div class="info-item">
+        <label>이름</label>
+        <p th:text="${user.userName}">홍길동</p>
+      </div>
+      <div class="info-item">
+        <label>성별</label>
+        <p>
+          <span th:if="${user.gender != null and user.gender.toString().equals('M')}">남성</span>
+          <span th:if="${user.gender != null and user.gender.toString().equals('F')}">여성</span>
+          <span th:if="${user.gender != null and user.gender.toString().equals('O')}">기타</span>
+          <span th:if="${user.gender == null or (user.gender != null and !(user.gender.toString().equals('M') or user.gender.toString().equals('F') or user.gender.toString().equals('O')))}">미입력</span>
+        </p>
+      </div>
+      <div class="info-item">
+        <label>생년월일</label>
+        <p th:text="${user.birthDate} ? ${#temporals.format(user.birthDate, 'yyyy-MM-dd')} : '미입력'">1990-01-01</p>
+      </div>
+      <div class="info-item">
+        <label>이메일</label>
+        <p th:text="${user.email}">user@example.com</p>
+      </div>
+      <div class="info-item">
+        <label>전화번호</label>
+        <p th:text="${user.phone} ? ${user.phone} : '미입력'">010-1234-5678</p>
+      </div>
+      <div class="info-item">
+        <label>닉네임</label>
+        <p th:text="${user.nickname}">홍길동</p>
+      </div>
+
+      <div class="info-item">
+        <label>소개</label>
+        <p th:text="${user.introduction} ? ${user.introduction} : '자기소개가 없습니다.'">안녕하세요!</p>
+      </div>
+
+      <a th:href="@{/user/profile-edit}" class="btn btn-primary btn-centered-reduced mt-3">정보 수정</a>
     </div>
-    <div class="info-item">
-      <label>소개</label>
-      <p th:text="${user.introduction} ? ${user.introduction} : '자기소개가 없습니다.'">안녕하세요!</p>
+
+    <div class="user-actions">
+      <hr>
+      <h3 align="center">계정 삭제</h3>
+      <p class="text-center">계정을 삭제하면 모든 정보가 삭제되며, 계정은 복구할 수 없습니다.</p> <button type="button" id="openDeleteModalBtn" class="btn btn-danger btn-delete">계정 삭제</button>
     </div>
 
-    <a th:href="@{/user/profile-edit}" class="btn btn-edit mt-3">정보 수정</a>
-  </div>
+    <div class="text-center mt-4"> <a th:href="@{/main}" class="btn btn-secondary">메인으로 돌아가기</a>
+    </div>
 
-  <div class="user-actions">
-    <hr>
-    <h3>계정 삭제</h3>
-    <p>계정을 삭제하면 모든 정보가 삭제되며, 계정은 복구할 수 없습니다.</p>
-    <button type="button" id="openDeleteModalBtn" class="btn btn-delete">계정 삭제</button>
   </div>
-
-  <a th:href="@{/main}" class="btn btn-secondary mt-3">메인으로 돌아가기</a>
 </div>
 
 <div id="deleteAccountModal" class="custom-modal">
@@ -337,6 +534,18 @@
       });
   });
 </script>
+
+<footer class="footer">
+  <div class="footer-links">
+    <a href="about.html" class="footer-link">회사소개</a><span class="footer-divider"></span>
+    <a href="partnership.html" class="footer-link">제휴안내</a><span class="footer-divider"></span>
+    <a href="advertising.html" class="footer-link">광고안내</a><span class="footer-divider"></span>
+    <a href="terms.html" class="footer-link">이용약관</a><span class="footer-divider"></span>
+    <a href="privacy.html" class="footer-link">개인정보처리방침</a><span class="footer-divider"></span>
+    <a href="youth-policy.html" class="footer-link">청소년보호정책</a>
+  </div>
+  <div class="footer-copyright">© 1999 – 2025 dcinside. All rights reserved.</div>
+</footer>
 
 </body>
 </html>

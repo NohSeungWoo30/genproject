@@ -164,7 +164,7 @@ public class UserService {
                 // CustomOAuth2UserService에서 People API를 통해 가져온 최신 정보를 existingUser에 반영
                 existingUser.setUserName(userDTO.getUserName());
                 existingUser.setEmail(userDTO.getEmail());
-                existingUser.setNickname(userDTO.getNickname());
+                //existingUser.setNickname(userDTO.getNickname());
                 existingUser.setProfileName(userDTO.getProfileName()); // ✅ 프로필 이미지 URL 업데이트
                 //existingUser.setPhone(userDTO.getPhone());             // ✅ 전화번호 업데이트
                 existingUser.setGender(userDTO.getGender());           // ✅ 성별 업데이트
