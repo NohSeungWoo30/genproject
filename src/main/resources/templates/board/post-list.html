@@ -1,141 +1,152 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>자유 게시판</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>자유 게시판</title>
 
-  <!-- CSS 파일 -->
-  <link rel="stylesheet" th:href="@{/css/boardstyle.css}" />
-  <link rel="stylesheet" th:href="@{/css/vars.css}" />
-  <link rel="stylesheet" th:href="@{/css/mainstyle.css}" />
-  <!--토스트(우측하단 실시간 알림) 추가 모든 페이지에 꼭 추가하기-->
-  <link rel="stylesheet" href="/css/toast.css" />
-  <!--알림(종모양)기능 css추가 알림기능이 포함되는 모든 곳에 추가하기-->
-  <link rel="stylesheet" href="/css/notify.css" />
-  <!--로그인 세션관련 계속 추가하기-->
-  <th:block th:replace="fragments/user-session :: sessionScript"></th:block>
-  <!--알림 아이콘관련 계속 추가하기-->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <!-- CSS 파일 -->
+    <link rel="stylesheet" th:href="@{/css/boardstyle.css}" />
+    <link rel="stylesheet" th:href="@{/css/vars.css}" />
+    <link rel="stylesheet" th:href="@{/css/mainstyle.css}" />
+    <!--토스트(우측하단 실시간 알림) 추가 모든 페이지에 꼭 추가하기-->
+    <link rel="stylesheet" href="/css/toast.css" />
+    <!--알림(종모양)기능 css추가 알림기능이 포함되는 모든 곳에 추가하기-->
+    <link rel="stylesheet" href="/css/notify.css" />
 
-  <!-- 1. 필수 라이브러리: SockJS, STOMP -->
-  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <!--로그인 세션관련 계속 추가하기-->
+    <th:block th:replace="fragments/user-session :: sessionScript"></th:block>
+
+    <!--알림 아이콘관련 계속 추가하기-->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+    <!-- 1. 필수 라이브러리: SockJS, STOMP -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 
 </head>
 <body>
 
-<!-- 상단 네비게이션 바 -->
+<!-- ─── 상단 네비게이션 ─── -->
 <header class="container-nav">
-  <div class="nav-left">
-    <a th:href="@{/main}"><img class="logo" src="/img/icons/Group 17.png" alt="M 로고"></a>
-  </div>
+    <div class="nav-left">
+        <a th:href="@{/main}"><img class="logo" src="/img/icons/Group 17.png" alt="M 로고"></a>
+    </div>
 
-  <div class="nav-right" id="navRight">
-    <a href="/user/login" class="login-link">로그인ㆍ회원가입</a>
-  </div>
+    <div class="nav-center">
+        <img src="/img/봄.png" class="nav-img" alt="그림10">
+        <img src="/img/여름.png" class="nav-img" alt="그림10">
+        <img src="/img/가을.png" class="nav-img" alt="그림10">
+        <img src="/img/겨울.png" class="nav-img" alt="그림10">
+    </div>
+
+    <!-- ** navRight: 로그인/알림/프로필 영역(동적) ** -->
+    <div class="nav-right" id="navRight">
+        <a href="/user/login" class="login-link">로그인ㆍ회원가입</a>
+    </div>
 </header>
 
-<!--하단 네비게이션 바-->
+<!-- ─── 하단 고정 네비 (모바일 bottom‑nav 스타일) ─── -->
 <section class="bottom-nav-wrapper">
-  <nav class="bottom-nav">
-    <a href="#" class="bottom-link">모임 생성</a>
-    <a href="meeting-list.html" class="bottom-link">모임 목록</a>
-    <a href="#" class="bottom-link">상품 목록</a>
-    <a th:href="@{/posts}" class="bottom-link">자유 게시판</a>
-  </nav>
+    <nav class="bottom-nav">
+        <a th:href="@{/group/create}" class="bottom-link">모임 생성</a>
+        <a th:href="@{/group/meetinglist}" class="bottom-link">모임 목록</a>
+        <a th:href="@{/product-list}" class="bottom-link">상품 목록</a>
+        <a th:href="@{/posts}" class="bottom-link">자유 게시판</a>
+    </nav>
 </section>
 
 <section class="board-wrapper">
-  <!-- 게시판 제목 및 카테고리 + 작성 버튼 -->
-  <div class="board-header">
-    <h2>자유 게시판</h2>
-    <div class="board-header-actions">
-      <form method="get" th:action="@{/posts}">
-        <select name="category" onchange="this.form.submit()">
-          <option th:value="''" th:selected="${category == null}">카테고리</option>
-          <option th:value="'공지'" th:selected="${category == '공지'}">공지</option>
-          <option th:value="'자유'" th:selected="${category == '자유'}">자유</option>
-          <option th:value="'질문'" th:selected="${category == '질문'}">질문</option>
-          <option th:value="'정보'" th:selected="${category == '정보'}">정보</option>
-        </select>
-        <input type="hidden" name="sort" th:value="${sort}" />
-      </form>
-      <a th:href="@{/posts/write}" class="btn-new-post">✚ 새 글 작성</a>
+    <!-- 게시판 제목 및 카테고리 + 작성 버튼 -->
+    <div class="board-header">
+        <h2>자유 게시판</h2>
+        <div class="board-header-actions">
+            <form method="get" th:action="@{/posts}">
+                <select name="category" onchange="this.form.submit()">
+                    <option th:value="''" th:selected="${category == null}">카테고리</option>
+                    <option th:value="'공지'" th:selected="${category == '공지'}">공지</option>
+                    <option th:value="'자유'" th:selected="${category == '자유'}">자유</option>
+                    <option th:value="'질문'" th:selected="${category == '질문'}">질문</option>
+                    <option th:value="'정보'" th:selected="${category == '정보'}">정보</option>
+                </select>
+                <input type="hidden" name="sort" th:value="${sort}" />
+            </form>
+            <a th:href="@{/posts/write}" class="btn-new-post">✚ 새 글 작성</a>
+        </div>
     </div>
-  </div>
 
-  <!-- 정렬 버튼 + 검색창 -->
-  <div class="board-controls">
-    <div class="sort-buttons">
-      <a th:href="@{/posts(sort='new', category=${category})}" th:classappend="${sort == 'new'} ? 'active'">최신순</a>
-      <a th:href="@{/posts(sort='views', category=${category})}" th:classappend="${sort == 'views'} ? 'active'">조회순</a>
-      <a th:href="@{/posts(sort='likes', category=${category})}" th:classappend="${sort == 'likes'} ? 'active'">추천순</a>
+    <!-- 정렬 버튼 + 검색창 -->
+    <div class="board-controls">
+        <div class="sort-buttons">
+            <a th:href="@{/posts(sort='new', category=${category})}" th:classappend="${sort == 'new'} ? 'active'">최신순</a>
+            <a th:href="@{/posts(sort='views', category=${category})}" th:classappend="${sort == 'views'} ? 'active'">조회순</a>
+            <a th:href="@{/posts(sort='likes', category=${category})}" th:classappend="${sort == 'likes'} ? 'active'">추천순</a>
+        </div>
+        <form method="get" th:action="@{/posts}" class="search-form">
+            <input type="text" name="keyword" placeholder="검색어를 입력하세요" th:value="${keyword}" />
+            <input type="hidden" name="category" th:value="${category}" />
+            <input type="hidden" name="sort" th:value="${sort}" />
+            <button type="submit">검색</button>
+        </form>
     </div>
-    <form method="get" th:action="@{/posts}" class="search-form">
-      <input type="text" name="keyword" placeholder="검색어를 입력하세요" th:value="${keyword}" />
-      <input type="hidden" name="category" th:value="${category}" />
-      <input type="hidden" name="sort" th:value="${sort}" />
-      <button type="submit">검색</button>
-    </form>
-  </div>
 
-  <!-- 게시글 테이블 -->
-  <table class="board-table">
-    <thead>
-    <tr>
-      <th>번호</th>
-      <th>카테고리</th>
-      <th>제목</th>
-      <th>작성자</th>
-      <th>조회수</th>
-      <th>추천수</th>
-      <th>작성일</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="post : ${posts}">
-      <td th:text="${post.postIdx}">1</td>
-      <td th:text="${post.category}">카테고리</td>
-      <td>
-        <a th:href="@{'/posts/' + ${post.postIdx} + '?page=' + ${currentPage} + '&category=' + ${category} + '&sort=' + ${sort} + '&keyword=' + ${keyword}}">
-          <span th:text="${post.title}">제목</span>
-        </a>
-        <span th:if="${post.commentCount > 0}" th:text="'(' + ${post.commentCount} + ')'">(0)</span>
-      </td>
-      <td th:text="${post.authorName}">작성자</td>
-      <td th:text="${post.viewCount}">0</td>
-      <td th:text="${post.likeCount}">0</td>
-      <td th:text="${#dates.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">2025-06-09</td>
-    </tr>
-    <tr th:if="${#lists.isEmpty(posts)}">
-      <td colspan="7">
-        <i th:text="${keyword != null and !keyword.isBlank() ? '검색 결과가 없습니다.' : '게시글이 없습니다.'}"></i>
-      </td>
-    </tr>
-    </tbody>
-  </table>
+    <!-- 게시글 테이블 -->
+    <table class="board-table">
+        <thead>
+        <tr>
+            <th>번호</th>
+            <th>카테고리</th>
+            <th>제목</th>
+            <th>작성자</th>
+            <th>조회수</th>
+            <th>추천수</th>
+            <th>작성일</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="post : ${posts}">
+            <td th:text="${post.postIdx}">1</td>
+            <td th:text="${post.category}">카테고리</td>
+            <td>
+                <a th:href="@{'/posts/' + ${post.postIdx} + '?page=' + ${currentPage} + '&category=' + ${category} + '&sort=' + ${sort} + '&keyword=' + ${keyword}}">
+                    <span th:text="${post.title}">제목</span>
+                </a>
+                <span th:if="${post.commentCount > 0}" th:text="'(' + ${post.commentCount} + ')'">(0)</span>
+            </td>
+            <td th:text="${post.authorName}">작성자</td>
+            <td th:text="${post.viewCount}">0</td>
+            <td th:text="${post.likeCount}">0</td>
+            <td th:text="${#dates.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">2025-06-09</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(posts)}">
+            <td colspan="7">
+                <i th:text="${keyword != null and !keyword.isBlank() ? '검색 결과가 없습니다.' : '게시글이 없습니다.'}"></i>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 
-  <!-- 페이징 -->
-  <div class="pagination" style="margin-top: 20px; text-align: center;">
+    <!-- 페이징 -->
+    <div class="pagination" style="margin-top: 20px; text-align: center;">
     <span th:if="${currentPage > 1}">
       <a th:href="@{/posts(page=${currentPage - 1}, category=${category}, sort=${sort}, keyword=${keyword})}">◀ 이전</a>
     </span>
 
-    <span th:each="i : ${#numbers.sequence(1, totalPages)}">
+        <span th:each="i : ${#numbers.sequence(1, totalPages)}">
       <a th:href="@{/posts(page=${i}, category=${category}, sort=${sort}, keyword=${keyword})}"
          th:text="${i}"
          th:classappend="${i == currentPage} ? 'active' : ''"
          style="margin: 0 5px;">1</a>
     </span>
 
-    <span th:if="${currentPage < totalPages}">
+        <span th:if="${currentPage < totalPages}">
       <a th:href="@{/posts(page=${currentPage + 1}, category=${category}, sort=${sort}, keyword=${keyword})}">다음 ▶</a>
     </span>
-  </div>
+    </div>
 </section>
 
 
@@ -150,17 +161,17 @@
 
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    console.log("✅ DOMContentLoaded - 알림/프로필 초기화 시작");
+    document.addEventListener("DOMContentLoaded", () => {
+      console.log("✅ DOMContentLoaded - 알림/프로필 초기화 시작");
 
-    if (typeof initNotification === "function") {
-      initNotification(); // 알림 렌더링용 함수
-    }
+      if (typeof initNotification === "function") {
+        initNotification(); // 알림 렌더링용 함수
+      }
 
-    if (typeof initUserSession === "function") {
-      initUserSession(); // 사용자 프로필 렌더링용 함수
-    }
-  });
+      if (typeof initUserSession === "function") {
+        initUserSession(); // 사용자 프로필 렌더링용 함수
+      }
+    });
 </script>
 </body>
 </html>

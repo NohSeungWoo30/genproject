@@ -1,120 +1,258 @@
-
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>환영합니다 - 메인 페이지</title>
-    <style>
-        /* 기본 스타일링 (선택 사항, 필요에 따라 CSS 파일로 분리) */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        h2 {
-            color: #0056b3;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .section {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #e9ecef;
-        }
-        .section p {
-            margin-bottom: 10px;
-        }
-        .button-group {
-            display: flex;
-            gap: 10px; /* 버튼 사이 간격 */
-            flex-wrap: wrap; /* 버튼이 많아지면 다음 줄로 넘어감 */
-            margin-top: 15px;
-        }
-        button, a.button {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1rem;
-            text-decoration: none; /* <a> 태그 버튼 스타일 */
-            color: #fff;
-            transition: background-color 0.2s ease;
-        }
-        button[type="submit"] {
-            background-color: #007bff;
-        }
-        button[type="submit"]:hover {
-            background-color: #0056b3;
-        }
-        a.button.secondary {
-            background-color: #6c757d;
-        }
-        a.button.secondary:hover {
-            background-color: #5a6268;
-        }
-        /* 추가된 정보확인 버튼 스타일 */
-        a.button.info-button {
-            background-color: #28a745; /* 녹색 */
-        }
-        a.button.info-button:hover {
-            background-color: #218838;
-        }
-    </style>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- vars.css 제거, mainstyle.css만 사용 -->
+    <link rel="stylesheet" href="/css/mainstyle.css" />
+
+    <title>메인 페이지</title>
 </head>
 <body>
-<div class="container">
-    <h2>환영합니다!</h2>
-
-    <div sec:authorize="isAuthenticated()" class="section authenticated-section">
-        <p>
-            안녕하세요, <strong sec:authentication="principal.nickname">사용자</strong> 님
-        </p>
-        <div class="button-group">
-            <a th:href="@{/user/profile}" class="button info-button">내 정보 확인</a>
-
-            <a th:href="@{/user/my-page}" class="button secondary">마이페이지로 이동</a>
-
-            <form th:action="@{/logout}" method="post" style="display: inline;">
-                <button type="submit">로그아웃</button>
-            </form>
+<div class="_1920-w-light">
+    <!-- ─── 1. 상단 내비게이션 바 ─── -->
+    <header class="container-nav">
+        <!-- 좌측 로고 -->
+        <div class="nav-left">
+            <a href="/main">
+                <img class="logo" src="/img/icons/MT5.png" alt="M 로고" />
+            </a>
         </div>
-    </div>
-    <div sec:authorize="isAnonymous()" class="section anonymous-section">
-        <p>로그인 후 더 많은 기능을 이용해보세요.</p>
-        <div class="button-group">
-            <form th:action="@{/user/login}" method="get" style="display: inline;">
-                <button type="submit">로그인</button>
-            </form>
-            <form th:action="@{/user/signup}" method="get" style="display: inline;">
-                <button type="submit">회원가입</button>
-            </form>
-            <form th:action="@{/user/find-id}" method="get" style="display: inline;">
-                <button type="submit" class="secondary">아이디 찾기</button>
-            </form>
-            <form th:action="@{/user/forgot-password}" method="get" style="display: inline;">
-                <button type="submit" class="secondary">비밀번호 찾기</button>
-            </form>
+
+        <!-- 우측 로그인·회원가입 -->
+        <div sec:authorize="isAuthenticated()" class="section authenticated-section">
+            <p>
+                안녕하세요, <strong sec:authentication="principal.nickname">사용자</strong>님!
+            </p>
+            <div class="button-group">
+                <a th:href="@{/user/profile}" class="button info-button">내 정보 확인</a>
+
+                <a th:href="@{/user/my-page}" class="button secondary">마이페이지로 이동</a>
+
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit">로그아웃</button>
+                </form>
+            </div>
         </div>
+        <!-- 비 로그인 -->
+        <div sec:authorize="isAnonymous()" class="section anonymous-section">
+            <p>로그인 후 더 많은 기능을 이용해보세요.</p>
+            <div class="button-group">
+                <form th:action="@{/user/login}" method="get" style="display: inline;">
+                    <button type="submit">로그인</button>
+                </form>
+                <form th:action="@{/user/signup}" method="get" style="display: inline;">
+                    <button type="submit">회원가입</button>
+                </form>
+                <form th:action="@{/user/find-id}" method="get" style="display: inline;">
+                    <button type="submit" class="secondary">아이디 찾기</button>
+                </form>
+                <form th:action="@{/user/forgot-password}" method="get" style="display: inline;">
+                    <button type="submit" class="secondary">비밀번호 찾기</button>
+                </form>
+            </div>
+        </div>
+
+    </header>
+
+    <!-- ─── 10. 하단 네비게이션 바 (모임생성 / 모임목록 / 상품목록 / 자유 게시판) ─── -->
+    <section class="bottom-nav-wrapper">
+        <nav class="bottom-nav">
+            <a href="/group/create" class="bottom-link">모임 생성</a>
+            <a href="/group/meetinglist" class="bottom-link">모임 목록</a>
+            <a href="#" class="bottom-link">상품 목록</a>
+            <a href="#" class="bottom-link">자유 게시판</a>
+        </nav>
+    </section>
+
+    <!-- ─── 2. 메인 배너 (세로로 센터 정렬 없이 width:100%) ─── -->
+    <section class="main-banner">
+        <img
+                src="/img/_2025-05-30-182035-10.png"
+                alt="예상 못한 기쁨 배너 이미지"
+                class="banner-image"
+        />
+    </section>
+
+    <!-- ─── 8. 중간 링크 (카테고리별 메뉴) 하드코딩 ─── -->
+    <nav class="category-links">
+        <a href="/meetings?mainCategoryId=1" class="cat-link">
+            <img src="/img/icons/ball1.png" alt="운동/액티비티 아이콘" class="cat-icon" />
+            <span class="cat-text">운동/액티비티</span>
+        </a>
+
+        <a href="/meetings?mainCategoryId=2" class="cat-link">
+            <img src="/img/icons/art1.png" alt="문화/예술 아이콘" class="cat-icon" />
+            <span class="cat-text">문화/예술</span>
+        </a>
+
+        <a href="/meetings?mainCategoryId=3" class="cat-link">
+            <img src="/img/icons/book1.png" alt="지식/스터디 아이콘" class="cat-icon" />
+            <span class="cat-text">지식/스터디</span>
+        </a>
+
+        <a href="/meetings?mainCategoryId=4" class="cat-link">
+            <img src="/img/icons/food1.png" alt="음식/카페 아이콘" class="cat-icon" />
+            <span class="cat-text">음식/카페</span>
+        </a>
+
+        <a href="/meetings?mainCategoryId=5" class="cat-link">
+            <img src="/img/icons/travel1.png" alt="여행/탐험 아이콘" class="cat-icon" />
+            <span class="cat-text">여행/탐험</span>
+        </a>
+
+        <a href="/meetings?mainCategoryId=6" class="cat-link">
+            <img src="/img/icons/game1.png" alt="게임/오락 아이콘" class="cat-icon" />
+            <span class="cat-text">게임/오락</span>
+        </a>
+
+        <a href="/meetings?mainCategoryId=7" class="cat-link">
+            <img src="/img/icons/game1.png" alt="게임/오락 아이콘" class="cat-icon" />
+            <span class="cat-text">반려동물/자연</span>
+        </a>
+
+        <a href="/meetings?mainCategoryId=8" class="cat-link">
+            <img src="/img/icons/build1.png" alt="만들기/공예 아이콘" class="cat-icon" />
+            <span class="cat-text">만들기/공예</span>
+        </a>
+
+        <a href="/meetings?mainCategoryId=9" class="cat-link">
+            <img src="/img/icons/social3.png" alt="소셜/친목 아이콘" class="cat-icon" />
+            <span class="cat-text">소셜/친목</span>
+        </a>
+
+        <a href="/meetings?mainCategoryId=10" class="cat-link">
+            <img src="/img/icons/guitar1.png" alt="기타 아이콘" class="cat-icon" />
+            <span class="cat-text">기타</span>
+        </a>
+    </nav>
+    <!-- ─── 카테고리별 메뉴 하드코딩 끝─── -->
+
+    <!-- ─── 3. "모임 카드"가 들어갈 가로 스크롤 래퍼 ─── -->
+    <section class="container2">
+        <!-- 1. 첫 번째 줄 -->
+        <span>인기소셜링</span>
+        <div class="flex-row">
+            <!-- 카테고리가 많은 인기 모임순 -->
+            <div th:each="rm_group : ${recommendGroupsList}" th:data-group-idx="${rm_group.groupIdx}" class="card">
+                <div class="card-thumb">
+                    <img th:if="${rm_group.groupImgUrl != null and !#strings.isEmpty(rm_group.groupImgUrl)}"
+                         th:src="@{${rm_group.groupImgUrl}}" />
+                    <img th:unless="${rm_group.groupImgUrl != null and !#strings.isEmpty(rm_group.groupImgUrl)}"
+                         th:src="@{/img/noImage.jpg}" />
+                </div>
+                <div class="card-info">
+                    <div class="card-category">
+                        <span th:text="${rm_group.district}"></span> · <span th:text="${rm_group.categoryMain.categoryMainName}"></span>
+                    </div>
+                    <div class="card-title" th:text="${rm_group.title}">
+                    </div>
+                    <div class="card-date" th:text="${#temporals.format(rm_group.groupDate, 'yyyy.MM.dd(E) HH:mm')}"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. 참여일 마감이 임박한 모임 -->
+    <section class="container2 second-row">
+        <span>참여일 마감</span>
+        <div class="flex-row">
+            <div class="card">
+                <div class="card-thumb">
+                    <img src="/img/div13.png" alt="망고 빅토리아 케이크 만들기 (반복)" />
+                </div>
+                <div class="card-info">
+                    <div class="card-category">중구 · 푸드·드링크</div>
+                    <div class="card-title">
+                        🥭생망고 올라간 망고 빅토리아 케이크 만들기!
+                    </div>
+                    <div class="card-date">2025.05.30(금) 10:00</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. 전체 모임중 랜덤 보여주기 -->
+    <section class="container2 third-row">
+        <div class="flex-row">
+            <div class="card">
+                <div class="card-thumb">
+                    <img src="/img/div22.png" alt="[두뇌서바이벌] 오행레이스 대전지부" />
+                </div>
+                <div class="card-info">
+                    <div class="card-category">유성구 · 소셜게임</div>
+                    <div class="card-title">
+                        [두뇌서바이벌] 오행레이스 🎃대전지부
+                    </div>
+                    <div class="card-date">2025.06.07(토) 11:00</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. 카테고리 중 가장 많이 만들어진 인기 카테고리 방 보여주기 -->
+    <section class="container2 fourth-row">
+        <div class="flex-row">
+            <div class="card">
+                <div class="card-thumb">
+                    <img src="/img/div34.png" alt="후끈 후끈 텍사스 홀덤 116회차" />
+                </div>
+                <div class="card-info">
+                    <div class="card-category">중구 · 푸드·드링크</div>
+                    <div class="card-title">🔥 후끈 후끈 [텍사스 홀덤] 116회차 🔥</div>
+                    <div class="card-date">2025.06.01(일) 09:00</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. 모임을 가장 많이 주선한 인기 호스트 -->
+    <section class="container2 fifth-row">
+        <div class="flex-row">
+            <div class="card">
+                <div class="card-thumb">
+                    <img src="/img/div42.png" alt="제주 게하 와인 파티 (일요일 낮)" />
+                </div>
+                <div class="card-info">
+                    <div class="card-category">영등포구 · 파티</div>
+                    <div class="card-title">
+                        ♥일욜낮소규모특집♥/ 제주게하 담은 따뜻한 와인 Party
+                    </div>
+                    <div class="card-date">2025.06.01(일) 05:00</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── 9. 중간 배너 (예: 세로로 길게 내려가는 배너) ─── -->
+    <div class="mid-banner">
+        <img src="/img/_200.png" alt="중간 배너 이미지" class="mid-banner-img" />
     </div>
 
-    <hr style="margin: 30px 0;">
-    <div class="section general-content">
-        <p>이곳은 서비스의 주요 콘텐츠가 표시되는 메인 페이지입니다.</p>
-        <p>다양한 정보와 기능을 탐색해 보세요!</p>
-    </div>
+    <!-- ─── 11. 하단 Footer ─── -->
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="about.html" class="footer-link">회사소개</a>
+            <span class="footer-divider"></span>
+            <a href="partnership.html" class="footer-link">제휴안내</a>
+            <span class="footer-divider"></span>
+            <a href="advertising.html" class="footer-link">광고안내</a>
+            <span class="footer-divider"></span>
+            <a href="terms.html" class="footer-link">이용약관</a>
+            <span class="footer-divider"></span>
+            <a href="privacy.html" class="footer-link">개인정보처리방침</a>
+            <span class="footer-divider"></span>
+            <a href="youth-policy.html" class="footer-link">청소년보호정책</a>
+        </div>
+        <div class="footer-copyright">
+            © 1999 - 2025 dcinside. All rights reserved.
+        </div>
+    </footer>
 </div>
+<script src="/js/mainHomePage.js"></script>
 </body>
 </html>

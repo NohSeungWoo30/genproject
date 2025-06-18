@@ -4,16 +4,95 @@
   <meta charset="UTF-8">
   <title>회원 정보 수정</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <style>
-    body { padding: 20px; }
-    .form-section { margin-bottom: 40px; border: 1px solid #eee; padding: 20px; border-radius: 5px; }
-    .form-section h3 { margin-bottom: 20px; }
+    body { padding: 20px; background-color: #f8f9fa; }
+    .container {
+      background-color: #ffffff;
+      padding: 10px 200px;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+      margin-top: 30px;
+    }
+    .form-section { margin-bottom: 40px; border: 1px solid #eee; padding: 20px; border-radius: 5px; background-color: #fdfdfd; }
+    .form-section h3 { margin-bottom: 20px; color: #343a40; }
     .alert { margin-bottom: 20px; }
+
+    /* 프로필 이미지 미리보기 스타일 */
+    .profile-image-section { text-align: center; margin-bottom: 20px; }
+    .profile-image-section img {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #ced4da;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 15px;
+    }
+    .file-input-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .file-input-group input[type="file"] {
+      margin-bottom: 10px;
+      /* align-items: center;  이 속성은 부모 flex 컨테이너에 적용되어야 합니다. */
+    }
+    .form-check-label { cursor: pointer; }
+    .birthdate-display {
+      font-size: 1.1em;
+      font-weight: bold;
+      color: #007bff;
+      margin-top: 5px;
+      padding: 8px 12px;
+      border: 1px solid #ced4da;
+      border-radius: .25rem;
+      background-color: #e9ecef;
+    }
+    /* 이메일 필드 제한 시 스타일 */
+    .email-restricted {
+      background-color: #e9ecef;
+      cursor: not-allowed;
+    }
+    .restriction-comment { /* 일반적인 제한 코멘트 스타일 */
+      color: #dc3545; /* 빨간색으로 경고 메시지 */
+      font-size: 0.85em;
+      margin-top: 5px;
+    }
+    /* 비활성화된 입력 요소에 대한 시각적 피드백 (숨겨질 요소에는 필요 없지만, 다른 곳에 적용될 수 있으므로 유지) */
+    input[disabled], textarea[disabled], select[disabled], .form-check-input[disabled] + .form-check-label {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+    .form-check-input[disabled] + .form-check-label {
+        color: #6c757d;
+    }
+
+    /* 클라이언트 측 유효성 검사 메시지 스타일 */
+    .validation-feedback {
+      font-size: 0.875em;
+      margin-top: 0.25rem;
+    }
+    .validation-feedback.text-danger {
+      color: #dc3545; /* Bootstrap danger color */
+    }
+    .validation-feedback.text-success {
+      color: #28a745; /* Bootstrap success color */
+    }
+
+    /* 버튼 가운데 정렬 및 너비 조절 */
+    .btn-centered-reduced {
+      display: block; /* 블록 요소로 만들어 margin: auto를 적용 가능하게 함 */
+      margin: 0 auto; /* 좌우 마진을 자동으로 설정하여 중앙 정렬 */
+      width: 40%; /* 너비를 50%로 줄임 (원하는 크기로 조절 가능) */
+      max-width: 200px; /* 최대 너비 설정으로 너무 커지지 않도록 방지 */
+    }
   </style>
 </head>
 <body>
 <div class="container">
-  <h1 class="my-4">회원 정보 수정</h1>
+  <h1 class="my-4 text-center">회원 정보 수정</h1>
 
   <div th:if="${message}" class="alert alert-success" role="alert" th:text="${message}">
     회원 정보가 성공적으로 수정되었습니다.
@@ -23,58 +102,94 @@
   </div>
 
   <div class="form-section">
-    <h3>회원 정보 수정</h3>
-    <form th:action="@{/user/profile-edit}" th:object="${user}" method="post">
+    <!--<h3>회원 정보 수정</h3>-->
+    <form th:action="@{/user/profile-edit}" th:object="${user}" method="post" enctype="multipart/form-data">
       <input type="hidden" th:field="*{userIdx}" />
+      <input type="hidden" th:field="*{birthDate}" />
+      <input type="hidden" th:field="*{userName}" />
+      <input type="hidden" th:field="*{gender}" />
+      <input type="hidden" id="userProvider" th:value="*{provider}" />
+
+      <div class="form-group profile-image-section">
+        <!--<label>프로필 사진</label>-->
+        <img id="currentProfileImage" th:src="${user.profileName}" alt="현재 프로필 이미지">
+        <img id="newProfileImagePreview" style="display:none;" alt="새 프로필 이미지 미리보기">
+        <div class="file-input-group">
+          <input type="file" id="profileImageFile" name="profileImageFile" accept="image/*" class="form-control-file">
+          <small class="form-text text-muted" id="profileImageHintText">새 이미지를 선택하면 기존 이미지는 교체됩니다. (최대 10MB)</small>
+          <div class="form-check mt-2" id="deleteProfileImageGroup">
+            <input type="checkbox" class="form-check-input" id="deleteProfileImage" name="deleteProfileImage" value="true">
+            <label class="form-check-label" for="deleteProfileImage">프로필 사진 삭제 (기본 이미지로 변경)</label>
+          </div>
+        </div>
+        <div id="profileImageRestrictionComment" class="restriction-comment" style="display:none;">
+          구글 로그인 사용자는 프로필 사진을 변경할 수 없습니다.
+        </div>
+      </div>
+
       <div class="form-group">
         <label for="userId">아이디</label>
         <input type="text" id="userId" class="form-control" th:field="*{userId}" readonly />
         <small class="form-text text-muted">아이디는 변경할 수 없습니다.</small>
       </div>
+
       <div class="form-group">
-        <label for="userName">이름</label>
-        <input type="text" id="userName" class="form-control" th:field="*{userName}" required />
+        <label for="userNameDisplay">이름</label>
+        <input type="text" id="userNameDisplay" class="form-control" th:value="*{userName}" readonly />
+        <small class="form-text text-muted">이름은 변경할 수 없습니다.</small>
       </div>
+
       <div class="form-group">
-        <label for="nickname">닉네임</label>
-        <input type="text" id="nickname" class="form-control" th:field="*{nickname}" required />
+        <label for="genderDisplay">성별</label>
+        <input type="text" id="genderDisplay" class="form-control"
+               th:value="${user.gender != null ?
+                      (user.gender.toString().equals('M') ? '남성' :
+                         (user.gender.toString().equals('F') ? '여성' :
+                           (user.gender.toString().equals('U') ? '미입력(구글)' : '기타')))
+                      : '미입력'}"
+               readonly />
+        <small class="form-text text-muted">성별은 변경할 수 없습니다.</small>
       </div>
+
       <div class="form-group">
-        <label for="birthDate">생년월일</label>
-        <input type="date" id="birthDate" class="form-control" th:field="*{birthDate}" />
+        <label>생년월일 / 만 나이</label>
+        <div class="birthdate-display">
+          <span th:text="*{birthDate}">YYYY-MM-DD</span> (<span id="ageDisplay"></span>세)
+        </div>
+        <small class="form-text text-muted">생년월일은 변경할 수 없습니다.</small>
       </div>
-      <div class="form-group">
-        <label for="gender">성별</label>
-        <select id="gender" class="form-control" th:field="*{gender}">
-          <option value="">선택</option>
-          <option value="M">남성</option>
-          <option value="F">여성</option>
-          <option value="O">기타</option>
-        </select>
-      </div>
+
       <div class="form-group">
         <label for="email">이메일</label>
         <input type="email" id="email" class="form-control" th:field="*{email}" required />
+        <div id="emailRestrictionComment" class="restriction-comment" style="display:none;">
+          구글 로그인 사용자는 이메일을 변경할 수 없습니다.
+        </div>
       </div>
+
       <div class="form-group">
         <label for="phone">전화번호</label>
         <input type="text" id="phone" class="form-control" th:field="*{phone}" />
       </div>
+
       <div class="form-group">
-        <label for="profileName">프로필 사진 이름</label>
-        <input type="text" id="profileName" class="form-control" th:field="*{profileName}" />
+        <label for="nickname">닉네임</label>
+        <input type="text" id="nickname" class="form-control" th:field="*{nickname}" required />
       </div>
+
       <div class="form-group">
-        <label for="introduction">소개</label>
-        <textarea id="introduction" class="form-control" th:field="*{introduction}" rows="3"></textarea>
+        <label for="introduction">자기소개</label>
+        <textarea id="introduction" class="form-control" th:field="*{introduction}" rows="5"></textarea>
       </div>
-      <button type="submit" class="btn btn-primary">정보 수정</button>
+
+      <button type="submit" class="btn btn-primary btn-centered-reduced">정보 수정</button>
+
     </form>
   </div>
 
   <div class="form-section">
-    <h3>비밀번호 변경</h3>
-    <form th:action="@{/user/profile-update-password}" method="post">
+    <h3 align="center">비밀번호 변경</h3>
+    <form id="passwordUpdateForm" th:action="@{/user/profile-update-password}" method="post">
       <div class="form-group">
         <label for="currentPassword">현재 비밀번호</label>
         <input type="password" id="currentPassword" name="currentPassword" class="form-control" required />
@@ -82,16 +197,200 @@
       <div class="form-group">
         <label for="newPassword">새 비밀번호</label>
         <input type="password" id="newPassword" name="newPassword" class="form-control" required />
+        <div id="newPasswordFeedback" class="validation-feedback"></div>
       </div>
       <div class="form-group">
         <label for="confirmNewPassword">새 비밀번호 확인</label>
         <input type="password" id="confirmNewPassword" name="confirmNewPassword" class="form-control" required />
+        <div id="confirmNewPasswordFeedback" class="validation-feedback"></div>
       </div>
-      <button type="submit" class="btn btn-warning">비밀번호 변경</button>
+      <button type="submit" id="passwordChangeSubmitBtn" class="btn btn-warning btn-centered-reduced">비밀번호 변경</button>
     </form>
   </div>
 
-  <a th:href="@{/main}" class="btn btn-secondary mt-3">메인으로 돌아가기</a>
+  <div class="text-center mt-4">
+    <a th:href="@{/main}" class="btn btn-secondary">메인으로 돌아가기</a>
+  </div>
+
 </div>
+
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  // 기존 프로필 이미지 경로 (기본 이미지 포함)
+  const currentUserProfileName = /*[[${user.profileName != null ? user.profileName : '/images/profile_upload/default_profile.jpg'}]]*/ '';
+  // 기존 생년월일 값 (YYYY-MM-DD 형식으로 가정)
+  const currentUserBirthDate = /*[[${user.birthDate}]]*/ null;
+
+  // 백엔드에서 전달된 errorMessage가 있다면 JavaScript alert로 띄우기
+  const backendErrorMessage = /*[[${errorMessage}]]*/ null;
+  const backendMessage = /*[[${message}]]*/ null;
+  /*]]>*/
+
+  $(document).ready(function() { // 하나의 $(document).ready 블록 시작
+
+    // 백엔드 메시지 처리 (기존 Thymeleaf div에 표시되지만, 혹시 alert도 원한다면)
+    if (backendErrorMessage) {
+        // alert(backendErrorMessage); // 필요하다면 주석 해제
+        // console.log("Backend Error Message:", backendErrorMessage); // 디버깅용
+    }
+    if (backendMessage) {
+        // alert(backendMessage); // 필요하다면 주석 해제
+        // console.log("Backend Success Message:", backendMessage); // 디버깅용
+    }
+
+    // --- 만 나이 계산 및 표시 ---
+    function calculateAge(birthDateString) {
+      if (!birthDateString) return '';
+      const birthDate = new Date(birthDateString);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return age;
+    }
+
+    if (currentUserBirthDate) {
+      const age = calculateAge(currentUserBirthDate);
+      $('#ageDisplay').text(age);
+    }
+
+    // --- 프로필 이미지 미리보기 및 삭제 로직 ---
+    const $profileImageInput = $('#profileImageFile');
+    const $currentProfileImage = $('#currentProfileImage');
+    const $newProfileImagePreview = $('#newProfileImagePreview');
+    const $deleteProfileImageCheckbox = $('#deleteProfileImage');
+    const $profileImageHintText = $('#profileImageHintText');
+    const $deleteProfileImageGroup = $('#deleteProfileImageGroup');
+    const $profileImageRestrictionComment = $('#profileImageRestrictionComment');
+
+    const userProvider = $('#userProvider').val();
+
+    if (userProvider === 'GOOGLE') {
+        $profileImageInput.hide();
+        $profileImageHintText.hide();
+        $deleteProfileImageGroup.hide();
+        $profileImageRestrictionComment.show();
+        $newProfileImagePreview.hide().attr('src', '');
+    }
+
+    $profileImageInput.on('change', function(event) {
+      if (userProvider === 'GOOGLE') {
+          $(this).val('');
+          return;
+      }
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          $newProfileImagePreview.attr('src', e.target.result).show();
+          $currentProfileImage.hide();
+          $deleteProfileImageCheckbox.prop('checked', false);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        if ($deleteProfileImageCheckbox.is(':checked')) {
+          $newProfileImagePreview.hide().attr('src', '');
+          $currentProfileImage.attr('src', '/images/profile_upload/default_profile.jpg').show();
+        } else {
+          $newProfileImagePreview.hide().attr('src', '');
+          $currentProfileImage.attr('src', currentUserProfileName).show();
+        }
+      }
+    });
+
+    $deleteProfileImageCheckbox.on('change', function() {
+        if (userProvider === 'GOOGLE') {
+            $(this).prop('checked', false);
+            return;
+        }
+      if ($(this).is(':checked')) {
+        $profileImageInput.val('');
+        $newProfileImagePreview.hide().attr('src', '');
+        $currentProfileImage.attr('src', '/images/profile_upload/default_profile.jpg').show();
+      } else {
+        if ($profileImageInput[0].files.length > 0) {
+          $profileImageInput.trigger('change');
+        } else {
+          $currentProfileImage.attr('src', currentUserProfileName).show();
+          $newProfileImagePreview.hide().attr('src', '');
+        }
+      }
+    });
+
+    // --- 이메일 및 비밀번호 수정 제한 로직 ---
+    const $emailInput = $('#email');
+    const $emailRestrictionComment = $('#emailRestrictionComment');
+    const $passwordChangeSection = $('.form-section:has(#currentPassword)');
+
+    if (userProvider === 'GOOGLE') {
+      $emailInput.attr('readonly', 'readonly').addClass('email-restricted');
+      $emailRestrictionComment.show();
+      $passwordChangeSection.hide();
+    }
+
+    // --- 실시간 비밀번호 유효성 검증 로직 추가 ---
+    // ★★★ 바로 여기에 $currentPassword를 선언해야 합니다. ★★★
+    const $currentPassword = $('#currentPassword');
+    const $newPassword = $('#newPassword');
+    const $confirmNewPassword = $('#confirmNewPassword');
+    const $newPasswordFeedback = $('#newPasswordFeedback');
+    const $confirmNewPasswordFeedback = $('#confirmNewPasswordFeedback');
+    const $passwordChangeSubmitBtn = $('#passwordChangeSubmitBtn');
+    const MIN_PASSWORD_LENGTH = 6; // 백엔드와 동일하게 최소 길이 설정
+
+    function validatePasswords() {
+      const newPass = $newPassword.val();
+      const confirmPass = $confirmNewPassword.val();
+      const currentPass = $currentPassword.val(); // 이제 $currentPassword가 정의되어 있음
+      let isValid = true;
+
+      // 1. 새 비밀번호 길이 검증
+      if (newPass.length < MIN_PASSWORD_LENGTH && newPass.length > 0) {
+        $newPasswordFeedback.text('새 비밀번호는 최소 ' + MIN_PASSWORD_LENGTH + '자 이상이어야 합니다.')
+                            .removeClass('text-success').addClass('text-danger');
+        isValid = false;
+      } else if (newPass.length === 0) {
+        $newPasswordFeedback.text('');
+      } else {
+        $newPasswordFeedback.text('비밀번호 길이 충족').removeClass('text-danger').addClass('text-success');
+      }
+
+      // 2. 새 비밀번호와 확인 비밀번호 일치 여부 검증
+      if (newPass !== confirmPass && confirmPass.length > 0) {
+        $confirmNewPasswordFeedback.text('새 비밀번호가 일치하지 않습니다.')
+                                   .removeClass('text-success').addClass('text-danger');
+        isValid = false;
+      } else if (confirmPass.length === 0 && newPass.length > 0) {
+          $confirmNewPasswordFeedback.text('새 비밀번호를 다시 입력해주세요.').removeClass('text-success').addClass('text-danger');
+          isValid = false;
+      } else if (newPass === confirmPass && newPass.length >= MIN_PASSWORD_LENGTH) {
+        $confirmNewPasswordFeedback.text('새 비밀번호가 일치합니다.').removeClass('text-danger').addClass('text-success');
+      } else {
+         $confirmNewPasswordFeedback.text('');
+      }
+
+      // 폼 제출 버튼 활성화/비활성화
+      const allFieldsFilled = currentPass.length > 0 && newPass.length > 0 && confirmPass.length > 0;
+      const allNewPasswordValid = (newPass.length >= MIN_PASSWORD_LENGTH) && (newPass === confirmPass);
+
+      if (allFieldsFilled && allNewPasswordValid) {
+        $passwordChangeSubmitBtn.prop('disabled', false);
+      } else {
+        $passwordChangeSubmitBtn.prop('disabled', true);
+      }
+    }
+
+    // 각 비밀번호 입력 필드에 keyup 이벤트 리스너 연결
+    // 이전에 $currentPassword가 정의되지 않았던 문제 발생 지점
+    $currentPassword.on('keyup', validatePasswords);
+    $newPassword.on('keyup', validatePasswords);
+    $confirmNewPassword.on('keyup', validatePasswords);
+
+    // 페이지 로드 시 초기 유효성 검사 (아무것도 입력되지 않았을 때는 버튼 비활성화)
+    validatePasswords();
+  }); // 하나의 $(document).ready 블록 끝
+</script>
 </body>
 </html>

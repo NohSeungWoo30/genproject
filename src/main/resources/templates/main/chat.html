@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>카톡 스타일 채팅 UI (날짜 중복 제거)</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+          font-family: sans-serif;
+          font-size:12px;
+          height:100vh;
+          background:#f0f0f0;
+          display:flex;
+          justify-content:center;
+          align-items:center;
+        }
+        .chat-container {
+          width:600px; height:90%;
+          background:#fff;
+          border:1px solid #ddd; border-radius:8px;
+          display:flex; flex-direction:column;
+          overflow:hidden; position:relative;
+        }
+        /* 헤더 */
+        .chat-header {
+          display:flex; align-items:center;
+          padding:8px 12px; border-bottom:1px solid #eee;
+        }
+        .title {
+          flex:1; text-align:center;
+        }
+        .chat-title {
+          font-size:14px; font-weight:600; color:#333;
+          display:flex; align-items:center; justify-content:center;
+        }
+        .chat-title .icon { margin-right:4px; color:purple; }
+        .chat-subtitle {
+          font-size:10px; color:#888; margin-top:2px;
+        }
+        .header-menu-btn {
+          background:none; border:none;
+          font-size:20px; cursor:pointer;
+          padding:4px;
+        }
+        /* 메시지 영역 */
+        .chat-messages {
+          flex:1; padding:8px 12px;
+          background:#fafafa; overflow-y:auto;
+        }
+        .chat-date-separator {
+          text-align:center; margin:8px 0;
+          color:#888; font-size:10px;
+        }
+        .message-group { margin-bottom:12px; }
+        .message {
+          display:flex; align-items:flex-start;
+        }
+        .message.self { justify-content:flex-end; }
+        .avatar {
+          width:24px; height:24px; border-radius:50%;
+          object-fit:cover; cursor:pointer;
+        }
+        .message.other .avatar { margin-right:6px; }
+        .message.self .avatar { margin-left:6px; }
+        .msg-content {
+          display:flex; flex-direction:column; max-width:65%;
+        }
+        .nickname {
+          font-size:11px; color:#555; margin-bottom:4px;
+        }
+        .bubble {
+          position:relative;
+          padding:8px 12px;
+          border-radius:16px;
+          line-height:1.4;
+          word-break:break-word;
+        }
+        .message.self .bubble {
+          background:#3792e6; color:#fff;
+          margin-right:4px;
+        }
+        .message.self .bubble::after {
+          content:""; position:absolute;
+          bottom:0; right:-6px;
+          width:12px; height:12px;
+          background:#3792e6;
+          border-bottom-left-radius:12px;
+        }
+        .message.other .bubble {
+          background:#f1f0f0; color:#000;
+          margin-left:4px;
+        }
+        .message.other .bubble::after {
+          content:""; position:absolute;
+          bottom:0; left:-6px;
+          width:12px; height:12px;
+          background:#f1f0f0;
+          border-bottom-right-radius:12px;
+        }
+        .timestamp {
+          font-size:10px;
+          color:rgba(0,0,0,0.45);
+          margin-top:4px;
+          text-align:right;
+        }
+        /* 입력창 */
+        .chat-input {
+          display:flex; align-items:center;
+          padding:8px 12px; border-top:1px solid #eee;
+        }
+        .chat-input input {
+          flex:1; padding:6px 8px;
+          border-radius:16px; border:1px solid #ccc;
+          outline:none; font-size:12px;
+        }
+        .chat-input button {
+          background:none; border:none;
+          font-size:18px; margin-left:8px;
+          cursor:pointer;
+        }
+        /* 프로필 패널 */
+        .profile-panel {
+          position:absolute; top:0; right:0;
+          width:240px; height:100%;
+          background:#fff; border-left:1px solid #eee;
+          transform:translateX(100%);
+          transition:transform .3s ease;
+          display:flex; flex-direction:column;
+          z-index:10;
+        }
+        .profile-panel.active { transform:translateX(0); }
+        .profile-header {
+          display:flex; align-items:center; padding:8px; border-bottom:1px solid #eee;
+        }
+        .profile-header .avatar {
+          width:40px; height:40px; margin-right:8px; border-radius:50%;
+        }
+        .profile-header .username {
+          font-size:14px; font-weight:600; color:#333;
+        }
+        .profile-header .close-btn {
+          margin-right:8px; background:none; border:none;
+          font-size:16px; cursor:pointer;
+        }
+        .profile-body {
+          padding:12px; font-size:12px; color:#555;
+        }
+        /* 방 정보 패널 */
+        .room-panel {
+          position:absolute; top:0; right:0;
+          width:240px; height:100%;
+          background:#fff; border-left:1px solid #eee;
+          transform:translateX(100%);
+          transition:transform .3s ease;
+          display:flex; flex-direction:column;
+          z-index:9;
+        }
+        .room-panel.active { transform:translateX(0); }
+        .room-header {
+          display:flex; align-items:center; padding:8px; border-bottom:1px solid #eee;
+        }
+        .room-header .close-btn {
+          margin-right:8px; background:none; border:none;
+          font-size:16px; cursor:pointer;
+        }
+        .room-header .title {
+          font-size:14px; font-weight:600; color:#333;
+        }
+        .participants {
+          flex:1; overflow-y:auto;
+        }
+        .participant {
+          display:flex; align-items:center; padding:8px; border-bottom:1px solid #f0f0f0;
+        }
+        .participant img {
+          width:24px; height:24px; border-radius:50%; margin-right:8px;
+        }
+        .participant .name {
+          font-size:12px; color:#333;
+        }
+    </style>
+</head>
+<body>
+<div class="chat-container">
+    <!-- 헤더 -->
+    <div class="chat-header">
+        <div class="title">
+            <div class="chat-title"><span class="icon">🦑</span>오징어 게임</div>
+            <div class="chat-subtitle">last seen 45 minutes ago</div>
+        </div>
+        <button class="header-menu-btn" id="roomBtn">⋯</button>
+    </div>
+
+    <!-- 메시지 리스트: 최초 한 번만 날짜 표시 -->
+    <div class="chat-messages" id="chatMessages">
+        <div class="chat-date-separator" data-date="6/10/2025">6/10/2025</div>
+        <div class="message-group">
+            <div class="message other">
+                <img src="avatar-1.png" class="avatar" data-nickname="오징어 1호" />
+                <div class="msg-content">
+                    <div class="nickname">오징어 1호</div>
+                    <div class="bubble">
+                        안녕하세요!
+                        <div class="timestamp">9:52 AM</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 입력창 -->
+    <div class="chat-input">
+        <button>😊</button>
+        <input type="text" id="chatInput" placeholder="메시지를 입력하세요" />
+        <button>📎</button>
+        <button id="sendBtn">▶️</button>
+    </div>
+
+    <!-- 프로필 패널 -->
+    <div class="profile-panel" id="profilePanel">
+        <div class="profile-header">
+            <button class="close-btn" id="profileCloseBtn">&larr;</button>
+            <img id="profileAvatar" class="avatar" src="" alt="프로필" />
+            <span id="profileNickname" class="username"></span>
+        </div>
+        <div class="profile-body">
+            <p>여기에 상태 메시지, 연락처, 가입일 등 프로필 정보를 표시하세요.</p>
+        </div>
+    </div>
+
+    <!-- 방 정보 패널 -->
+    <div class="room-panel" id="roomPanel">
+        <div class="room-header">
+            <button class="close-btn" id="roomCloseBtn">&larr;</button>
+            <span class="title">참여자 목록</span>
+        </div>
+        <div class="participants" id="participantsList"></div>
+    </div>
+</div>
+
+<script>
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const profilePanel = document.getElementById('profilePanel');
+    const profileAvatar = document.getElementById('profileAvatar');
+    const profileNickname = document.getElementById('profileNickname');
+    const profileCloseBtn = document.getElementById('profileCloseBtn');
+    const roomBtn = document.getElementById('roomBtn');
+    const roomPanel = document.getElementById('roomPanel');
+    const roomCloseBtn = document.getElementById('roomCloseBtn');
+    const participantsList = document.getElementById('participantsList');
+
+    const participants = [
+      { avatar: 'avatar1.png', name: '프로트런트' },
+      { avatar: 'avatar-1.png', name: '오징어 1호' },
+      { avatar: 'avatar-2.png', name: '오징어 2호' },
+      { avatar: 'avatar-3.png', name: '오징어 3호' },
+      { avatar: 'avatar-4.png', name: '오징어 4호' },
+    ];
+
+    function renderParticipants() {
+      participantsList.innerHTML = '';
+      participants.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'participant';
+        div.innerHTML = `<img src="${p.avatar}" alt="${p.name}" /><span class="name">${p.name}</span>`;
+        participantsList.appendChild(div);
+      });
+    }
+
+    function sendMessage() {
+      const text = chatInput.value.trim();
+      if (!text) return;
+      const now = new Date();
+      addMessage('self', 'avatar-self.png', '프로트런트', text, now);
+      chatInput.value = '';
+    }
+
+    function addMessage(type, avatarSrc, nickname, content, date) {
+      const dateStr = `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()}`;
+      // 같은 날짜 구분자가 이미 있으면 추가하지 않음
+      if (!chatMessages.querySelector(`.chat-date-separator[data-date="${dateStr}"]`)) {
+        const sep = document.createElement('div');
+        sep.className = 'chat-date-separator';
+        sep.dataset.date = dateStr;
+        sep.textContent = dateStr;
+        chatMessages.appendChild(sep);
+      }
+
+      const group = document.createElement('div');
+      group.className = 'message-group';
+      const msg = document.createElement('div');
+      msg.className = `message ${type}`;
+
+      const avatar = document.createElement('img');
+      avatar.className = 'avatar';
+      avatar.src = avatarSrc;
+      avatar.dataset.nickname = nickname;
+
+      const contentWrap = document.createElement('div');
+      contentWrap.className = 'msg-content';
+
+      const nickEl = document.createElement('div');
+      nickEl.className = 'nickname';
+      nickEl.textContent = nickname;
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.textContent = content;
+
+      const hours = date.getHours();
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const hour12 = ((hours + 11) % 12) + 1;
+      const ts = document.createElement('div');
+      ts.className = 'timestamp';
+      ts.textContent = `${hour12}:${minutes} ${ampm}`;
+      bubble.appendChild(ts);
+
+      contentWrap.appendChild(nickEl);
+      contentWrap.appendChild(bubble);
+
+      if (type === 'self') {
+        msg.appendChild(contentWrap);
+        msg.appendChild(avatar);
+      } else {
+        msg.appendChild(avatar);
+        msg.appendChild(contentWrap);
+      }
+
+      group.appendChild(msg);
+      chatMessages.appendChild(group);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    chatMessages.addEventListener('click', e => {
+      if (e.target.classList.contains('avatar')) {
+        const src = e.target.src;
+        const nick = e.target.dataset.nickname
+                     || e.target.closest('.message').querySelector('.nickname')?.textContent
+                     || '알 수 없음';
+        profileAvatar.src = src;
+        profileNickname.textContent = nick;
+        profilePanel.classList.add('active');
+      }
+    });
+    profileCloseBtn.addEventListener('click', () => profilePanel.classList.remove('active'));
+
+    roomBtn.addEventListener('click', () => {
+      renderParticipants();
+      roomPanel.classList.add('active');
+    });
+    roomCloseBtn.addEventListener('click', () => roomPanel.classList.remove('active'));
+
+    sendBtn.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
+</script>
+</body>
+</html>

@@ -38,11 +38,47 @@ public class MainController {
         List<Groups> recommendGroupsList = groupService.getRecommendGroup();
         model.addAttribute("recommendGroupsList", recommendGroupsList);
 
+        // 인기 장르 모음
+        List<Groups> groupByCategory = groupService.getGroupByCategory();
+        model.addAttribute("groupByCategory", groupByCategory);
+
+        // 최근 생성날 기준 모임
+        List<Groups> groupByCreateDate = groupService.getGroupByCreateDate();
+        model.addAttribute("groupByCreateDate", groupByCreateDate);
+
+        // 모임 임박 기준 리스트
+        List<Groups> groupByGroupDate = groupService.getGroupByGroupDate();
+        model.addAttribute("groupByGroupDate", groupByGroupDate);
+
+        if (groupByCategory != null && !groupByCategory.isEmpty()) {
+            System.out.println("--- recommendGroupsList Start ---");
+            System.out.println("Total recommend groups found: " + groupByCategory.size());
+            for (int i = 0; i < groupByCategory.size(); i++) {
+                Groups group = groupByCategory.get(i);
+                System.out.println("Group " + (i + 1) + ":");
+                System.out.println("  groupIdx: " + group.getGroupIdx());
+                System.out.println("  title: " + group.getTitle());
+                System.out.println("  ownerIdx: " + group.getOwnerIdx());
+
+            }
+            System.out.println("--- recommendGroupsList End ---");
+        } else {
+            System.out.println("recommendGroupsList is null or empty.");
+        }
         return "main/main";
+    }
+
+    @GetMapping("/main/login")
+    public String login2() {
+        return "main/login"; // main.html 템플릿 반환
     }
 
     @GetMapping("/main/MAIN")
     public String mainPage2() {
         return "main/MAIN"; // main.html 템플릿 반환
     }
+    /*@GetMapping("/main/main")
+    public String mainPage2() {
+        return "main/main"; // main.html 템플릿 반환
+    }*/
 }

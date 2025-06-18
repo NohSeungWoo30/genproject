@@ -1,6 +1,10 @@
 package generationgap.co.kr.controller.user;
 
 import generationgap.co.kr.domain.user.UserDTO;
+import generationgap.co.kr.dto.mypage.PaymentDto;
+import generationgap.co.kr.dto.mypage.PostDto;
+import generationgap.co.kr.mapper.payment.PaymentMapper;
+import generationgap.co.kr.mapper.post.BoardPostMapper;
 import generationgap.co.kr.security.CustomUserDetails;
 import generationgap.co.kr.service.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,20 +23,25 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.IOException;
-import java.security.Principal;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Controller
-@RequestMapping("/user")
+@RequestMapping({"/user",""})
 public class UserController {
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     private UserService userService;
+
+    // ─── 추가된 Mapper 주입 ───
+
+
+    @Autowired
+    private PaymentMapper paymentMapper;
+    @Autowired
+    private BoardPostMapper boardpostMapper;
+
 
     // 회원가입 폼 표시
     @GetMapping("/signup")
@@ -104,37 +112,80 @@ public class UserController {
 
     // 로그인 폼 표시
     @GetMapping("/login")
-    public String loginPage() {
+    public String loginPage(Model model,
+                            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails != null) {
+            model.addAttribute("user", userDetails);
+        }
+
+
         return "user/login";
     }
 
-    // 아이디 찾기 폼
+    // 아이디 찾기 폼 (GET 요청)
     @GetMapping("/find-id")
-    public String showFindIdForm(@RequestParam(value = "success", required = false) String success,
-                                 @RequestParam(value = "error", required = false) String error,
+    public String showFindIdForm(@RequestParam(value = "foundUserId", required = false) String foundUserId, // 'success' 대신 'foundUserId'로 변경
+                                 @RequestParam(value = "errorMessage", required = false) String errorMessage,   // 'error' 대신 'errorMessage'로 변경
                                  Model model) {
-        if (success != null) model.addAttribute("foundUserId", success);
-        if (error != null) model.addAttribute("errorMessage", error);
+        if (foundUserId != null) {
+            model.addAttribute("foundUserId", foundUserId);
+        }
+        if (errorMessage != null) {
+            model.addAttribute("errorMessage", errorMessage);
+        }
         log.info("아이디 찾기 폼 로드.");
-        return "user/find-id";
+        return "user/find-id"; // user/find-id.html 템플릿 반환
     }
 
-    // 아이디 찾기 처리
+    // 아이디 찾기 처리 (POST 요청)
     @PostMapping("/find-id")
     public String findIdProcess(@RequestParam("userName") String userName,
                                 @RequestParam("phone") String phone,
                                 RedirectAttributes rttr) {
         log.info("아이디 찾기 요청: 이름={}, 전화번호={}", userName, phone);
+
         Optional<String> result = userService.findUserIdByUserNameAndPhone(userName, phone);
 
         if (result.isPresent()) {
-            rttr.addAttribute("success", result.get());
-            log.info("아이디 찾기 성공");
+            rttr.addAttribute("foundUserId", result.get()); // 'success' 대신 'foundUserId'로 변경
+            log.info("아이디 찾기 성공: {}", result.get()); // 성공 시 아이디를 로그에 기록
         } else {
-            rttr.addAttribute("error", "입력한 정보로 아이디를 찾을 수 없습니다.");
-            log.warn("아이디 찾기 실패");
+            rttr.addAttribute("errorMessage", "입력한 정보로 아이디를 찾을 수 없습니다."); // 'error' 대신 'errorMessage'로 변경
+            log.warn("아이디 찾기 실패: 이름={}, 전화번호={}", userName, phone); // 실패 시 입력 정보를 로그에 기록
         }
-        return "redirect:/user/find-id";
+        return "redirect:/user/find-id"; // GET 요청으로 리다이렉트
+    }
+
+    // ─── 마이페이지 뷰 매핑 추가 ───
+    @GetMapping("/mypage")
+    public String mypage(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model
+    ) {
+        if (userDetails == null) {
+            return "redirect:/user/login";
+        }
+
+        UserDTO user = userService.getUserProfile(userDetails.getUserIdx());
+        if (user == null) {
+            return "redirect:/logout";
+        }
+
+        model.addAttribute("user", user);
+
+        // ─── 추가된 부분: 참여 이력, 결제 내역, 내가 쓴 글 조회 ───
+
+        List<PaymentDto> payments = paymentMapper.findPaymentsByUserIdx(user.getUserIdx());
+        if (payments == null) payments = new ArrayList<>();
+        List<PostDto> posts = boardpostMapper.findPostsByAuthorIdx(user.getUserIdx());
+        if (posts == null) posts = new ArrayList<>();
+
+        Map<String, Object> pageData = new HashMap<>();
+
+        pageData.put("payments", payments);
+        pageData.put("posts",    posts);
+        model.addAttribute("pageData", pageData);
+        return "mypage";    // resources/templates/mypage.html 렌더링
     }
 
     // 프로필 수정 폼
@@ -160,6 +211,8 @@ public class UserController {
     @PostMapping("/profile-edit")
     public String updateProfile(@AuthenticationPrincipal CustomUserDetails userDetails,
                                 @ModelAttribute("user") UserDTO user,
+                                @RequestParam(value = "profileImageFile", required = false) MultipartFile profileImageFile, // ⭐ 추가: MultipartFile 파라미터
+                                @RequestParam(value = "deleteProfileImage", defaultValue = "false") boolean deleteProfileImage, // ⭐ 추가: 이미지 삭제 요청 파라미터
                                 RedirectAttributes redirectAttributes) {
         if (userDetails == null) {
             log.warn("비로그인 사용자의 프로필 수정 시도");
@@ -169,17 +222,18 @@ public class UserController {
         user.setUserIdx(userDetails.getUserIdx());
 
         try {
-            userService.updateUserInfo(user);
-            redirectAttributes.addFlashAttribute("message", "회원 정보가 수정되었습니다.");
+            // ⭐ 프로필 이미지 처리 로직 호출
+            userService.updateUserProfile(user, profileImageFile, deleteProfileImage);
+            redirectAttributes.addFlashAttribute("messageInfo", "회원 정보가 수정되었습니다.");
             log.info("프로필 수정 성공: userIdx={}", userDetails.getUserIdx());
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessageInfo01", e.getMessage());
             log.warn("프로필 수정 실패: {}", e.getMessage());
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "회원 정보 수정 중 오류 발생");
+            redirectAttributes.addFlashAttribute("errorMessageInfo02", "회원 정보 수정 중 오류 발생");
             log.error("프로필 수정 오류: {}", e.getMessage(), e);
         }
-        return "redirect:/user/profile-edit";
+        return "redirect:/user/profile";
     }
 
     // 비밀번호 변경 처리
@@ -194,26 +248,33 @@ public class UserController {
             return "redirect:/user/login";
         }
 
+        // 프론트엔드 유효성 검사를 했지만, 서버에서도 한 번 더 확인 (이중 체크)
         if (!newPassword.equals(confirmNewPassword)) {
-            redirectAttributes.addFlashAttribute("errorMessage", "새 비밀번호가 일치하지 않습니다.");
+            redirectAttributes.addFlashAttribute("errorMessagePass01", "새 비밀번호가 일치하지 않습니다.");
             log.warn("비밀번호 불일치: userIdx={}", userDetails.getUserIdx());
-            return "redirect:/user/profile-edit";
+            return "redirect:/user/profile";
         }
+        if (newPassword.length() < 6) { // 최소 길이 검증 추가
+            redirectAttributes.addFlashAttribute("errorMessagePass02", "새 비밀번호는 최소 6자 이상이어야 합니다.");
+            log.warn("비밀번호 변경 실패: 새 비밀번호 길이 부족");
+            return "redirect:/user/profile";
+        }
+
 
         try {
             boolean updated = userService.updatePassword(userDetails.getUserIdx(), currentPassword, newPassword);
             if (updated) {
-                redirectAttributes.addFlashAttribute("message", "비밀번호가 변경되었습니다.");
+                redirectAttributes.addFlashAttribute("messagePass", "비밀번호가 변경되었습니다.");
                 log.info("비밀번호 변경 성공: userIdx={}", userDetails.getUserIdx());
             } else {
-                redirectAttributes.addFlashAttribute("errorMessage", "현재 비밀번호가 틀립니다.");
+                redirectAttributes.addFlashAttribute("errorMessagePass03", "현재 비밀번호가 틀립니다.");
                 log.warn("비밀번호 변경 실패: 현재 비밀번호 불일치");
             }
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "비밀번호 변경 중 오류 발생");
+            redirectAttributes.addFlashAttribute("errorMessagePass04", "비밀번호 변경 중 오류 발생");
             log.error("비밀번호 변경 오류: {}", e.getMessage(), e);
         }
-        return "redirect:/user/profile-edit";
+        return "redirect:/user/profile";
     }
 
 
@@ -264,7 +325,6 @@ public class UserController {
         // 이제 "user/settings"가 아닌 "user/profile"을 사용합니다.
         return "user/profile";
     }
-
 
     // 회원 탈퇴 처리 (소프트 삭제)
     @PostMapping("/delete")
