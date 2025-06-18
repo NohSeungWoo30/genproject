@@ -1,603 +1,528 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8" />
-    <title>게시글 상세보기</title>
-    <link rel="stylesheet" href="/css/vars.css" />
-    <link rel="stylesheet" href="/css/boardstyle.css" />
-    <style>
-        /* (기존 스타일 그대로 유지) */
-        .detail-container {
-          max-width: 700px;
-          margin: 60px auto;
-          background: var(--color-white-solid, #fff);
-          border-radius: 10px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-          padding: 36px 32px 40px;
-          font-family: var(--font-pretendard-regular, sans-serif);
-        }
-        .detail-container h2 {
-          font-family: var(--font-pretendard-medium);
-          font-size: 26px;
-          margin-bottom: 20px;
-          color: var(--color-mine-shaft);
-          word-break: keep-all;
-        }
-        .detail-meta {
-          margin-bottom: 14px;
-          color: var(--color-grey-80);
-          font-size: 15px;
-          display: flex;
-          gap: 16px;
-          flex-wrap: wrap;
-        }
-        .detail-meta span {
-          margin-right: 18px;
-          white-space: nowrap;
-        }
-        .detail-content {
-          margin: 30px 0 38px;
-          font-size: 17px;
-          color: var(--color-mine-shaft);
-          line-height: 1.7;
-          word-break: break-all;
-          min-height: 100px;
-        }
-        .detail-images-list {
-          display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
-          margin: 20px 0;
-        }
-        .detail-images-list img {
-          max-width: 150px;
-          max-height: 150px;
-          border-radius: 8px;
-          object-fit: cover;
-          display: block;
-        }
-        .btn-back {
-          display: inline-block;
-          margin-top: 12px;
-          padding: 9px 19px;
-          background: var(--color-grey-89);
-          color: var(--color-mine-shaft);
-          border: none;
-          border-radius: 4px;
-          font-family: var(--font-pretendard-medium);
-          text-decoration: none;
-          font-size: 15px;
-          transition: background 0.2s;
-        }
-        .btn-back:hover {
-          background: var(--color-grey-80);
-          color: var(--color-white-solid);
-        }
-        .btn-like {
-          display: inline-block;
-          margin-bottom: 20px;
-          padding: 8px 16px;
-          background: var(--color-cornflower-blue);
-          color: #fff;
-          border: none;
-          border-radius: 4px;
-          font-family: var(--font-pretendard-medium);
-          font-size: 15px;
-          cursor: pointer;
-          transition: background 0.2s;
-        }
-        .btn-like:hover {
-          background: var(--color-blue-40, #3b4890);
-        }
-        .comments-section {
-          margin-top: 40px;
-          border-top: 1px solid var(--color-grey-80);
-          padding-top: 20px;
-        }
-        .comments-section h3 {
-          font-family: var(--font-pretendard-medium);
-          font-size: 20px;
-          margin-bottom: 12px;
-          color: var(--color-mine-shaft);
-        }
-        .comment-item-container {
-          margin-bottom: 16px;
-        }
-        .comment-item {
-          padding: 12px;
-          border-radius: 8px;
-          background: var(--color-grey-97);
-          position: relative;
-        }
-        .comment-author {
-          font-family: var(--font-pretendard-medium);
-          font-size: 15px;
-          color: var(--color-mine-shaft);
-          margin-bottom: 4px;
-        }
-        .comment-date {
-          font-size: 13px;
-          color: var(--color-grey-80);
-          margin-bottom: 8px;
-        }
-        .comment-text {
-          font-size: 15px;
-          color: var(--color-mine-shaft);
-          line-height: 1.5;
-          word-break: break-all;
-        }
-        .btn-reply {
-          margin-top: 8px;
-          font-size: 13px;
-          color: var(--color-grey-80);
-          cursor: pointer;
-          background: none;
-          border: none;
-          padding: 0;
-        }
-        .btn-reply:disabled {
-          color: var(--color-grey-60);
-          cursor: default;
-        }
-        .btn-reply:hover:not(:disabled) {
-          color: var(--color-pigment-indigo);
-        }
-        .btn-show-replies {
-          margin-top: 8px;
-          font-size: 13px;
-          color: var(--color-pigment-indigo);
-          background: none;
-          border: none;
-          cursor: pointer;
-          padding: 0;
-        }
-        .btn-show-replies:hover {
-          text-decoration: underline;
-        }
-        .replies-container {
-          margin-top: 12px;
-          margin-left: 20px;
-          display: none;
-        }
-        .reply-item {
-          margin-bottom: 12px;
-          padding: 10px;
-          border-radius: 6px;
-          background: var(--color-grey-94);
-        }
-        .reply-author {
-          font-family: var(--font-pretendard-medium);
-          font-size: 14px;
-          color: var(--color-mine-shaft);
-          margin-bottom: 2px;
-        }
-        .reply-date {
-          font-size: 12px;
-          color: var(--color-grey-80);
-          margin-bottom: 6px;
-        }
-        .reply-text {
-          font-size: 14px;
-          color: var(--color-mine-shaft);
-          line-height: 1.4;
-          word-break: break-all;
-        }
-        .reply-form {
-          margin-top: 12px;
-          padding: 12px;
-          background: var(--color-white-solid);
-          border: 1px solid var(--color-grey-80);
-          border-radius: 8px;
-        }
-        .reply-form input,
-        .reply-form textarea {
-          width: 100%;
-          margin-bottom: 8px;
-          padding: 8px;
-          border: 1px solid var(--color-grey-80);
-          border-radius: 4px;
-          font-family: var(--font-pretendard-regular);
-          font-size: 14px;
-        }
-        .reply-form button {
-          padding: 6px 12px;
-          background: var(--color-pigment-indigo);
-          color: #fff;
-          border: none;
-          border-radius: 4px;
-          font-family: var(--font-pretendard-medium);
-          font-size: 14px;
-          cursor: pointer;
-        }
-        .reply-form button:hover {
-          background: #9a4ed6;
-        }
-        .comment-form {
-          margin-top: 20px;
-          padding: 12px;
-          background: var(--color-white-solid);
-          border: 1px solid var(--color-grey-80);
-          border-radius: 8px;
-        }
-        .comment-form input,
-        .comment-form textarea {
-          width: 100%;
-          margin-bottom: 8px;
-          padding: 8px;
-          border: 1px solid var(--color-grey-80);
-          border-radius: 4px;
-          font-family: var(--font-pretendard-regular);
-          font-size: 14px;
-        }
-        .comment-form button {
-          padding: 6px 12px;
-          background: var(--color-pigment-indigo);
-          color: #fff;
-          border: none;
-          border-radius: 4px;
-          font-family: var(--font-pretendard-medium);
-          font-size: 14px;
-          cursor: pointer;
-        }
-        .comment-form button:hover {
-          background: #9a4ed6;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>채팅 최종 완성본</title>
+  <style>
+    :root {
+        --background-primary: #FFFFFF;
+        --background-secondary: #F0F2F5;
+        --header-bg: #FFFFFF;
+        --text-primary: #050505;
+        --text-secondary: #65676B;
+        --accent-color: #0084FF;
+        --bubble-self-bg: #E7F3FF;
+        --bubble-other-bg: #E4E6EB;
+        --danger-color: #d9534f;
+    }
+
+    body, html { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif; background-color: #f0f2f5; }
+
+    .room-detail-section { padding: 40px 20px; }
+
+    /* 상세 카드 재배치 스타일 */
+    .live-card {
+        border: 2px solid var(--accent-color);
+        border-radius: 12px;
+        overflow: hidden;
+        background: #fff;
+        max-width: 600px;
+        margin: auto;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .card-top-banner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #FFFBEA; /* Light yellow background */
+        padding: 12px 20px;
+    }
+
+    .card-top-banner .food-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    .card-top-banner .host-info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .card-top-banner .host-info img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+    }
+
+    .card-top-banner .host-info span {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .card-content { padding: 20px; }
+
+    .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .tag-list span { padding: 4px 10px; border-radius: 12px; font-size: 13px; color: #333; background-color: #f0f2f5; font-weight: 500; }
+
+    .card-content h3 { margin: 0 0 V16px 0; font-size: 22px; }
+
+    .content-body {
+        display: flex;
+        gap: 20px;
+        margin-top: 16px;
+    }
+    .content-body .left-col {
+        flex: 1;
+        font-size: 16px;
+        line-height: 1.6;
+        white-space: pre-wrap; /* Preserve line breaks */
+    }
+    .content-body .right-col {
+        width: 200px;
+        flex-shrink: 0;
+    }
+
+    #detailMap { width: 100%; height: 120px; border-radius: 8px; background-color: #f0f2f5; margin-bottom: 12px; }
+
+    .details-list {
+        font-size: 15px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .details-list li {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        color: var(--text-secondary);
+    }
+    .details-list li .label {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .card-actions {
+        margin-top: 24px;
+    }
+    .detail-btn {
+        padding: 12px 20px;
+        font-size: 18px;
+        cursor: pointer;
+        border-radius: 8px;
+        background-color: var(--accent-color);
+        color: white; border: none;
+        font-weight: 600;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .detail-btn.delete { background-color: var(--danger-color); }
+
+
+    /* 인라인 채팅 컨테이너 스타일 (기존과 동일) */
+    #inline-chat-wrapper { display: none; max-width: 600px; margin: 30px auto 0 auto; }
+    .chat-container { width: 100%; height: 70vh; max-height: 700px; background: var(--background-primary); border: 1px solid #ddd; display: flex; flex-direction: column; overflow: hidden; position: relative; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .chat-header { display: flex; align-items: center; padding: 12px 16px; background-color: var(--header-bg); border-bottom: 1px solid var(--background-secondary); z-index: 2; position: relative; }
+    .title { flex: 1; text-align: left; }
+    .chat-title { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+    .header-buttons { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); }
+    .header-menu-btn { background: none; border: none; font-size: 24px; cursor: pointer; padding: 4px; color: var(--text-secondary); }
+
+    /* 메시지 영역 (기존과 동일) */
+    .chat-messages { flex: 1; padding: 0 16px; overflow-y: auto; background-color: var(--background-secondary); }
+    .message-group { padding-top: 8px; }
+    .message-group.new-speaker { padding-top: 16px; }
+    .message { display: flex; }
+    .message.self { justify-content: flex-end; }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; margin-right: 12px; }
+    .message.self .avatar { display: none; }
+    .content-container { display: flex; flex-direction: column; max-width: 70%; }
+    .nickname { font-size: 14px; color: var(--text-primary); font-weight: 500; margin-bottom: 4px; }
+    .message.self .nickname { align-self: flex-end; }
+    .bubble-container { display: flex; align-items: flex-end; gap: 8px; }
+    .message.self .bubble-container { flex-direction: row-reverse; }
+    .bubble { padding: 10px 14px; border-radius: 18px; line-height: 1.5; word-break: break-word; font-size: 15px; }
+    .message.self .bubble { background: var(--accent-color); color: white; }
+    .message.other .bubble { background: var(--bubble-other-bg); color: var(--text-primary); }
+    .timestamp { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+    .message-group:not(.new-speaker) .avatar, .message-group:not(.new-speaker) .nickname { display: none; }
+    .message-group:not(.new-speaker) .content-container { padding-left: 52px; }
+    .message.self .message-group:not(.new-speaker) .content-container { padding-right: 0; }
+    .date-separator { text-align: center; margin: 24px 0 16px 0; }
+    .date-separator .text { padding: 4px 12px; font-size: 12px; font-weight: 500; color: var(--text-secondary); background-color: #DDE1E5; border-radius: 12px; }
+    .system-message { text-align: center; margin: 16px 0; color: var(--text-secondary); font-size: 13px; }
+
+    /* 채팅 입력창 (기존과 동일) */
+    .chat-input-wrapper { padding: 8px 16px; background-color: var(--background-primary); border-top: 1px solid #ddd; }
+    .chat-input { display: flex; align-items: center; background-color: var(--background-secondary); border-radius: 20px; padding: 0 8px; }
+    .chat-input input { flex: 1; padding: 10px 8px; background: transparent; border: none; outline: none; font-size: 15px; color: var(--text-primary); }
+    .chat-input-wrapper button { background: none; border: none; font-size: 24px; color: var(--text-secondary); cursor: pointer; padding: 8px; }
+
+    /* 사이드 패널 (기존과 동일) */
+    .side-panel { position: absolute; top: 0; right: 0; width: 260px; height: 100%; background: var(--background-primary); border-left: 1px solid #ddd; transform: translateX(100%); transition: transform .3s ease; display: flex; flex-direction: column; z-index: 10; }
+    .side-panel.active { transform: translateX(0); }
+    .side-panel-header { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--background-secondary); }
+    .side-panel-header .close-btn { margin-right: 8px; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-secondary); }
+    .side-panel-header .title { font-size: 16px; font-weight: 600; }
+    .participants { flex: 1; overflow-y: auto; }
+    .participant { display: flex; align-items: center; padding: 12px 16px; cursor: pointer; }
+    .participant:hover { background-color: #f0f2f5; }
+    .participant img { width: 40px; height: 40px; margin-right: 12px; border-radius: 50%; }
+    .participant .name { font-weight: 500; }
+    .profile-body { padding: 20px; text-align: center; }
+    .profile-body .avatar { width: 80px; height: 80px; border-radius: 35%; margin-bottom: 12px; }
+    .profile-body .nickname { font-size: 18px; font-weight: 600; }
+    .side-panel-footer { padding: 16px; margin-top: auto; border-top: 1px solid var(--background-secondary); }
+  </style>
 </head>
 <body>
-<div class="detail-container" id="post-detail"></div>
+<section class="room-detail-section">
+  <div id="roomDetailCard"></div>
+
+  <div id="inline-chat-wrapper">
+    <div class="chat-container">
+      <header class="chat-header">
+        <div class="title">
+          <div class="chat-title" id="chatRoomTitleText"></div>
+        </div>
+        <div class="header-buttons">
+          <button class="header-menu-btn" id="roomBtn">⋮</button>
+        </div>
+      </header>
+      <main class="chat-messages" id="chatMessages"></main>
+      <footer class="chat-input-wrapper">
+        <div class="chat-input">
+          <button>➕</button>
+          <input type="text" id="chatInput" placeholder="메시지 보내기" />
+          <button id="sendBtn">➤</button>
+        </div>
+      </footer>
+      <aside class="side-panel" id="roomPanel">
+        <div class="side-panel-header"> <button class="close-btn" id="roomCloseBtn">✕</button> <span class="title">대화 상대</span> </div>
+        <div class="participants" id="participantsList"></div>
+        <footer class="side-panel-footer" id="roomPanelFooter"></footer>
+      </aside>
+      <aside class="side-panel" id="profilePanel">
+        <div class="side-panel-header"> <button class="close-btn" id="profileCloseBtn">✕</button> <span class="title">프로필</span> </div>
+        <div class="profile-body">
+          <img id="profilePanelAvatar" class="avatar" src="">
+          <div id="profilePanelNickname" class="nickname"></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
 <script>
-    // --------------------------------------------------------
-    // 1) URL 파라미터에서 seq 가져오기
-    // --------------------------------------------------------
-    function getSeqFromUrl() {
-      const params = new URLSearchParams(window.location.search);
-      return params.get("seq");
+  document.addEventListener('DOMContentLoaded', () => {
+    // --- 1. 데이터 준비 (시안에 맞게 수정) ---
+    const currentLoggedInUser = { name: '프로트런트', avatar: 'https://i.pravatar.cc/150?u=me' };
+
+    // 모임 시간을 동적으로 설정 (현재로부터 1시간 30분 뒤)
+    const meetingDate = new Date();
+    meetingDate.setHours(meetingDate.getHours() + 1);
+    meetingDate.setMinutes(meetingDate.getMinutes() + 30);
+
+    const room = {
+        title: '감자탕 맛있다 ~ 모임',
+        hostName: '장규진 귀엽다',
+        hostAvatar: 'https://i.pravatar.cc/150?u=jangkyujin',
+        foodImage: 'https://images.unsplash.com/photo-1627041541484-2353f5556658?q=80&w=1964&auto=format&fit=crop',
+        content: `맛있는 감자탕 먹어용
+아들,아들 감칠맛 쩌는
+고기 먹고, 국물 머금은
+시래기 먹다가, 어느 정도
+먹었을때 라면 사리 넣어
+서 또 다른 재미를 챙겨주고
+볶음밥으로 마무리~~`,
+        tags: ['식사'],
+        participants: [
+            { name: '장규진 귀엽다', avatar: 'https://i.pravatar.cc/150?u=jangkyujin' },
+            { name: '이순신', avatar: 'https://i.pravatar.cc/150?u=leesoonsin' },
+            { name: '김프로', avatar: 'https://i.pravatar.cc/150?u=kimpro' },
+        ],
+        age_min: 20,
+        age_max: 29,
+        group_date_obj: meetingDate, // Date 객체로 저장
+        members_max: 4,
+        place_name: '참이맛 감자탕',
+    };
+
+    // --- 2. UI 요소 가져오기 ---
+    const detailCardContainer = document.getElementById('roomDetailCard');
+    const inlineChatWrapper = document.getElementById('inline-chat-wrapper');
+    const chatRoomTitleText = document.getElementById('chatRoomTitleText');
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const roomBtn = document.getElementById('roomBtn');
+    const roomPanel = document.getElementById('roomPanel');
+    const roomCloseBtn = document.getElementById('roomCloseBtn');
+    const participantsList = document.getElementById('participantsList');
+    const roomPanelFooter = document.getElementById('roomPanelFooter');
+    const profilePanel = document.getElementById('profilePanel');
+    const profileCloseBtn = document.getElementById('profileCloseBtn');
+    const profilePanelAvatar = document.getElementById('profilePanelAvatar');
+    const profilePanelNickname = document.getElementById('profilePanelNickname');
+    let isChatJoined = room.participants.some(p => p.name === currentLoggedInUser.name);
+    let lastMessageInfo = null;
+
+    // --- 3. 함수 정의 ---
+    function formatTime(date) {
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        const hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? '오후' : '오전';
+        const displayHour = hours % 12 || 12;
+        return `${month}월 ${day}일 ${ampm} ${displayHour}시 ${minutes}분`;
     }
-    //const seq = getSeqFromUrl();
-    //if (!seq) {
-    //  document.getElementById("post-detail").innerHTML = "<p style='font-size:17px'>잘못된 접근입니다.</p><a href='board.html' class='btn-back'>목록으로</a>";
-    //  throw new Error("No seq provided");
-    //}
-    const seq = 1; // 테스트용
 
-    // --------------------------------------------------------
-    // 2) 로그인 여부 확인 (추천·댓글 작성 시 필요)
-    // --------------------------------------------------------
-    const userIdx = sessionStorage.getItem('user_idx');
-    const authToken = sessionStorage.getItem('auth_token');
+    function getTimeRemaining(endtime) {
+        const total = Date.parse(endtime) - Date.parse(new Date());
+        const hours = Math.floor((total / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((total / 1000 / 60) % 60);
 
-    // --------------------------------------------------------
-    // 3) 게시글 상세 정보 가져오기 및 조회수 증가
-    //    GET /api/board-posts/:seq
-    // --------------------------------------------------------
-    async function fetchPostDetail() {
-  return {
-    seq: 1,
-    category: "일반",
-    title: "테스트 게시글입니다",
-    author: "관리자",
-    views: 123,
-    likes: 5,
-    date: "2025-06-10 10:00",
-    content: "이것은 테스트용 본문입니다.",
-    images: [
-      "/img/sample1.jpg",
-      "/img/sample2.jpg"
-    ]
-  };
+        if (total <= 0) {
+            return "모임 시간 종료";
+        }
+        return `${hours > 0 ? hours + '시간 ' : ''}${minutes}분`;
+    }
+
+    function displayRoomDetails() {
+        const allTags = [...room.tags];
+        if(room.age_min >= 20 && room.age_max < 30) allTags.push('20대');
+        else if(room.age_min >= 30 && room.age_max < 40) allTags.push('30대');
+
+        detailCardContainer.innerHTML = `
+            <div class="live-card">
+                <div class="card-top-banner">
+                    <img src="${room.foodImage}" alt="모임 대표 이미지" class="food-image">
+                    <div class="host-info">
+                        <img src="${room.hostAvatar}" alt="${room.hostName}">
+                        <span>${room.hostName}</span>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="tag-list">${allTags.map(tag => `<span>${tag}</span>`).join('')}</div>
+                    <h3>${room.title}</h3>
+                    <div class="content-body">
+                        <div class="left-col">${room.content}</div>
+                        <div class="right-col">
+                            <div id="detailMap"></div>
+                             <ul class="details-list">
+                                <li><span class="label">모임 시간</span> <span>${formatTime(room.group_date_obj)}</span></li>
+                                <li><span class="label">남은 시간</span> <span>${getTimeRemaining(room.group_date_obj)}</span></li>
+                                <li><span class="label">현재 인원</span> <span>${room.participants.length} / ${room.members_max}</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-actions" id="cardActions"></div>
+                </div>
+            </div>`;
+
+        // 지도 생성 (Naver Maps API가 로드된 경우)
+        setTimeout(() => { if (window.naver && window.naver.maps) { new naver.maps.Map('detailMap', { center: new naver.maps.LatLng(37.5665, 126.9780), zoom: 15 }); }}, 100);
+
+        updateMainButtons();
+    }
+
+    function updateMainButtons() {
+        const cardActionsContainer = document.getElementById('cardActions');
+        if (!cardActionsContainer) return;
+
+        cardActionsContainer.innerHTML = '';
+        if (isChatJoined) {
+             // 방장인 경우 버튼 없음, 방장이 아닌 참여자는 나가기 버튼
+            if (room.hostName !== currentLoggedInUser.name) {
+                const leaveBtn = document.createElement('button');
+                leaveBtn.className = 'detail-btn delete';
+                leaveBtn.textContent = '방 나가기';
+                leaveBtn.onclick = leaveChat;
+                cardActionsContainer.appendChild(leaveBtn);
+            }
+        } else {
+            // 참여하지 않은 경우
+            const joinBtn = document.createElement('button');
+            joinBtn.className = 'detail-btn';
+            joinBtn.textContent = '방 참여';
+            joinBtn.onclick = joinChat;
+            cardActionsContainer.appendChild(joinBtn);
+        }
+    }
+
+    function updateSidePanelFooter() {
+        roomPanelFooter.innerHTML = '';
+        if (room.hostName === currentLoggedInUser.name) {
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'detail-btn delete';
+            deleteBtn.textContent = '방 삭제하기';
+            deleteBtn.style.width = '100%';
+            deleteBtn.onclick = () => alert('방이 삭제되었습니다.');
+            roomPanelFooter.appendChild(deleteBtn);
+        } else if (isChatJoined) {
+            const leaveBtn = document.createElement('button');
+            leaveBtn.className = 'detail-btn delete';
+            leaveBtn.textContent = '방 나가기';
+            leaveBtn.style.width = '100%';
+            leaveBtn.onclick = leaveChat;
+            roomPanelFooter.appendChild(leaveBtn);
+        }
+    }
+
+    function joinChat() {
+        if (!isChatJoined) {
+            room.participants.push(currentLoggedInUser);
+            isChatJoined = room.participants.some(p => p.name === currentLoggedInUser.name);
+            displayRoomDetails();
+            showInlineChat(true);
+        }
+    }
+
+    function leaveChat() {
+        room.participants = room.participants.filter(p => p.name !== currentLoggedInUser.name);
+        isChatJoined = false;
+        displayRoomDetails();
+        inlineChatWrapper.style.display = 'none';
+        roomPanel.classList.remove('active');
+    }
+
+    function addSystemMessage(text) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'system-message';
+        msgDiv.textContent = text;
+        chatMessages.appendChild(msgDiv);
+    }
+
+    function addMessage(msgData) {
+        const { type, avatar, nickname, content, date } = msgData;
+        const simpleDateStr = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+        const allSeparators = document.querySelectorAll('#chatMessages .date-separator');
+        const lastDateSeparator = allSeparators.length > 0 ? allSeparators[allSeparators.length - 1] : null;
+
+        if (!lastDateSeparator || lastDateSeparator.dataset.date !== simpleDateStr) {
+            const sep = document.createElement('div');
+            sep.className = 'date-separator';
+            sep.dataset.date = simpleDateStr;
+            sep.innerHTML = `<span class="text">${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일</span>`;
+            chatMessages.appendChild(sep);
+        }
+
+        const hours = date.getHours(); const ampm = hours >= 12 ? '오후' : '오전';
+        const hour12 = ((hours + 11) % 12) + 1; const minutes = String(date.getMinutes()).padStart(2, '0');
+        const timeStr = `${ampm} ${hour12}:${minutes}`;
+
+        const isNewSpeaker = !lastMessageInfo || lastMessageInfo.nickname !== nickname || lastMessageInfo.simpleDate !== simpleDateStr;
+        if (lastMessageInfo && !isNewSpeaker && lastMessageInfo.timeStr === timeStr && lastMessageInfo.timestampElement) {
+            lastMessageInfo.timestampElement.style.display = 'none';
+        }
+
+        const group = document.createElement('div');
+        group.className = 'message-group';
+        group.dataset.nickname = nickname;
+        if (isNewSpeaker) group.classList.add('new-speaker');
+
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${type}`;
+
+        messageDiv.innerHTML = `
+            <img src="${avatar}" class="avatar" data-nickname="${nickname}" data-avatar="${avatar}">
+            <div class="content-container">
+                <div class="nickname">${nickname}</div>
+                <div class="bubble-container">
+                    <div class="bubble">${content}</div>
+                    <span class="timestamp">${timeStr}</span>
+                </div>
+            </div>`;
+
+        if (type === 'self') {
+            messageDiv.querySelector('.avatar').style.display = 'none';
+        }
+
+        group.appendChild(messageDiv);
+        chatMessages.appendChild(group);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        lastMessageInfo = {
+            nickname: nickname,
+            simpleDate: simpleDateStr,
+            timeStr: timeStr,
+            timestampElement: group.querySelector('.timestamp')
+        };
+    }
+
+    function showInlineChat(isFirstTime) {
+        chatRoomTitleText.textContent = room.title;
+        if (isFirstTime) {
+            chatMessages.innerHTML = '';
+            lastMessageInfo = null;
+            addSystemMessage(`${currentLoggedInUser.name}님이 채팅방에 입장하셨습니다.`);
+        }
+        inlineChatWrapper.style.display = 'block';
+    }
+
+    function sendMessage() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+        addMessage({
+            type: 'self',
+            avatar: currentLoggedInUser.avatar,
+            nickname: currentLoggedInUser.name,
+            content: text,
+            date: new Date()
+        });
+        chatInput.value = '';
+    }
+
+    // 기존 showProfile 함수 제거하고 아래로 교체
+  function showProfile(nickname, avatarSrc) {
+  window.location.href = `/user-profile.html?user=${encodeURIComponent(nickname)}`;
 }
 
-    // --------------------------------------------------------
-    // 4) 댓글 목록 가져오기
-    //    GET /api/board-posts/:seq/comments
-    // --------------------------------------------------------
-    async function fetchComments() {
-  return [
-    {
-      id: 1,
-      parentId: null,
-      author: "홍길동",
-      text: "첫 번째 댓글입니다.",
-      date: "2025-06-10 10:30"
-    },
-    {
-      id: 2,
-      parentId: 1,
-      author: "이순신",
-      text: "답글입니다.",
-      date: "2025-06-10 10:45"
-    }
-  ];
-}
+    // --- 4. 이벤트 핸들러 연결 및 초기화 ---
+    displayRoomDetails();
+    // 남은 시간을 1분마다 업데이트
+    setInterval(displayRoomDetails, 60000);
 
-    // --------------------------------------------------------
-    // 5) 현재 시간 문자열 생성 ("YYYY-MM-DD HH:mm")
-    // --------------------------------------------------------
-    function getCurrentDateTime() {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, "0");
-      const day = String(now.getDate()).padStart(2, "0");
-      const hours = String(now.getHours()).padStart(2, "0");
-      const minutes = String(now.getMinutes()).padStart(2, "0");
-      return `${year}-${month}-${day} ${hours}:${minutes}`;
+    sendBtn.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
+
+    if (isChatJoined) {
+        showInlineChat(false);
     }
 
-    // --------------------------------------------------------
-    // 6) 댓글 렌더링 함수 (최상위·1단계 자식만)
-    // --------------------------------------------------------
-    function renderComments(commentsList, container) {
-      const parentComments = commentsList.filter(c => c.parentId === null);
-      parentComments.forEach(parent => {
-        const parentContainer = document.createElement("div");
-        parentContainer.className = "comment-item-container";
-        container.appendChild(parentContainer);
+    roomBtn.addEventListener('click', () => {
+        participantsList.innerHTML = room.participants.map(p => {
+            let nameTag = p.name;
+            if (p.name === room.hostName) nameTag += ' (방장)';
+            return `<div class="participant" data-nickname="${p.name}" data-avatar="${p.avatar}"><img src="${p.avatar}" alt="${p.name}"><span class="name">${nameTag}</span></div>`
+        }).join('');
+        updateSidePanelFooter();
+        roomPanel.classList.add('active');
+    });
+    roomCloseBtn.addEventListener('click', () => roomPanel.classList.remove('active'));
 
-        const item = document.createElement("div");
-        item.className = "comment-item";
-        item.dataset.commentId = parent.id;
-        item.innerHTML = `
-          <div class="comment-author">${parent.author}</div>
-          <div class="comment-date">${parent.date}</div>
-          <div class="comment-text">${parent.text}</div>
-          ${ userIdx ? `<button class="btn-reply">답글</button>` : '' }
-        `;
-        parentContainer.appendChild(item);
-
-        // 자식 댓글 필터
-        const childComments = commentsList.filter(c => c.parentId === parent.id);
-        if (childComments.length > 0) {
-          const showBtn = document.createElement("button");
-          showBtn.className = "btn-show-replies";
-          showBtn.textContent = `답글 ${childComments.length}개 보기`;
-          parentContainer.appendChild(showBtn);
-
-          const repliesContainer = document.createElement("div");
-          repliesContainer.className = "replies-container";
-          parentContainer.appendChild(repliesContainer);
-
-          let opened = false;
-          showBtn.addEventListener("click", () => {
-            if (!opened) {
-              childComments.forEach(child => {
-                const replyItem = document.createElement("div");
-                replyItem.className = "reply-item";
-                replyItem.innerHTML = `
-                  <div class="reply-author">${child.author}</div>
-                  <div class="reply-date">${child.date}</div>
-                  <div class="reply-text">${child.text}</div>
-                `;
-                repliesContainer.appendChild(replyItem);
-              });
-              repliesContainer.style.display = "block";
-              showBtn.textContent = "답글 숨기기";
-              opened = true;
-            } else {
-              repliesContainer.innerHTML = "";
-              repliesContainer.style.display = "none";
-              showBtn.textContent = `답글 ${childComments.length}개 보기`;
-              opened = false;
-            }
-          });
+    chatMessages.addEventListener('click', (e) => {
+        if (e.target.classList.contains('avatar')) {
+            showProfile(e.target.dataset.nickname, e.target.dataset.avatar);
         }
+    });
 
-        if (userIdx) {
-          const replyBtn = item.querySelector(".btn-reply");
-          replyBtn.addEventListener("click", () => {
-            // 1) 기존 폼 제거
-            document.querySelectorAll(".reply-form").forEach(f => f.remove());
-            // 2) 다른 답글 버튼 비활성화
-            document.querySelectorAll(".btn-reply").forEach(btn => btn.disabled = true);
-            replyBtn.disabled = false;
-
-            let repliesContainer = parentContainer.querySelector(".replies-container");
-            if (!repliesContainer) {
-              repliesContainer = document.createElement("div");
-              repliesContainer.className = "replies-container";
-              parentContainer.appendChild(repliesContainer);
-            }
-            repliesContainer.style.display = "block";
-
-            // 3) 답글 폼 생성
-            const form = document.createElement("form");
-            form.className = "reply-form";
-            form.innerHTML = `
-              <input type="text" class="reply-author" placeholder="이름" required />
-              <textarea class="reply-content" placeholder="답글을 입력하세요" rows="2" required></textarea>
-              <button type="submit">작성</button>
-            `;
-            repliesContainer.insertBefore(form, repliesContainer.firstChild);
-
-            form.addEventListener("submit", async (e) => {
-              e.preventDefault();
-              const authorInput = form.querySelector(".reply-author");
-              const contentInput = form.querySelector(".reply-content");
-              const author = authorInput.value.trim();
-              const text = contentInput.value.trim();
-              if (!author || !text) return;
-
-              // -----------------------------------------
-              // 7) 서버에 답글 등록 API 호출
-              //    POST /api/board-posts/:seq/comments
-              // -----------------------------------------
-              try {
-                const res = await fetch(`/api/board-posts/${seq}/comments`, {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + authToken
-                  },
-                  body: JSON.stringify({
-                    parentId: parent.id,
-                    author_name: author,
-                    content: text
-                  })
-                });
-                if (!res.ok) {
-                  const err = await res.json();
-                  alert('답글 등록 실패: ' + (err.message || '잠시 후 다시 시도해주세요.'));
-                  return;
-                }
-                form.remove();
-                document.querySelectorAll(".btn-reply").forEach(btn => btn.disabled = false);
-                await loadComments();  // 댓글 재로딩
-              } catch (err) {
-                console.error(err);
-                alert('서버 요청 중 오류가 발생했습니다.');
-              }
-            });
-          });
+    participantsList.addEventListener('click', (e) => {
+        const participant = e.target.closest('.participant');
+        if (participant) {
+            showProfile(participant.dataset.nickname, participant.dataset.avatar);
         }
-      });
-    }
-
-    // --------------------------------------------------------
-    // 8) 댓글 전체 삭제 후 다시 렌더링
-    // --------------------------------------------------------
-    let commentListContainer = null;
-    async function loadComments() {
-      const comments = await fetchComments();
-      if (!commentListContainer) {
-        commentListContainer = document.createElement("div");
-        commentListContainer.id = "comments-list";
-        document.querySelector(".comments-section").insertBefore(commentListContainer, document.getElementById("comment-form"));
-      }
-      commentListContainer.innerHTML = "";
-      renderComments(comments, commentListContainer);
-    }
-
-    // --------------------------------------------------------
-    // 9) 게시글 렌더링 함수
-    // --------------------------------------------------------
-    async function renderPostDetail() {
-      const post = await fetchPostDetail();
-      if (!post) {
-        document.getElementById("post-detail").innerHTML = "<p style='font-size:17px'>글을 찾을 수 없습니다.</p><a href='board.html' class='btn-back'>목록으로</a>";
-        return;
-      }
-
-      document.getElementById("post-detail").innerHTML = `
-        <h2>${post.title}</h2>
-        <div class="detail-meta">
-          <span>카테고리: ${post.category}</span>
-          <span>작성자: ${post.author}</span>
-          <span>조회수: <span id="view-count">${post.views}</span></span>
-          <span>추천수: <span id="like-count">${post.likes}</span></span>
-          <span>작성일: ${post.date}</span>
-        </div>
-        ${ userIdx
-           ? `<button id="like-button" class="btn-like">추천</button>`
-           : ''
-        }
-        ${
-          (post.images && post.images.length)
-          ? `<div class="detail-images-list">
-                ${post.images.map(img => `<img src="${img}" alt="이미지">`).join('')}
-             </div>`
-          : ""
-        }
-        <div class="detail-content">${post.content || ""}</div>
-
-        <!-- 댓글 섹션 시작 -->
-        <div class="comments-section">
-          <h3>댓글</h3>
-          <!-- 댓글 리스트가 이곳에 생성됨 -->
-          <div id="comments-list"></div>
-          <!-- 최상위 댓글 입력 폼 -->
-          ${ userIdx
-            ? `<form id="comment-form" class="comment-form">
-                <input type="text" id="comment-author" placeholder="이름" required />
-                <textarea id="comment-content" placeholder="댓글을 입력하세요" rows="3" required></textarea>
-                <button type="submit">작성</button>
-              </form>`
-            : `<p style="margin-bottom: 20px; color: var(--color-grey-80);">로그인해야 댓글을 작성할 수 있습니다.</p>`
-          }
-        </div>
-        <!-- 댓글 섹션 끝 -->
-
-        <a href="board.html" class="btn-back">목록으로</a>
-      `;
-
-      // --------------------------------------------------------
-      // 10) 추천 버튼 이벤트 등록
-      //     PATCH /api/board-posts/:seq/like
-      // --------------------------------------------------------
-      if (userIdx) {
-        const likeButton = document.getElementById("like-button");
-        likeButton.addEventListener("click", async () => {
-          try {
-            const res = await fetch(`/api/board-posts/${seq}/like`, {
-              method: "PATCH",
-              headers: {
-                "Authorization": "Bearer " + authToken
-              }
-            });
-            if (!res.ok) {
-              const err = await res.json();
-              alert('추천 실패: ' + (err.message || '잠시 후 다시 시도해주세요.'));
-              return;
-            }
-            // 추천 수 업데이트
-            const newData = await res.json();
-            // 예: newData = { like_count: 5 }
-            document.getElementById("like-count").textContent = newData.like_count;
-          } catch (err) {
-            console.error(err);
-            alert('서버 요청 중 오류가 발생했습니다.');
-          }
-        });
-      }
-
-      // --------------------------------------------------------
-      // 11) 댓글 로딩 및 폼 제출 핸들러 등록
-      // --------------------------------------------------------
-      await loadComments();
-
-      if (userIdx) {
-        const commentForm = document.getElementById("comment-form");
-        commentForm.addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const authorInput = document.getElementById("comment-author");
-          const contentInput = document.getElementById("comment-content");
-          const author = authorInput.value.trim();
-          const text = contentInput.value.trim();
-          if (!author || !text) return;
-
-          try {
-            const res = await fetch(`/api/board-posts/${seq}/comments`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + authToken
-              },
-              body: JSON.stringify({
-                parentId: null,
-                author_name: author,
-                content: text
-              })
-            });
-            if (!res.ok) {
-              const err = await res.json();
-              alert('댓글 등록 실패: ' + (err.message || '잠시 후 다시 시도해주세요.'));
-              return;
-            }
-            authorInput.value = "";
-            contentInput.value = "";
-            await loadComments();
-          } catch (err) {
-            console.error(err);
-            alert('서버 요청 중 오류가 발생했습니다.');
-          }
-        });
-      }
-    }
-
-    // --------------------------------------------------------
-    // 12) 페이지 로드 시 게시글 상세렌더링 호출
-    // --------------------------------------------------------
-    renderPostDetail();
+    });
+    profileCloseBtn.addEventListener('click', () => profilePanel.classList.remove('active'));
+  });
 </script>
-<script src="/js/meetingcreate.js"></script>
 </body>
 </html>

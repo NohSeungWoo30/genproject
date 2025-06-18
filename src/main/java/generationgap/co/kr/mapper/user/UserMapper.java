@@ -4,7 +4,7 @@ import generationgap.co.kr.domain.user.UserDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Param; // @Param 사용 시 필요
-
+import java.util.List;
 import java.util.Optional;
 
 @Mapper
@@ -63,4 +63,20 @@ public interface UserMapper {
 
     void updateProfileName(@Param("userIdx") Long userIdx, @Param("profileName") String profileName);
 
+    // 신고된 유저 설정을 위해 추가 ksm
+    void suspendUser(@Param("userId") Long userId);
+
+    // 신고된 유저 자동 해제 ksm
+    int releaseExpiredSuspensions();
+
+    //테스트용 ksm
+    List<UserDTO> findSuspendCandidates();
+
+    /*//user_idx로 조회하는 매서드 추가 ksm
+    UserDTO findByUserIdx(@Param("userIdx") Long userIdx);
+*/
+  /*  void updateUserInfo(UpdateInfoDTO dto);
+    void updateUserProfileImage(UserDTO user);
+*/
+    void updateUserPassword(UserDTO userToUpdate);
 }

@@ -2,9 +2,13 @@ package generationgap.co.kr.controller.board;
 
 import generationgap.co.kr.domain.board.Comment;
 import generationgap.co.kr.mapper.board.CommentMapper;
+import generationgap.co.kr.mapper.board.PostMapper;
 import generationgap.co.kr.security.CustomUserDetails;
+import generationgap.co.kr.service.board.CommentService;
+import generationgap.co.kr.service.notification.NotificationService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,9 +22,13 @@ import java.util.Map;
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/posts")
+@Slf4j
 public class CommentController {
 
     private final CommentMapper commentMapper;
+    private final PostMapper postMapper;
+    private final NotificationService notificationService;
+    private final CommentService commentService;
 
 
     //댓글 등록
@@ -46,7 +54,9 @@ public class CommentController {
         comment.setContent(content);
         comment.setParentCommentId(parentCommentId);
 
-        commentMapper.insertComment(comment);
+        System.out.println("🌐 Controller 요청 도착");
+        commentService.addComment(comment, userIdx);
+
         return "ok";
     }
 

@@ -2,9 +2,11 @@ package generationgap.co.kr.dto.report;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class ReportRequestDto {
     private String entityType; // "USER", "POST", "COMMENT"
     private Long entityId; // 대상 Id

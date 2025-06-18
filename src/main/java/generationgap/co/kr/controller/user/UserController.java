@@ -3,6 +3,16 @@ package generationgap.co.kr.controller.user;
 import generationgap.co.kr.domain.user.UserDTO;
 import generationgap.co.kr.security.CustomUserDetails;
 import generationgap.co.kr.service.user.UserService;
+// ─── 추가된 Mapper import ───
+
+import generationgap.co.kr.mapper.payment.PaymentMapper;
+import generationgap.co.kr.mapper.post.BoardPostMapper;
+
+import java.util.*;
+
+import generationgap.co.kr.dto.mypage.PaymentDto;
+import generationgap.co.kr.dto.mypage.PostDto;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
@@ -12,7 +22,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,20 +29,23 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.IOException;
-import java.security.Principal;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
 @Controller
-@RequestMapping("/user")
+@RequestMapping({"/user",""})
 public class UserController {
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     private UserService userService;
+
+    // ─── 추가된 Mapper 주입 ───
+
+
+    @Autowired
+    private PaymentMapper paymentMapper;
+    @Autowired
+    private BoardPostMapper boardpostMapper;
+
 
     // 회원가입 폼 표시
     @GetMapping("/signup")
@@ -140,6 +152,38 @@ public class UserController {
             log.warn("아이디 찾기 실패: 이름={}, 전화번호={}", userName, phone); // 실패 시 입력 정보를 로그에 기록
         }
         return "redirect:/user/find-id"; // GET 요청으로 리다이렉트
+    }
+
+    // ─── 마이페이지 뷰 매핑 추가 ───
+    @GetMapping("/mypage")
+    public String mypage(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model
+    ) {
+        if (userDetails == null) {
+            return "redirect:/user/login";
+        }
+
+        UserDTO user = userService.getUserProfile(userDetails.getUserIdx());
+        if (user == null) {
+            return "redirect:/logout";
+        }
+
+        model.addAttribute("user", user);
+
+        // ─── 추가된 부분: 참여 이력, 결제 내역, 내가 쓴 글 조회 ───
+
+        List<PaymentDto> payments = paymentMapper.findPaymentsByUserIdx(user.getUserIdx());
+        if (payments == null) payments = new ArrayList<>();
+        List<PostDto> posts = boardpostMapper.findPostsByAuthorIdx(user.getUserIdx());
+        if (posts == null) posts = new ArrayList<>();
+
+        Map<String, Object> pageData = new HashMap<>();
+
+        pageData.put("payments", payments);
+        pageData.put("posts",    posts);
+        model.addAttribute("pageData", pageData);
+        return "mypage";    // resources/templates/mypage.html 렌더링
     }
 
     // 프로필 수정 폼

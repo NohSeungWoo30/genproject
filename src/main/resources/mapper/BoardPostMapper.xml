@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="generationgap.co.kr.mapper.post.BoardPostMapper">
+
+    <!-- 1) PostDto 필드와 컬럼 매핑 (PostMapper 방식 차용) -->
+    <resultMap id="boardPostDtoMap" type="generationgap.co.kr.dto.mypage.PostDto">
+        <result property="postIdx"      column="post_idx"/>
+        <result property="title"        column="title"/>
+        <result property="category"     column="category"/>
+        <result property="createdAt"    column="created_at"/>
+        <result property="views"        column="view_count"/>
+        <result property="likeCount"    column="like_count"/>
+        <result property="commentCount" column="comment_count"/>
+    </resultMap>
+
+    <!-- 2) 내가 쓴 게시글 조회 (author_idx 필터 + 댓글 수 집계) -->
+    <select id="findPostsByAuthorIdx"
+            parameterType="long"
+            resultMap="boardPostDtoMap">
+        SELECT
+        bp.post_idx,
+        bp.title,
+        bp.category,
+        bp.created_at,
+        bp.view_count,
+        bp.like_count,
+        COUNT(c.comment_idx) AS comment_count
+        FROM board_posts bp
+        LEFT JOIN post_comments c
+        ON bp.post_idx = c.post_idx
+        AND c.is_deleted = 'N'
+        WHERE bp.author_idx = #{authorIdx}
+        AND bp.is_deleted = 'N'
+        GROUP BY
+        bp.post_idx,
+        bp.title,
+        bp.category,
+        bp.created_at,
+        bp.view_count,
+        bp.like_count
+        ORDER BY bp.post_idx DESC
+    </select>
+
+</mapper>

@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -66,7 +69,14 @@ public class PostController {
                               @RequestParam(defaultValue = "new")String sort,
                               @RequestParam(required = false) String category,
                               @RequestParam(required = false) String keyword,
+                              @AuthenticationPrincipal CustomUserDetails userDetails,
                               Model model){
+
+        if (userDetails != null) {
+            model.addAttribute("user", userDetails);
+        }
+
+
         int pageSize =10;
         int offset = (page - 1) * pageSize;
 
@@ -81,7 +91,7 @@ public class PostController {
             sort = "new"; // 기본 정렬 방식 지정
         }
 
-        List<Post> posts = postService.getPostListPagedFiltered(offset, pageSize, category, sort);
+        List<Post> posts = postService.getPostListPagedFiltered(offset, pageSize, category, sort, keyword);
 
 
         // ✅ 댓글 수 계산 추가
@@ -102,7 +112,7 @@ public class PostController {
         }
 
 
-        int totalCount = postService.getTotalPostCountFiltered(category);
+        int totalCount = postService.getTotalPostCountFiltered(category,keyword);
         int totalPages = (int) Math.ceil((double) totalCount / pageSize);
 
         model.addAttribute("posts", posts);
@@ -110,6 +120,7 @@ public class PostController {
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("sort", sort);
         model.addAttribute("category", category);
+        model.addAttribute("keyword", keyword);
 
 
         return "board/post-list";
@@ -121,8 +132,13 @@ public class PostController {
                                  @RequestParam(required = false) String category,
                                  @RequestParam(defaultValue = "new") String sort,
                                  @RequestParam(required = false) String keyword,
+                                 @AuthenticationPrincipal CustomUserDetails userDetails,
                                  Model model,
                                  HttpServletRequest request){
+
+        if (userDetails != null) {
+            model.addAttribute("user", userDetails);
+        }
 
         postService.incrementViewCount(postIdx); // 조회수 증가시키기
         Post post = postService.getPostById(postIdx); // 게시글 가져오기
@@ -130,7 +146,30 @@ public class PostController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글이 존재하지 않거나 삭제되었습니다.");
         }
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        String createdAtStr = post.getCreatedAt() != null
+                ? post.getCreatedAt().toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime()
+                .format(formatter)
+                : null;
+
+        String updatedAtStr = post.getUpdateAt() != null
+                ? post.getUpdateAt().toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime()
+                .format(formatter)
+                : null;
+
+        boolean isEdited = post.getUpdateAt() != null &&
+                !post.getUpdateAt().equals(post.getCreatedAt());
+
         model.addAttribute("post", post);
+        model.addAttribute("createdAtStr", createdAtStr);
+        model.addAttribute("updatedAtStr", updatedAtStr);
+        model.addAttribute("isEdited", isEdited);
+
+
 
         // 첨부파일 목록 조회 추가
         List<Attachment> attachments = postService.getAttachmentsByPostId((long) postIdx);
@@ -174,6 +213,9 @@ public class PostController {
         model.addAttribute("_csrf", request.getAttribute(CsrfToken.class.getName()));
 
 
+
+
+
         //대댓글 갯수 파악하기 위해 추가
         Map<Long, Integer> replyCounts = new HashMap<>();
         for (Comment parent : parentComments) {
@@ -196,6 +238,7 @@ public class PostController {
         model.addAttribute("category", category);
         model.addAttribute("sort", sort);
         model.addAttribute("keyword", keyword);
+
 
         return "board/detail";
     }
@@ -260,7 +303,12 @@ public class PostController {
 
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable("id") int postIdx,
+                               @AuthenticationPrincipal CustomUserDetails userDetails,
                                Model model){
+
+        if (userDetails != null) {
+            model.addAttribute("user", userDetails);
+        }
         int userIdx = getLoginUserIdx();
         Post post = postService.getPostById(postIdx);
 
@@ -281,7 +329,10 @@ public class PostController {
     public String editPost(@PathVariable("id") Long postIdx,
                            @RequestParam String title,
                            @RequestParam String content,
-                           @RequestParam(required = false) List<MultipartFile> files ){
+                           @RequestParam String category,
+                           @RequestParam(required = false) List<MultipartFile> files
+                           ){
+
         int userIdx = getLoginUserIdx();
         Post post = postService.getPostById(postIdx.intValue());
 
@@ -292,6 +343,7 @@ public class PostController {
         if (!userIdxEquals(post.getAuthorIdx(), userIdx)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "작성자만 수정할 수 있습니다.");
         }
+        post.setCategory(category);
         post.setPostIdx(postIdx);
         post.setTitle(title);
         post.setContent(content);

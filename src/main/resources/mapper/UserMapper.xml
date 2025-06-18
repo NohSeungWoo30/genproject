@@ -24,6 +24,9 @@
         <result property="lastLoginAt" column="last_login_at" jdbcType="DATE"/>
         <result property="updateAt" column="update_at" jdbcType="DATE"/>
         <result property="ghost" column="ghost" jdbcType="DATE"/>
+        <!--신고위해 추가한 컬럼 추가 ksm-->
+        <result property="isSuspended" column="is_suspended"/>
+        <result property="suspendUntil" column="suspend_until"/>
     </resultMap>
 
     <insert id="insertUser" parameterType="generationgap.co.kr.domain.user.UserDTO">
@@ -153,4 +156,42 @@
         SET profile_name = #{profileName}
         WHERE user_idx = #{userIdx}
     </update>
+
+
+    <!-- 3일 정지 설정 ksm -->
+    <update id="suspendUser">
+        UPDATE users
+        SET is_suspended = 1,
+        suspend_until = SYSTIMESTAMP + NUMTODSINTERVAL(3, 'DAY')
+        WHERE user_idx = #{userId}
+    </update>
+
+    <!--시간 지나면 자동으로 정지 해제 ksm-->
+    <update id="releaseExpiredSuspensions">
+        <![CDATA[
+        UPDATE users
+            SET is_suspended = 0,
+            suspend_until = NULL
+        WHERE is_suspended = 1
+            AND suspend_until <= SYSTIMESTAMP
+        ]]>
+    </update>
+
+    <!--확인용 ksm-->
+    <select id="findSuspendCandidates" resultMap="userResultMap">
+        <![CDATA[
+        SELECT user_idx, user_id, is_suspended, suspend_until
+        FROM users
+        WHERE is_suspended = 1
+        AND suspend_until <= SYSTIMESTAMP
+        ]]>
+    </select>
+
+    <update id="updateUserProfileImage" parameterType="generationgap.co.kr.domain.user.UserDTO">
+        UPDATE users
+        SET profile_name = #{profileName},
+        update_at = SYSDATE
+        WHERE user_idx = #{userIdx}
+    </update>
+
 </mapper>

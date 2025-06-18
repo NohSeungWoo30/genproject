@@ -16,4 +16,12 @@ public interface CommentMapper {
     void insertCommentEdit(@Param("commentIdx") int commentIdx,
                            @Param("contentBefore") String contentBefore,
                            @Param("editedBy") int editedBy);
+
+    //게시글 작성자 조회용 메서드
+    int getPostWriterByPostIdx(@Param("postIdx") int postIdx);
+
+
+    int getPostIdxByCommentId(int commentId);
+
+
 }

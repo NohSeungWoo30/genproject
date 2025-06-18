@@ -50,6 +50,8 @@ public class SecurityConfig {
                                 new AntPathRequestMatcher("/error"),
                                 new AntPathRequestMatcher("/favicon.ico"),
                                 new AntPathRequestMatcher("/main"),
+                                new AntPathRequestMatcher("/**"),          // 모든 요청 일단 허용 (개발 초기 단계)
+
                                 // 사용자 관련 공개 경로
                                 new AntPathRequestMatcher("/user/profile"),
                                 new AntPathRequestMatcher("/user/signup"),

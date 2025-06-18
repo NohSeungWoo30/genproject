@@ -357,3 +357,108 @@
     .modal .btn-cancel:hover {
       background: var(--color-grey-80);
     }
+
+
+
+    /* 테이블 기본 스타일 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+
+    a {
+      text-decoration: none;
+      color: #333;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* 정렬 버튼 */
+    .sort-buttons a {
+      padding: 6px 12px;
+      font-family: var(--font-pretendard-medium);
+      font-size: 14px;
+      border: 1px solid var(--color-grey-80);
+      border-radius: 4px;
+      background: var(--color-white-solid);
+      cursor: pointer;
+      transition: background 0.2s;
+      display: inline-block;
+    }
+
+    .sort-buttons a:hover {
+      background: var(--color-grey-96);
+    }
+
+    .sort-buttons a.active {
+      background: var(--color-pigment-indigo);
+      color: var(--color-white-solid);
+      border-color: var(--color-pigment-indigo);
+    }
+
+    /* 제목, 작성자 열 폭 조정 */
+    .board-table th:nth-child(3),
+    .board-table td:nth-child(3) {
+      width: 40%;
+    }
+
+    .board-table th:nth-child(4),
+    .board-table td:nth-child(4) {
+      width: 15%;
+    }
+
+    /* 게시판 상단 구조 개선 */
+    .board-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .board-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .board-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .search-form input[type="text"] {
+      padding: 6px 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .search-form button {
+      padding: 6px 12px;
+      margin-left: 4px;
+      background-color: var(--color-pigment-indigo);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    select {
+      font-family: inherit;
+      font-size: inherit;
+      background-color: transparent;
+      border: none;
+      outline: none;
+      cursor: pointer;
+    }

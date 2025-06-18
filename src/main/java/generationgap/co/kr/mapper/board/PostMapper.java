@@ -9,8 +9,6 @@ import java.util.List;
 
 @Mapper
 public interface PostMapper {
-    List<Post> getPostsPaged(int offset, int limit);
-
     int getPostCount();
 
     void insertPost(Post post);
@@ -54,10 +52,13 @@ public interface PostMapper {
     List<Post> getPostsPagedFiltered(@Param("offset") int offset,
                                      @Param("limit") int limit,
                                      @Param("category") String category,
-                                     @Param("sort") String sort);
+                                     @Param("sort") String sort,
+                                     @Param("keyword")String keyword);
+
 
     // 필터링된 게시글 수 계산
-    int getPostCountFiltered(@Param("category") String category);
+    int getPostCountFiltered(@Param("category") String category,
+                             @Param("keyword")String keyword);
 
 
 }
