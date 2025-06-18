@@ -31,3 +31,4 @@ public class GroupDto {
 
     private List<MemberDto> participants;
 }
+

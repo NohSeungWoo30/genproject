@@ -673,3 +673,4 @@ public class UserService {
         return userMapper.getUserId_Nick(hostIndex);
     }
 }
+

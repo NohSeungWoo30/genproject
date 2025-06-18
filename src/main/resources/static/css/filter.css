@@ -101,3 +101,4 @@ body {
 .result-item-card { background-color: white; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 16px; transition: all .2s; cursor: pointer; }
 .result-item-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
 .card-img-placeholder { width: 56px; height: 56px; border-radius: 12px; background-color: #f0f0f0; flex-shrink: 0; }
+

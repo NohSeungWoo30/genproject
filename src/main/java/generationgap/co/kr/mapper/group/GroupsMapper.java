@@ -71,3 +71,4 @@ public interface GroupsMapper {
     GroupDto findCurrentGroup(@Param("userId") long userId);
 
 }
+

@@ -212,3 +212,4 @@ $(function () {
     $('#close-room-detail-btn').on('click', closeRoomDetail);
 });
 
+
