@@ -1,4 +1,4 @@
-
+// src/main/java/generationgap/co/kr/domain/payment/UserMemberships.java
 package generationgap.co.kr.domain.payment;
 
 import jakarta.persistence.*;

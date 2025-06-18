@@ -36,6 +36,11 @@
             <result property="userIdx" column="user_idx"/>
             <result property="userId" column="user_id"/>
             <result property="nickname" column="nickname"/>
+
+            <!--추가됨-->
+            <result property="profileName" column="profile_name"/>
+
+
         </association>
 
         <association property="categoryMain" javaType="generationgap.co.kr.domain.group.CategoryMain">
@@ -109,8 +114,6 @@
         u.nickname,
         cm.category_main_idx AS cm_category_main_idx,
         cm.category_main_name,
-        cs.category_sub_idx,
-        cs.category_sub_name,
         g.title,
         g.gender_limit,
         g.age_min,
@@ -135,7 +138,6 @@
         FROM groups g
         JOIN users u ON g.owner_idx = u.user_idx
         JOIN group_category_main cm ON g.category_main_idx = cm.category_main_idx
-        JOIN group_category_sub cs ON g.category_sub_idx = cs.category_sub_idx
     </select>
 
     <!-- 방 생성 -->
@@ -227,7 +229,6 @@
         g.group_date DESC
         FETCH FIRST 10 ROWS ONLY
     </select>
-
     <!-- 해당 그룹번호에 맞는 그룹방 정보 전달 -->
     <select id="getGroupById" resultMap="Groups">
     <!--모임이미지 프로필이미지 닉네임 카테고리 나이제한 인원수제한
@@ -263,4 +264,254 @@
     </select>
 
 
+
+    <select id="getMatchedGroups" resultMap="Groups">
+        SELECT g.*, u.nickname
+        FROM groups g
+        JOIN users u ON g.owner_idx = u.user_idx
+        WHERE g.category_main_idx IN
+        <foreach item="id" collection="categories" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND g.age_min &lt;= #{maxAge}
+        AND g.age_max &gt;= #{minAge}
+        AND (#{gender} = 'A' OR g.gender_limit = #{gender})
+        AND g.groups_status = 'RECRUITING'
+    </select>
+
+    <resultMap id="GroupMembersResultMap" type="generationgap.co.kr.domain.group.GroupMembers">
+        <id property="membersIdx" column="members_idx" />
+        <result property="groupIdx" column="group_idx" />
+        <result property="userIdx" column="user_idx" />
+        <result property="nickName" column="gm_nickname" />
+        <result property="isConfirmed" column="is_confirmed" />
+        <result property="joinedAt" column="joined_at" />
+
+        <association property="user" javaType="generationgap.co.kr.domain.user.UserDTO">
+            <id property="userIdx" column="user_idx"/>
+            <result     property="profileName" column="profile_name"/>
+            <result property="nickname" column="user_nickname"/>
+        </association>
+    </resultMap>
+
+
+    <select id="getGroupMembersByGroupId" resultMap="GroupMembersResultMap">
+        SELECT
+        gm.members_idx,
+        gm.group_idx,
+        gm.user_idx,
+        gm.nickname        AS gm_nickname,
+        gm.is_confirmed,
+        gm.joined_at,
+        u.profile_name,
+        u.nickname         AS user_nickname
+        FROM group_members gm
+        JOIN users u ON gm.user_idx = u.user_idx
+        WHERE gm.group_idx = #{groupId}
+    </select>
+
+    <insert id="insertGroupMember" parameterType="map">
+        INSERT INTO group_members (group_idx, user_idx, nickname)
+        VALUES (#{groupIdx}, #{userIdx}, #{nickname})
+    </insert>
+
+    <select id="isAlreadyMember" resultType="int">
+        SELECT COUNT(*) FROM group_members
+        WHERE group_idx = #{groupIdx} AND user_idx = #{userIdx}
+    </select>
+
+
+    <delete id="deleteGroupMember">
+        DELETE FROM group_members
+        WHERE group_idx = #{groupIdx}
+        AND user_idx = #{userIdx}
+    </delete>
+
+
+    <!-- 그룹 기본 정보 조회 -->
+    <select id="findGroupById" resultType="generationgap.co.kr.dto.group.GroupDto">
+        SELECT g.group_idx AS groupIdx,
+        g.title,
+        g.content,
+        g.group_date AS groupDate,
+        g.group_img_url AS groupImgUrl,
+        u.nickname AS hostNickname,
+        u.profile_name AS hostAvatar,
+        g.members_max AS membersMax,
+        (
+        SELECT COUNT(*) FROM group_members gm WHERE gm.group_idx = g.group_idx
+        ) AS party_member
+        FROM groups g
+        JOIN users u ON g.owner_idx = u.user_idx
+        WHERE g.group_idx = #{groupIdx}
+    </select>
+
+    <!-- 참여자 목록 조회 -->
+    <select id="findParticipantsByGroupIdx" resultType="generationgap.co.kr.dto.group.MemberDto">
+        SELECT u.nickname, u.profile_name AS avatar
+        FROM group_members gm
+        JOIN users u ON gm.user_idx = u.user_idx
+        WHERE gm.group_idx = #{groupIdx}
+    </select>
+
+
+    <select id="findActiveGroupForUser"
+            parameterType="long"
+            resultType="generationgap.co.kr.dto.group.GroupDto">
+        SELECT
+        g.group_idx       AS groupIdx,
+        g.title,
+        g.content,
+        g.group_date      AS groupDate,
+        g.group_img_url   AS groupImgUrl,
+
+        u.nickname        AS hostNickname,
+        u.profile_name    AS hostAvatar,
+
+        /* 주소 · 장소명 추가 */
+        g.place_address   AS placeAddress,
+        g.place_name      AS placeName,
+
+        /* 인원 */
+        g.members_min     AS membersMin,
+        g.members_max     AS membersMax,
+        ( SELECT COUNT(*) FROM group_members gm
+        WHERE gm.group_idx = g.group_idx
+        AND gm.is_confirmed = 'Y') AS partyMember
+
+        FROM groups g
+        JOIN group_members gm ON gm.group_idx = g.group_idx
+        JOIN users u ON g.owner_idx = u.user_idx
+        WHERE gm.user_idx = #{userId}
+        AND g.group_date >= SYSDATE
+        AND g.deleted_at IS NULL
+        ORDER BY g.group_date
+        FETCH FIRST 1 ROWS ONLY
+    </select>
+
+
+
+    <select id="findGroupDetail"
+            parameterType="int"
+            resultType="generationgap.co.kr.dto.group.GroupDto">
+
+        SELECT
+        g.group_idx            AS groupIdx,
+        g.title,
+        g.content,
+        g.group_date           AS groupDate,
+        g.group_img_url        AS groupImgUrl,
+
+        /* 모임장 */
+        u.nickname             AS hostNickname,
+        u.profile_name         AS hostAvatar,
+
+        /* 장소 */
+        g.place_address        AS placeAddress,
+        g.place_name           AS placeName,
+
+        /* 인원 */
+        g.members_min          AS membersMin,     -- ★ 추가
+        g.members_max          AS membersMax,
+        NVL(g.party_member,
+        (SELECT COUNT(*) FROM group_members gm
+        WHERE gm.group_idx = g.group_idx
+        AND gm.is_confirmed = 'Y'))       AS partyMember
+
+        FROM groups g
+        JOIN users u ON u.user_idx = g.owner_idx
+        WHERE g.group_idx = #{groupIdx}
+        AND g.deleted_at IS NULL
+    </select>
+
+    <update id="increasePartyMember" parameterType="long">
+        UPDATE groups
+        SET party_member = NVL(party_member,0) + 1
+        WHERE group_idx = #{groupIdx}
+    </update>
+
+
+
+
+
+
+    <!-- 인기 장르 모임 -->
+    <select id="getGroupByCategory" resultMap="Groups">
+        WITH CategoryGroupCounts AS (
+        SELECT
+        g.category_main_idx,
+        COUNT(g.group_idx) AS group_count_in_category
+        FROM
+        groups g
+        JOIN
+        group_category_main cm ON g.category_main_idx = cm.category_main_idx
+        GROUP BY
+        g.category_main_idx, cm.category_main_name
+        )
+        SELECT
+        g.group_idx,
+        g.owner_idx,
+        g.title,
+        cm.category_main_name,
+        g.group_date,
+        g.place_address,
+        g.group_img_url
+        FROM
+        groups g
+        LEFT JOIN
+        group_category_main cm ON g.category_main_idx = cm.category_main_idx
+        JOIN
+        CategoryGroupCounts cgc ON g.category_main_idx = cgc.category_main_idx
+        WHERE
+        g.groups_status = 'RECRUITING'
+        ORDER BY
+        cgc.group_count_in_category DESC,
+        g.group_date DESC
+        FETCH FIRST 10 ROWS ONLY
+    </select>
+
+    <!-- 최근 생성날 기준 모임 -->
+    <select id="getGroupByCreateDate" resultMap="Groups">
+        SELECT
+        g.group_idx,
+        g.owner_idx,
+        g.title,
+        cm.category_main_name,
+        g.group_date,
+        g.place_address,
+        g.group_img_url,
+        g.created_at
+        FROM
+        groups g
+        LEFT JOIN
+        group_category_main cm ON cm.category_main_idx = g.category_main_idx
+        WHERE
+        g.groups_status = 'RECRUITING'
+        ORDER BY
+        g.created_at DESC
+        FETCH FIRST 10 ROWS ONLY
+    </select>
+
+    <!-- 모임날짜 임박 기준 -->
+    <select id="getGroupByGroupDate" resultMap="Groups">
+    SELECT
+    g.group_idx,
+    g.owner_idx,
+    g.title,
+    cm.category_main_name,
+    g.group_date,
+    g.place_address,
+    g.group_img_url
+    FROM
+    groups g
+    LEFT JOIN
+    group_category_main cm ON g.category_main_idx = cm.category_main_idx
+    WHERE
+    g.groups_status = 'RECRUITING' AND
+    g.group_date >= SYSDATE
+
+    ORDER BY
+    g.group_date ASC
+    FETCH FIRST 10 ROWS ONLY;
+    </select>
 </mapper>

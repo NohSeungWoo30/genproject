@@ -1,15 +1,14 @@
 package generationgap.co.kr.service.user;
 
-import generationgap.co.kr.domain.oauth.OAuthAttributes;
 import generationgap.co.kr.domain.user.UserDTO;
 import generationgap.co.kr.mapper.user.UserMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.slf4j.Logger; // Logger 임포트
-import org.slf4j.LoggerFactory; // LoggerFactory 임포트
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -17,8 +16,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Optional;
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -670,5 +669,7 @@ public class UserService {
         userMapper.updateProfileName(userIdx, defaultDbPath);
         log.info("프로필 이미지 기본값으로 재설정 및 DB 업데이트 완료: userIdx={}", userIdx);
     }
-
+    public UserDTO getUserId_Nick(int hostIndex){
+        return userMapper.getUserId_Nick(hostIndex);
+    }
 }

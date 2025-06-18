@@ -1,4 +1,4 @@
-
+// src/main/java/generationgap/co/kr/repository/payment/UserMembershipsRepository.java
 package generationgap.co.kr.repository.payment;
 
 import generationgap.co.kr.domain.payment.UserMemberships;

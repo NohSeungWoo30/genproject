@@ -3,8 +3,9 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="generationgap.co.kr.mapper.user.UserMapper">
 
+<!-- 예시 유저 맵퍼 -->
+<mapper namespace="generationgap.co.kr.mapper.user.UserMapper">
     <resultMap id="userResultMap" type="generationgap.co.kr.domain.user.UserDTO">
         <id property="userIdx" column="user_idx"/>
         <result property="userId" column="user_id"/>
@@ -28,6 +29,8 @@
         <result property="isSuspended" column="is_suspended"/>
         <result property="suspendUntil" column="suspend_until"/>
     </resultMap>
+
+
 
     <insert id="insertUser" parameterType="generationgap.co.kr.domain.user.UserDTO">
         INSERT INTO users (
@@ -187,11 +190,31 @@
         ]]>
     </select>
 
+    <!--ksm 추가-->
+    <select id="findNicknameById" resultType="String">
+        SELECT nickname FROM users WHERE user_idx = #{userIdx}
+    </select>
+
+    <!-- 유저 번호 닉네임 프로필 이미지 호현상 -->
+    <select id="getUserId_Nick" resultMap="userResultMap">
+        SELECT
+        U.user_idx,
+        U.nickname,
+        U.profile_name
+        FROM
+        USERS U
+        JOIN
+        GROUPS G ON U.user_idx = G.owner_idx
+        WHERE
+        G.group_idx = #{groupIdx}
+    </select>
+
     <update id="updateUserProfileImage" parameterType="generationgap.co.kr.domain.user.UserDTO">
         UPDATE users
         SET profile_name = #{profileName},
         update_at = SYSDATE
         WHERE user_idx = #{userIdx}
     </update>
+
 
 </mapper>

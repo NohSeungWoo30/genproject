@@ -3,311 +3,336 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>상품 목록</title>
-  <link rel="stylesheet" th:href="@{/css/mainvars.css}"/>
-  <link rel="stylesheet" th:href="@{/css/mainstyle.css}"/>
-  <link rel="stylesheet" th:href="@{/css/product-card.css}"/>
-  <link rel="stylesheet" th:href="@{/css/payment-modal-style.css}"/>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>상품 목록</title>
+    <link rel="stylesheet" th:href="@{/css/mainvars.css}"/>
+    <link rel="stylesheet" th:href="@{/css/mainstyle.css}"/>
+    <link rel="stylesheet" th:href="@{/css/product-card.css}"/>
+    <link rel="stylesheet" th:href="@{/css/payment-modal-style.css}"/>
+    <!--토스트(우측하단 실시간 알림) 추가 모든 페이지에 꼭 추가하기-->
+    <link rel="stylesheet" href="/css/toast.css" />
+    <!--알림(종모양)기능 css추가 알림기능이 포함되는 모든 곳에 추가하기-->
+    <link rel="stylesheet" href="/css/notify.css" />
+    <!--로그인 세션관련 계속 추가하기-->
+    <th:block th:replace="fragments/user-session :: sessionScript"></th:block>
 
-  <script src="https://js.tosspayments.com/v1/payment-widget"></script>
+    <!--알림 아이콘관련 계속 추가하기-->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 
-  <style>
-    /* 3. 현재 활성화된 메뉴('상품 목록')가 더 잘 보이도록 스타일 수정 */
-    .bottom-nav .bottom-link.active {
-        font-weight: bold;
-        border-bottom: 2px solid #FFFFFF;
-        padding-bottom: 6px;
-    }
+    <!-- 1. 필수 라이브러리: SockJS, STOMP -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 
-    /* 4. 상품 목록을 스크롤바 없이 한 줄에 4개가 모두 보이도록 grid 방식으로 변경 */
-    .flex-row {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 30px;
-        overflow-x: hidden;
-    }
+    <!--토스 라이브러리-->
+    <script src="https://js.tosspayments.com/v1/payment-widget"></script>
 
-    /* 상위 컨테이너 스크롤 숨김 */
-    .container2,
-    ._1920-w-light {
-        overflow-x: hidden;
-    }
+    <style>
+        /* 3. 현재 활성화된 메뉴('상품 목록')가 더 잘 보이도록 스타일 수정 */
+        .bottom-nav .bottom-link.active {
+            font-weight: bold;
+            border-bottom: 2px solid #FFFFFF;
+            padding-bottom: 6px;
+        }
 
-    /* 카드 레이아웃 크기 및 스타일 */
-    .product-card {
-        display: flex;
-        flex-direction: column;
-        min-height: 450px;
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-    .product-thumb {
-        min-height: 180px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-top-left-radius: 8px;
-        border-top-right-radius: 8px;
-        background: #f5f6f8;
-    }
-    .product-info {
-        display: flex;
-        flex-direction: column;
-        flex-grow: 1;
-        padding: 25px;
-    }
-    .placeholder-title {
-        font-size: 2em;
-        font-weight: bold;
-    }
-    .placeholder-subtitle {
-        font-size: 1.5em;
-        margin-top: 10px;
-        color: #666;
-    }
-    .product-title {
-        font-size: 1.2em;
-        font-weight: bold;
-        margin-bottom: 4px;
-    }
-    .product-price {
-        font-size: 1.5em;
-        font-weight: bold;
-        margin-bottom: 12px;
-        color: #333;
-    }
-    .product-desc {
-        font-size: 1.1em;
-        color: #555;
-        margin-bottom: 20px;
-        flex-grow: 1;
-    }
-    .product-button {
-        font-size: 1.1em;
-        padding: 14px 16px;
-        border-radius: 6px;
-        cursor: pointer;
-        border: none;
-        transition: background 0.2s;
-    }
-    .btn-pay {
-        background: #0066ff;
-        color: #fff;
-        margin-bottom: 8px;
-    }
-    .product-button:hover {
-        opacity: 0.9;
-    }
-  </style>
+        /* 4. 상품 목록을 스크롤바 없이 한 줄에 4개가 모두 보이도록 grid 방식으로 변경 */
+        .flex-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            overflow-x: hidden;
+        }
+
+        /* 상위 컨테이너 스크롤 숨김 */
+        .container2,
+        ._1920-w-light {
+            overflow-x: hidden;
+        }
+
+        /* 카드 레이아웃 크기 및 스타일 */
+        .product-card {
+            display: flex;
+            flex-direction: column;
+            min-height: 450px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .product-thumb {
+            min-height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            background: #f5f6f8;
+        }
+        .product-info {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            padding: 25px;
+        }
+        .placeholder-title {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        .placeholder-subtitle {
+            font-size: 1.5em;
+            margin-top: 10px;
+            color: #666;
+        }
+        .product-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .product-price {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #333;
+        }
+        .product-desc {
+            font-size: 1.1em;
+            color: #555;
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+        .product-button {
+            font-size: 1.1em;
+            padding: 14px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s;
+        }
+        .btn-pay {
+            background: #0066ff;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        .product-button:hover {
+            opacity: 0.9;
+        }
+    </style>
 </head>
 <body>
 
 <div class="_1920-w-light">
 
-  <header class="container-nav">
-    <div class="nav-left">
-      <a th:href="@{/main}" class="logo-link">
-        <img th:src="@{/img/icons/MT5.png}" class="logo" alt="M 로고"/>
-      </a>
+    <!-- ─── 상단 네비게이션 ─── -->
+    <header class="container-nav">
+        <div class="nav-left">
+            <a th:href="@{/main}"><img class="logo" src="/img/icons/Group 17.png" alt="M 로고"></a>
+        </div>
+
+        <div class="nav-center">
+            <img src="/img/봄.png" class="nav-img" alt="그림10">
+            <img src="/img/여름.png" class="nav-img" alt="그림10">
+            <img src="/img/가을.png" class="nav-img" alt="그림10">
+            <img src="/img/겨울.png" class="nav-img" alt="그림10">
+        </div>
+
+        <!-- ** navRight: 로그인/알림/프로필 영역(동적) ** -->
+        <div class="nav-right" id="navRight">
+            <a href="/user/login" class="login-link">로그인ㆍ회원가입</a>
+        </div>
+    </header>
+
+    <section class="bottom-nav-wrapper">
+        <nav class="bottom-nav">
+            <a th:href="@{/group/create}" class="bottom-link">모임 생성</a>
+            <a th:href="@{/group/meetinglist}" class="bottom-link">모임 목록</a>
+            <a th:href="@{/product-list}" class="bottom-link">상품 목록</a>
+            <a th:href="@{/posts}" class="bottom-link">자유 게시판</a>
+        </nav>
+    </section>
+
+    <section class="container2">
+        <div class="flex-row">
+
+            <!-- 1회 이용권 -->
+            <div class="product-card free">
+                <div class="product-thumb">
+                    <div class="product-text-placeholder">
+                        <p class="placeholder-title">1회 이용권</p>
+                        <p class="placeholder-subtitle">1,500원</p>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <div class="product-title">1회 이용권</div>
+                    <div class="product-price">1,500원</div>
+                    <div class="product-desc">• 모임 방 만들기 또는 참여 1회</div>
+                    <button sec:authorize="isAuthenticated()"
+                            class="product-button btn-pay"
+                            data-product-name="1회 이용권"
+                            data-amount="1500">
+                        결제하기
+                    </button>
+                    <button sec:authorize="!isAuthenticated()"
+                            class="product-button"
+                            th:onclick="|location.href='@{/login}'|">
+                        로그인 후 결제
+                    </button>
+                </div>
+            </div>
+
+            <!-- 5회 이용권 -->
+            <div class="product-card standard">
+                <div class="product-thumb">
+                    <div class="product-text-placeholder">
+                        <p class="placeholder-title">5회 이용권</p>
+                        <p class="placeholder-subtitle">3,500원</p>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <div class="product-title">5회 이용권</div>
+                    <div class="product-price">3,500원</div>
+                    <div class="product-desc">• 모임 방 만들기 또는 참여 5회</div>
+                    <button sec:authorize="isAuthenticated()"
+                            class="product-button btn-pay"
+                            data-product-name="5회 이용권"
+                            data-amount="3500">
+                        결제하기
+                    </button>
+                    <button sec:authorize="!isAuthenticated()"
+                            class="product-button"
+                            th:onclick="|location.href='@{/login}'|">
+                        로그인 후 결제
+                    </button>
+                </div>
+            </div>
+
+            <!-- 1달 무제한 -->
+            <div class="product-card premium">
+                <div class="product-thumb">
+                    <div class="product-text-placeholder">
+                        <p class="placeholder-title">1달 무제한</p>
+                        <p class="placeholder-subtitle">10,000원</p>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <div class="product-title">1달 무제한</div>
+                    <div class="product-price">10,000원</div>
+                    <div class="product-desc">• 모임 방 만들기·참여 무제한 (1개월)</div>
+                    <button sec:authorize="isAuthenticated()"
+                            class="product-button btn-pay"
+                            data-product-name="1달 무제한"
+                            data-amount="10000">
+                        결제하기
+                    </button>
+                    <button sec:authorize="!isAuthenticated()"
+                            class="product-button"
+                            th:onclick="|location.href='@{/login}'|">
+                        로그인 후 결제
+                    </button>
+                </div>
+            </div>
+
+            <!-- 1년 무제한 -->
+            <div class="product-card vip">
+                <div class="product-thumb">
+                    <div class="product-text-placeholder">
+                        <p class="placeholder-title">1년 무제한</p>
+                        <p class="placeholder-subtitle">60,000원</p>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <div class="product-title">1년 무제한</div>
+                    <div class="product-price">60,000원</div>
+                    <div class="product-desc">• 모임 방 만들기·참여 무제한 (1년)</div>
+                    <button sec:authorize="isAuthenticated()"
+                            class="product-button btn-pay"
+                            data-product-name="1년 무제한"
+                            data-amount="60000">
+                        결제하기
+                    </button>
+                    <button sec:authorize="!isAuthenticated()"
+                            class="product-button"
+                            th:onclick="|location.href='@{/login}'|">
+                        로그인 후 결제
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 결제 모달 -->
+    <div id="payment-modal-backdrop" class="payment-modal-backdrop">
+        <div id="payment-widget-container" class="payment-widget-container">
+            <h2 class="modal-title">결제 정보 입력</h2>
+            <button id="modal-close-x-button" class="modal-close-x-button">&times;</button>
+            <div id="payment-methods-div"></div>
+            <div id="agreement-div" class="agreement-div"></div>
+            <div class="modal-button-group">
+                <button id="request-payment-button" class="card-button primary-button">결제하기</button>
+                <button id="close-widget-button" class="card-button secondary-button">닫기</button>
+            </div>
+        </div>
     </div>
-    <div class="nav-right">
-      <a sec:authorize="!isAuthenticated()" th:href="@{/login}" class="login-link">
-        로그인ㆍ회원가입
-      </a>
-      <span sec:authorize="isAuthenticated()" class="user-name"
-            th:text="${#authentication.name} + '님'"></span>
-      <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="logout-link">
-        로그아웃
-      </a>
-    </div>
-  </header>
-
-  <section class="bottom-nav-wrapper">
-    <nav class="bottom-nav">
-      <a th:href="@{/meetingcreate}" class="bottom-link">모임 생성</a>
-      <a th:href="@{/Meeting-list}" class="bottom-link">모임 목록</a>
-      <a th:href="@{/product-list}" class="bottom-link active">상품 목록</a>
-      <a th:href="@{/posts}" class="bottom-link">자유 게시판</a>
-    </nav>
-  </section>
-
-  <section class="container2">
-    <div class="flex-row">
-
-      <!-- 1회 이용권 -->
-      <div class="product-card free">
-        <div class="product-thumb">
-          <div class="product-text-placeholder">
-            <p class="placeholder-title">1회 이용권</p>
-            <p class="placeholder-subtitle">1,500원</p>
-          </div>
-        </div>
-        <div class="product-info">
-          <div class="product-title">1회 이용권</div>
-          <div class="product-price">1,500원</div>
-          <div class="product-desc">• 모임 방 만들기 또는 참여 1회</div>
-          <button sec:authorize="isAuthenticated()"
-                  class="product-button btn-pay"
-                  data-product-name="1회 이용권"
-                  data-amount="1500">
-            결제하기
-          </button>
-          <button sec:authorize="!isAuthenticated()"
-                  class="product-button"
-                  th:onclick="|location.href='@{/login}'|">
-            로그인 후 결제
-          </button>
-        </div>
-      </div>
-
-      <!-- 5회 이용권 -->
-      <div class="product-card standard">
-        <div class="product-thumb">
-          <div class="product-text-placeholder">
-            <p class="placeholder-title">5회 이용권</p>
-            <p class="placeholder-subtitle">3,500원</p>
-          </div>
-        </div>
-        <div class="product-info">
-          <div class="product-title">5회 이용권</div>
-          <div class="product-price">3,500원</div>
-          <div class="product-desc">• 모임 방 만들기 또는 참여 5회</div>
-          <button sec:authorize="isAuthenticated()"
-                  class="product-button btn-pay"
-                  data-product-name="5회 이용권"
-                  data-amount="3500">
-            결제하기
-          </button>
-          <button sec:authorize="!isAuthenticated()"
-                  class="product-button"
-                  th:onclick="|location.href='@{/login}'|">
-            로그인 후 결제
-          </button>
-        </div>
-      </div>
-
-      <!-- 1달 무제한 -->
-      <div class="product-card premium">
-        <div class="product-thumb">
-          <div class="product-text-placeholder">
-            <p class="placeholder-title">1달 무제한</p>
-            <p class="placeholder-subtitle">10,000원</p>
-          </div>
-        </div>
-        <div class="product-info">
-          <div class="product-title">1달 무제한</div>
-          <div class="product-price">10,000원</div>
-          <div class="product-desc">• 모임 방 만들기·참여 무제한 (1개월)</div>
-          <button sec:authorize="isAuthenticated()"
-                  class="product-button btn-pay"
-                  data-product-name="1달 무제한"
-                  data-amount="10000">
-            결제하기
-          </button>
-          <button sec:authorize="!isAuthenticated()"
-                  class="product-button"
-                  th:onclick="|location.href='@{/login}'|">
-            로그인 후 결제
-          </button>
-        </div>
-      </div>
-
-      <!-- 1년 무제한 -->
-      <div class="product-card vip">
-        <div class="product-thumb">
-          <div class="product-text-placeholder">
-            <p class="placeholder-title">1년 무제한</p>
-            <p class="placeholder-subtitle">60,000원</p>
-          </div>
-        </div>
-        <div class="product-info">
-          <div class="product-title">1년 무제한</div>
-          <div class="product-price">60,000원</div>
-          <div class="product-desc">• 모임 방 만들기·참여 무제한 (1년)</div>
-          <button sec:authorize="isAuthenticated()"
-                  class="product-button btn-pay"
-                  data-product-name="1년 무제한"
-                  data-amount="60000">
-            결제하기
-          </button>
-          <button sec:authorize="!isAuthenticated()"
-                  class="product-button"
-                  th:onclick="|location.href='@{/login}'|">
-            로그인 후 결제
-          </button>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- 결제 모달 -->
-  <div id="payment-modal-backdrop" class="payment-modal-backdrop">
-    <div id="payment-widget-container" class="payment-widget-container">
-      <h2 class="modal-title">결제 정보 입력</h2>
-      <button id="modal-close-x-button" class="modal-close-x-button">&times;</button>
-      <div id="payment-methods-div"></div>
-      <div id="agreement-div" class="agreement-div"></div>
-      <div class="modal-button-group">
-        <button id="request-payment-button" class="card-button primary-button">결제하기</button>
-        <button id="close-widget-button" class="card-button secondary-button">닫기</button>
-      </div>
-    </div>
-  </div>
 
 </div>
 
 <script th:inline="javascript">
-  document.addEventListener('DOMContentLoaded', function () {
-    if (typeof window.PaymentWidget === 'undefined') return;
-    const clientKey = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
-    const userIdx = /*[[${userIdx}]]*/ null;
-    const customerKey = userIdx ? String(userIdx) : 'guest_' + new Date().getTime();
-    const paymentWidget = PaymentWidget(clientKey, customerKey);
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof window.PaymentWidget === 'undefined') return;
+      const clientKey = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
+      const userIdx = /*[[${userIdx}]]*/ null;
+      const customerKey = userIdx ? String(userIdx) : 'guest_' + new Date().getTime();
+      const paymentWidget = PaymentWidget(clientKey, customerKey);
 
-    const modalBackdrop = document.getElementById('payment-modal-backdrop');
-    const methodsDiv = document.getElementById('payment-methods-div');
-    const agreementDiv = document.getElementById('agreement-div');
-    const reqBtn = document.getElementById('request-payment-button');
-    const closeBtn = document.getElementById('close-widget-button');
-    const xBtn = document.getElementById('modal-close-x-button');
-    let currentOrder='', currentAmt=0;
+      const modalBackdrop = document.getElementById('payment-modal-backdrop');
+      const methodsDiv = document.getElementById('payment-methods-div');
+      const agreementDiv = document.getElementById('agreement-div');
+      const reqBtn = document.getElementById('request-payment-button');
+      const closeBtn = document.getElementById('close-widget-button');
+      const xBtn = document.getElementById('modal-close-x-button');
+      let currentOrder='', currentAmt=0;
 
-    document.querySelectorAll('.btn-pay').forEach(btn => btn.addEventListener('click', () => {
-      currentOrder = btn.dataset.productName;
-      currentAmt = parseInt(btn.dataset.amount,10);
-      if (isNaN(currentAmt)) return alert('금액 오류');
-      paymentWidget.renderPaymentMethods('#payment-methods-div',{value:currentAmt});
-      paymentWidget.renderAgreement('#agreement-div');
-      modalBackdrop.style.display='flex';
-    }));
+      document.querySelectorAll('.btn-pay').forEach(btn => btn.addEventListener('click', () => {
+        currentOrder = btn.dataset.productName;
+        currentAmt = parseInt(btn.dataset.amount,10);
+        if (isNaN(currentAmt)) return alert('금액 오류');
+        paymentWidget.renderPaymentMethods('#payment-methods-div',{value:currentAmt});
+        paymentWidget.renderAgreement('#agreement-div');
+        modalBackdrop.style.display='flex';
+      }));
 
-    reqBtn.addEventListener('click', () => {
-      const orderId = 'order_'+Date.now();
-      const successUrl = new URL(window.location.origin+'/payment/result');
-      successUrl.searchParams.append('orderName', currentOrder);
-      const failUrl = new URL(window.location.origin+'/payment/fail');
-      failUrl.searchParams.append('orderName', currentOrder);
-      paymentWidget.requestPayment({
-        orderId, orderName: currentOrder,
-        customerName: /*[[${#authentication.name}]]*/'비회원',
-        customerEmail: /*[[${#authentication.principal?.email}]]*/'test@example.com',
-        successUrl: successUrl.toString(),
-        failUrl: failUrl.toString()
-      }).catch(err=>{if(err.code!=='USER_CANCEL')alert('오류:'+err.message);});
+      reqBtn.addEventListener('click', () => {
+        const orderId = 'order_'+Date.now();
+        const successUrl = new URL(window.location.origin+'/payment/result');
+        successUrl.searchParams.append('orderName', currentOrder);
+        const failUrl = new URL(window.location.origin+'/payment/fail');
+        failUrl.searchParams.append('orderName', currentOrder);
+        paymentWidget.requestPayment({
+          orderId, orderName: currentOrder,
+          customerName: /*[[${#authentication.name}]]*/'비회원',
+          customerEmail: '/*[[${#authentication.name != null ? #authentication.name : "test@example.com"}]]*/',
+
+          successUrl: successUrl.toString(),
+          failUrl: failUrl.toString()
+        }).catch(err=>{if(err.code!=='USER_CANCEL')alert('오류:'+err.message);});
+      });
+
+      function closeModal(){
+        modalBackdrop.style.display='none';
+        methodsDiv.innerHTML=''; agreementDiv.innerHTML='';
+      }
+      closeBtn.addEventListener('click',closeModal);
+      xBtn.addEventListener('click',closeModal);
+      modalBackdrop.addEventListener('click',e=>{if(e.target===modalBackdrop)closeModal();});
     });
-
-    function closeModal(){
-      modalBackdrop.style.display='none';
-      methodsDiv.innerHTML=''; agreementDiv.innerHTML='';
-    }
-    closeBtn.addEventListener('click',closeModal);
-    xBtn.addEventListener('click',closeModal);
-    modalBackdrop.addEventListener('click',e=>{if(e.target===modalBackdrop)closeModal();});
-  });
 </script>
+
+<!--꼭 notify.js나 notification.js 보다 위에-->
+<th:block th:replace="fragments/notification-templates :: notiTemplates"></th:block>
+
+<script src="/js/notify.js" defer></script>
+<script src="/js/notification.js" defer></script>
+
 </body>
 </html>

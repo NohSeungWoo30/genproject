@@ -4,6 +4,32 @@
     <meta charset="UTF-8">
     <title>로그인</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!--토스트(우측하단 실시간 알림) 추가 모든 페이지에 꼭 추가하기-->
+    <link rel="stylesheet" href="/css/toast.css" />
+    <!--알림(종모양)기능 css추가 알림기능이 포함되는 모든 곳에 추가하기-->
+    <link rel="stylesheet" href="/css/notify.css" />
+    <link rel="stylesheet" href="/css/mainstyle.css" />
+
+    <!--로그인 세션관련 계속 추가하기-->
+    <th:block th:replace="fragments/user-session :: sessionScript"></th:block>
+
+    <!-- 1. 필수 라이브러리: SockJS, STOMP -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+
+    <!-- ===== 외부 라이브러리 ===== -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- ionicons: main, simple 둘 다 필요 -->
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <!-- noUiSlider: simple.html용 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.js"></script>
+
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,61 +40,7 @@
             min-height: 100vh;
         }
 
-        /* --- Header Styles --- */
-        .container-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            background-color: #ffffff; /* 흰색 배경 */
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            position: sticky; /* 스크롤 시 상단 고정 */
-            top: 0;
-            z-index: 1000; /* 다른 요소 위에 표시 */
-        }
-        .nav-left .logo {
-            height: 40px; /* 로고 크기 조정 */
-        }
-        .nav-center {
-            display: flex;
-            gap: 15px; /* 이미지 간 간격 */
-        }
-        .nav-center .nav-img {
-            height: 30px; /* nav 이미지 크기 조정 */
-            width: auto;
-        }
-        .nav-right .login-link {
-            text-decoration: none;
-            color: #007bff;
-            font-weight: bold;
-        }
-        .nav-right .login-link:hover {
-            text-decoration: underline;
-        }
 
-        /* --- Bottom Nav Styles --- */
-        .bottom-nav-wrapper {
-            background-color: #e9ecef; /* 연한 회색 배경 */
-            padding: 10px 0;
-            border-bottom: 1px solid #dee2e6;
-            margin-bottom: 20px; /* 로그인 컨테이너와의 간격 */
-        }
-        .bottom-nav {
-            display: flex;
-            justify-content: center;
-            gap: 30px; /* 링크 간 간격 */
-        }
-        .bottom-nav .bottom-link {
-            text-decoration: none;
-            color: #495057;
-            font-weight: 500;
-            padding: 5px 10px;
-            border-radius: 4px;
-            transition: background-color 0.2s ease;
-        }
-        .bottom-nav .bottom-link:hover {
-            background-color: #dee2e6;
-        }
 
         /* --- Login Container Styles (기존 유지 + margin-top 조정) --- */
         .login-wrapper { /* 로그인 컨테이너를 감싸는 새로운 래퍼 */
@@ -188,43 +160,13 @@
             color: #adb5bd; /* 구분자 색상 변경 */
         }
 
-        /* --- Footer Styles --- */
-        .footer {
-            background-color: #343a40; /* 어두운 배경색 */
-            color: #f8f9fa; /* 밝은 텍스트 색상 */
-            padding: 20px 0;
-            text-align: center;
-            margin-top: auto; /* 하단에 고정 */
-            font-size: 0.9em;
-        }
-        .footer-links {
-            margin-bottom: 10px;
-        }
-        .footer-link {
-            color: #f8f9fa;
-            text-decoration: none;
-            margin: 0 10px;
-            transition: color 0.2s ease;
-        }
-        .footer-link:hover {
-            color: #adb5bd;
-            text-decoration: underline;
-        }
-        .footer-divider {
-            color: #6c757d;
-            margin: 0 5px;
-        }
-        .footer-copyright {
-            color: #adb5bd;
-            font-size: 0.85em;
-        }
     </style>
 </head>
 <body>
-
+<!-- ─── 상단 네비게이션 ─── -->
 <header class="container-nav">
     <div class="nav-left">
-        <a href="main.html"><img class="logo" src="/img/icons/Group 17.png" alt="M 로고"></a>
+        <a th:href="@{/main}"><img class="logo" src="/img/icons/Group 17.png" alt="M 로고"></a>
     </div>
 
     <div class="nav-center">
@@ -233,16 +175,20 @@
         <img src="/img/가을.png" class="nav-img" alt="그림10">
         <img src="/img/겨울.png" class="nav-img" alt="그림10">
     </div>
+
+    <!-- ** navRight: 로그인/알림/프로필 영역(동적) ** -->
     <div class="nav-right" id="navRight">
-        <a href="login.html" class="login-link">로그인ㆍ회원가입</a>
+        <a href="/user/login" class="login-link">로그인ㆍ회원가입</a>
     </div>
 </header>
+
+<!-- ─── 하단 고정 네비 (모바일 bottom‑nav 스타일) ─── -->
 <section class="bottom-nav-wrapper">
     <nav class="bottom-nav">
-        <a href="#" class="bottom-link">모임 생성</a>
-        <a href="meeting-list.html" class="bottom-link">모임 목록</a>
-        <a href="#" class="bottom-link">상품 목록</a>
-        <a href="board.html" class="bottom-link">자유 게시판</a>
+        <a th:href="@{/group/create}" class="bottom-link">모임 생성</a>
+        <a th:href="@{/group/meetinglist}" class="bottom-link">모임 목록</a>
+        <a th:href="@{/product-list}" class="bottom-link">상품 목록</a>
+        <a th:href="@{/posts}" class="bottom-link">자유 게시판</a>
     </nav>
 </section>
 
@@ -280,6 +226,7 @@
 </div>
 </div>
 
+<!-- ─── Footer ─── -->
 <footer class="footer">
     <div class="footer-links">
         <a href="about.html" class="footer-link">회사소개</a><span class="footer-divider"></span>
@@ -292,5 +239,13 @@
     <div class="footer-copyright">© 1999 – 2025 dcinside. All rights reserved.</div>
 </footer>
 
+
+
+<!--꼭 notify.js나 notification.js 보다 위에-->
+<th:block th:replace="fragments/notification-templates :: notiTemplates"></th:block>
+
+
+<script src="/js/notify.js" defer></script>
+<script src="/js/notification.js" defer></script>
 </body>
 </html>

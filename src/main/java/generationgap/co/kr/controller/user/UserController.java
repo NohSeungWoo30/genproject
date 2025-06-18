@@ -1,18 +1,12 @@
 package generationgap.co.kr.controller.user;
 
 import generationgap.co.kr.domain.user.UserDTO;
-import generationgap.co.kr.security.CustomUserDetails;
-import generationgap.co.kr.service.user.UserService;
-// ─── 추가된 Mapper import ───
-
-import generationgap.co.kr.mapper.payment.PaymentMapper;
-import generationgap.co.kr.mapper.post.BoardPostMapper;
-
-import java.util.*;
-
 import generationgap.co.kr.dto.mypage.PaymentDto;
 import generationgap.co.kr.dto.mypage.PostDto;
-
+import generationgap.co.kr.mapper.payment.PaymentMapper;
+import generationgap.co.kr.mapper.post.BoardPostMapper;
+import generationgap.co.kr.security.CustomUserDetails;
+import generationgap.co.kr.service.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
@@ -28,6 +22,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.*;
 
 @Controller
 @RequestMapping({"/user",""})
@@ -116,7 +112,13 @@ public class UserController {
 
     // 로그인 폼 표시
     @GetMapping("/login")
-    public String loginPage() {
+    public String loginPage(Model model,
+                            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails != null) {
+            model.addAttribute("user", userDetails);
+        }
+
+
         return "user/login";
     }
 
