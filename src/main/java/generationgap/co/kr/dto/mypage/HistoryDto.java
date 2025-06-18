@@ -7,7 +7,7 @@ import java.util.Date;
 @Getter
 @Setter
 public class HistoryDto {
-    private String title;
-    private Date date;
+    private String groupName;
+    private Date participatedAt;
     private Integer participants;
 }
