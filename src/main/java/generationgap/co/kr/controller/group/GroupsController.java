@@ -4,14 +4,15 @@ import generationgap.co.kr.domain.group.CategoryMain;
 import generationgap.co.kr.domain.group.CategorySub;
 import generationgap.co.kr.domain.group.GroupMembers;
 import generationgap.co.kr.domain.group.Groups;
-import generationgap.co.kr.dto.group.GroupDto;
 import generationgap.co.kr.domain.user.UserDTO;
+import generationgap.co.kr.dto.group.GroupDto;
+import generationgap.co.kr.mapper.group.GroupsMapper;
 import generationgap.co.kr.security.CustomUserDetails;
 import generationgap.co.kr.service.group.GroupService;
-import org.springframework.http.HttpStatus;
 import generationgap.co.kr.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -27,7 +28,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 @Controller
@@ -38,6 +38,8 @@ public class GroupsController {
     private final GroupService groupService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private GroupsMapper groupsMapper;
     // 이미지 저장 경로를 상수로 정의하여 관리 용이성 높임
     private static final String UPLOAD_DIR = "src/main/resources/static/upload/groupImg/";
 
@@ -279,10 +281,10 @@ public class GroupsController {
 
     @GetMapping("/api/current-group")
     @ResponseBody
-    public ResponseEntity<GroupDto> getCurrentGroup(@RequestParam Long userId) {
-        Optional<GroupDto> group = groupService.findActiveGroupForUser(userId);
-        return group.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.noContent().build());
+    public ResponseEntity<?> currentGroup(@RequestParam long userId) {
+        return groupService.findCurrentGroup(userId)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @GetMapping("/api/groups/{id}")
@@ -338,7 +340,5 @@ public class GroupsController {
     public ResponseEntity<GroupDto> getGroupDetailJson(@PathVariable int groupIdx){
         return ResponseEntity.ok(groupService.getGroupDetails(groupIdx));
     }
-
-
 
 }

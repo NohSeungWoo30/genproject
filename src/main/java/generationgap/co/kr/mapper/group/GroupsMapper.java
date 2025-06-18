@@ -68,4 +68,6 @@ public interface GroupsMapper {
 
     int increasePartyMember(@Param("groupIdx") Long groupIdx);
 
+    GroupDto findCurrentGroup(@Param("userId") long userId);
+
 }

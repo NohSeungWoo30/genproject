@@ -351,3 +351,30 @@
     }
 
     .details-list .label { display:inline-block; width:5.5rem; font-weight:600; }
+
+
+
+
+
+
+
+
+
+
+    /* ─── 확인 모달 ─────────────────────────── */
+    .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+           background:rgba(0,0,0,.45);z-index:1000; z-index: 10002;}
+    .modal.hidden{display:none;}
+    .modal-dialog {
+      position: relative;   /* relative여야 z-index 적용 */
+      z-index: 1;           /* modal보다 낮아도, 모달 안에서는 제일 위 */
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px 20px;
+      max-width: 340px;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0,0,0,.15);
+    }
+    .modal-btn{min-width:72px;margin:0 6px;padding:8px 16px;border:none;border-radius:6px;cursor:pointer;}
+    .modal-btn.confirm{background:#4062ec;color:#fff;}
+    .modal-btn.cancel{background:#9ca3af;color:#fff;}

@@ -36,6 +36,30 @@ const profileCloseBtn = document.getElementById('profileCloseBtn');
 const profilePanelAvatar = document.getElementById('profilePanelAvatar');
 const profilePanelNickname = document.getElementById('profilePanelNickname');
 
+
+
+function applyGroupButtonUI() {
+  console.log('[BTN] applyGroupButtonUI');   // ← ②
+
+  const btn  = document.getElementById('open-filter-btn');
+  if (!btn) return;
+
+  // ↙︎ 방어: room 또는 groupIdx 없으면 실행하지 말고 리턴
+  if (!window.room || !window.room.groupIdx) return;
+  const icon = btn.querySelector('ion-icon');
+  const text = btn.querySelector('span');
+
+  icon.setAttribute('name', 'chatbubble-ellipses-outline');
+  text.textContent = '그룹방';
+  btn.onclick = () => {
+    document.getElementById('group-detail-modal')?.classList.remove('hidden');
+    displayRoomDetails();
+    showInlineChat(false);
+    connectWebSocket();
+  };
+}
+
+
 // ✅ 초기화
 function displayRoomDetails() {
   if (!window.room) return;
@@ -96,6 +120,34 @@ if (!window.groupId && room && room.groupIdx) {
   console.log("✅ 동적으로 groupId 설정됨:", window.groupId);
 }
 
+// ① 모달 열기·닫기 함수
+function openJoinConfirmModal() {
+  const modal = document.getElementById('join-confirm-modal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+
+  const okBtn = document.getElementById('joinConfirmBtn');
+  const cancelBtn = document.getElementById('joinCancelBtn');
+
+  // 중복 바인딩 방지용 기존 리스너 제거
+  okBtn.replaceWith(okBtn.cloneNode(true));
+  cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+
+  // 새 요소 다시 가져오기
+  const ok = document.getElementById('joinConfirmBtn');
+  const cancel = document.getElementById('joinCancelBtn');
+
+  ok.onclick = () => {          // 확인 → 실제 joinChat 호출
+    modal.classList.add('hidden');
+    joinChat();
+  };
+  cancel.onclick = () => {      // 취소 → 그냥 닫기
+    modal.classList.add('hidden');
+  };
+}
+
+
+
 function updateMainButtons() {
   const cardActionsContainer = document.getElementById('cardActions');
   if (!cardActionsContainer) return;
@@ -113,7 +165,7 @@ function updateMainButtons() {
     const joinBtn = document.createElement('button');
     joinBtn.className = 'detail-btn';
     joinBtn.textContent = '방 참여';
-    joinBtn.onclick = joinChat;
+    joinBtn.onclick = openJoinConfirmModal;
     cardActionsContainer.appendChild(joinBtn);
   }
 }
@@ -155,8 +207,9 @@ async function joinChat() {
 
       if (!room.participants) room.participants = [];
       room.participants.push(currentLoggedInUser);
+
       localStorage.setItem('joinedGroupId', window.groupId);
-      updateFloatingButton();
+      await updateFloatingButton();
 
       connectWebSocket();
       showInlineChat(true);
@@ -167,62 +220,63 @@ async function joinChat() {
   }
 }
 
-async function updateFloatingButton() {
-  console.log("🔍 updateFloatingButton 실행됨");
+async function updateFloatingButton () {
+  console.log('🔍 updateFloatingButton 실행됨');
 
   const btn = document.getElementById('open-filter-btn');
-  if (!btn) {
-    console.warn("❗ 플로팅 버튼 요소를 찾을 수 없음");
-    return;
-  }
+  if (!btn) return;
 
-  const icon = btn.querySelector('ion-icon');
-  const text = btn.querySelector('span');
-
-  const userId = window.userId;
-  console.log("👤 현재 로그인된 userId:", userId);
-
-  if (!userId || userId < 0) {
-    console.warn("⚠ 유효하지 않은 userId:", userId);
-    return;
-  }
-
-  try {
-    const res = await fetch(`/group/api/current-group?userId=${userId}`);
-    console.log("📡 응답 상태 코드:", res.status);
-
-    if (res.status === 204) throw new Error("참여 중인 그룹 없음");
-
-    const groupData = await res.json();
-    console.log("✅ 그룹 데이터:", groupData);
-
-    if (!groupData || !groupData.groupIdx) {
-      console.warn("❌ groupData가 올바르지 않음", groupData);
-      throw new Error("groupData invalid");
-    }
-
-    window.room = groupData;
-    window.groupId = groupData.groupIdx;
-    window.isChatJoined = true;
-
-    icon.setAttribute('name', 'chatbubble-ellipses-outline');
-    text.textContent = '그룹방';
-    btn.onclick = () => {
-      document.getElementById('group-detail-modal')?.classList.remove('hidden');
-      displayRoomDetails();
-      showInlineChat(false);
-      connectWebSocket();
-    };
-
-  } catch (e) {
-    console.warn("❌ 그룹 확인 실패:", e.message || e);
-
-    localStorage.removeItem('joinedGroupId');
+  /* ① ───── setToMatching 정의(함수 선언) ───── */
+  const setToMatching = () => {
+    console.log('[BTN] setToMatching');          // ← 한 번만 찍히면 성공
+    const icon = btn.querySelector('ion-icon');
+    const text = btn.querySelector('span');
     icon.setAttribute('name', 'options-outline');
     text.textContent = '간편 매칭';
-    btn.onclick = () => {
+    btn.onclick = () =>
       document.getElementById('filter-modal')?.classList.remove('hidden');
-    };
+  };
+
+  /* ② ───── ‘기본값’ 으로 한 번만 호출 ───── */
+  setToMatching();      // ★ 여기 1회만!
+
+  /* ③ ───── 서버 & 로컬스토리지 확인 ───── */
+  try {
+    /* 1) 로컬스토리지 우선 */
+    const stored = localStorage.getItem('joinedGroupId');
+    if (stored) {
+      const r = await fetch(`/group/api/groups/${stored}`);
+      if (r.ok) {
+        window.room  = await r.json();
+        window.groupId = room.groupIdx;
+        isChatJoined = true;
+        applyGroupButtonUI();       // ← 그룹방 UI 로 덮어쓰기
+        return;                     // 더 이상 진행 X
+      }
+        localStorage.removeItem('joinedGroupId');
+
+    }
+
+    /* 2) 서버에 현재 참가 방 질의 */
+    const res = await fetch(`/group/api/current-group?userId=${window.userId}`);
+    console.log('📡 status', res.status);
+
+    if (res.status === 200) {
+      const group = await res.json();
+      if (group && group.groupIdx) {
+        window.room    = group;
+        window.groupId = group.groupIdx;
+        isChatJoined   = true;
+        localStorage.setItem('joinedGroupId', group.groupIdx);
+        applyGroupButtonUI();       // ← 그룹방 UI 로 교체
+
+      }
+    }
+
+    /* 3) 204이거나 데이터 없으면 그대로 ‘간편 매칭’ 유지 */
+  } catch (err) {
+    console.warn('❌ current-group 요청 실패', err);
+    // 네트워크 장애 시에도 기존 UI(간편 매칭) 유지
   }
 }
 
@@ -527,9 +581,10 @@ function formatTime(date) {
   return `${month}월 ${day}일 ${ampm} ${displayHour}시 ${minutes}분`;
 }
 // ✅ 이벤트 연결 ──────────────────────────
-sendBtn.addEventListener('click', sendMessage);
-chatInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
-
+if (sendBtn)   sendBtn.addEventListener('click', sendMessage);
+if (chatInput) chatInput.addEventListener('keypress', e => {
+  if (e.key === 'Enter') sendMessage();
+});
 // ▼ ▼ 1) roomBtn이 있을 때만 사이드패널 열기 ▼ ▼
 if (roomBtn) {
   roomBtn.addEventListener('click', () => {
@@ -549,20 +604,27 @@ if (roomBtn) {
     roomPanel.classList.add('active');
   });
 }
-roomCloseBtn.addEventListener('click', () => roomPanel.classList.remove('active'));
+if (roomCloseBtn) {
+  roomCloseBtn.addEventListener('click', () => roomPanel.classList.remove('active'));
+}
 chatMessages.addEventListener('click', (e) => {
   if (e.target.classList.contains('avatar')) {
     showProfile(e.target.dataset.nickname, e.target.dataset.avatar);
   }
 });
-participantsList.addEventListener('click', (e) => {
-  const participant = e.target.closest('.participant');
-  if (participant) {
-    showProfile(participant.dataset.nickname, participant.dataset.avatar);
-  }
-});
-profileCloseBtn.addEventListener('click', () => profilePanel.classList.remove('active'));
-
+if (participantsList) {
+  participantsList.addEventListener('click', (e) => {
+    const participant = e.target.closest('.participant');
+    if (participant) {
+      showProfile(participant.dataset.nickname, participant.dataset.avatar);
+    }
+  });
+}
+if (profileCloseBtn) {
+  profileCloseBtn.addEventListener('click', () => {
+    profilePanel.classList.remove('active');
+  });
+}
 function showProfile(nickname, avatarSrc) {
   profilePanelAvatar.src = avatarSrc;
   profilePanelNickname.textContent = nickname;
@@ -571,9 +633,8 @@ function showProfile(nickname, avatarSrc) {
 
 // ✅ 초기 실행
 window.addEventListener('DOMContentLoaded', async () => {
-  // ✅ 서버 기준으로 그룹 참여 여부를 확인하고 버튼 상태 반영
-  await updateFloatingButton();
 
+  /* ① 로컬스토리지 먼저 → UI 고정 */
   const storedGroupId = localStorage.getItem('joinedGroupId');
 
   if (storedGroupId) {
@@ -586,6 +647,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       window.groupId = joinedRoom.groupIdx;
       isChatJoined = true;
 
+      applyGroupButtonUI();
       displayRoomDetails();
       showInlineChat(false);
       connectWebSocket();
@@ -597,6 +659,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   } else {
     displayRoomDetails(); // 기본 카드 렌더링
   }
+
+
 
   // ✅ 안전한 이벤트 연결 (null 체크)
   if (sendBtn) {
@@ -653,6 +717,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   // ✅ 1분마다 갱신
   setInterval(displayRoomDetails, 60000);
+
+
+  /* ② 그다음 서버에 한 번 더 물어봐서 동기화 */
+    await updateFloatingButton();
 });
 
 
@@ -892,3 +960,11 @@ if (typeof displayRoomDetails === 'function') {
 } else {
   console.error("❌ displayRoomDetails 전역 등록 실패");
 }
+
+
+fetch('/group/api/current-group?userId=' + window.userId)
+  .then(res => {
+    console.log('status =', res.status);   // ← 200? 204? 500?
+    return res.text();                     // 바디도 확인
+  })
+  .then(console.log);

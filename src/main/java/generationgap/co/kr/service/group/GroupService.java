@@ -301,6 +301,11 @@ public class GroupService {
 
     public Optional<GroupDto> findActiveGroupForUser(Long userId) {
         return Optional.ofNullable(groupsMapper.findActiveGroupForUser(userId));
+
+    }
+
+    public Optional<GroupDto> findCurrentGroup(long userId) {
+        return Optional.ofNullable(groupsMapper.findCurrentGroup(userId));
     }
 
 

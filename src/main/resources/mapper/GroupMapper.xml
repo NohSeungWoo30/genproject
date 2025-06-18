@@ -181,7 +181,7 @@
         #{naverPlaceUrl},
         #{latitude},
         #{longitude},
-        #{groupImgUrl},
+        #{groupImgUrl , jdbcType=VARCHAR},
         SYSDATE
         )
     </insert>
@@ -198,7 +198,7 @@
         #{groupIdx},
         #{userIdx},
         #{nickName},
-        'N',
+        'Y',
         SYSDATE
         )
     </insert>
@@ -513,5 +513,40 @@
     ORDER BY
     g.group_date ASC
     FETCH FIRST 10 ROWS ONLY;
+    </select>
+
+
+
+
+    <select id="findCurrentGroup"
+            parameterType="long"
+            resultType="generationgap.co.kr.dto.group.GroupDto">
+
+        SELECT
+        g.group_idx       AS groupIdx,        <!-- 꼭 alias -->
+        g.title,
+        g.content,
+        g.group_img_url   AS groupImgUrl,
+        g.group_date      AS groupDate,
+
+        /* 호스트 정보 */
+        u.nickname        AS hostNickname,
+        u.profile_name    AS hostAvatar,
+
+        /* 장소·인원도 필요하면 모두 alias 지정 */
+        g.place_address   AS placeAddress,
+        g.place_name      AS placeName,
+        g.members_min     AS membersMin,
+        g.members_max     AS membersMax,
+        ( SELECT COUNT(*) FROM group_members gm
+        WHERE gm.group_idx = g.group_idx
+        )                  AS partyMember
+
+        FROM groups g
+        JOIN users u          ON u.user_idx  = g.owner_idx
+        JOIN group_members m  ON m.group_idx = g.group_idx
+        WHERE m.user_idx = #{userId}
+        AND g.deleted_at IS NULL
+        FETCH FIRST 1 ROWS ONLY
     </select>
 </mapper>

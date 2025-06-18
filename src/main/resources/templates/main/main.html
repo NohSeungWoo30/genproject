@@ -335,6 +335,20 @@
     </div>
 </div>
 
+<!-- 참가 확인 모달 -->
+<div id="join-confirm-modal" class="modal hidden">
+    <div class="modal-dialog">
+        <p class="message">
+            해당 모임에 참여하게 되면 모임 이용 횟수가 1회 차감됩니다.<br>
+            참여하시겠습니까?
+        </p>
+        <div class="actions">
+            <button id="joinConfirmBtn" class="modal-btn confirm">확인</button>
+            <button id="joinCancelBtn"  class="modal-btn cancel">취소</button>
+        </div>
+    </div>
+</div>
+
 <script th:inline="javascript">
     // 로그인한 사용자 정보가 필요할 때 대비
     window.currentLoggedInUser = {
