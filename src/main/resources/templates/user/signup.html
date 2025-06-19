@@ -331,6 +331,9 @@
                 const value = $input.val().trim();
                 if (value === '') {
                     $message.text('필수 항목입니다.').removeClass('success-message').addClass('error-message');
+                    // 직접 스타일 설정
+                    $message.css('color', 'red'); // 빨간색
+                    $message.css('font-weight', 'bold'); // 굵게
                     validationStatus[validationKey] = false;
                     updateSubmitButtonStatus();
                     return;
@@ -343,9 +346,15 @@
                     success: function(response) {
                         if (response.duplicated) {
                             $message.text('이미 사용 중입니다.').removeClass('success-message').addClass('error-message');
+                            // 직접 스타일 설정
+                            $message.css('color', 'red');
+                            $message.css('font-weight', 'bold');
                             validationStatus[validationKey] = false;
                         } else {
                             $message.text('사용 가능합니다.').removeClass('error-message').addClass('success-message');
+                            // 직접 스타일 설정
+                            $message.css('color', 'green'); // 초록색
+                            $message.css('font-weight', 'bold');
                             validationStatus[validationKey] = true;
                         }
                         updateSubmitButtonStatus();
@@ -353,6 +362,9 @@
                     error: function(xhr, status, error) {
                         console.error("AJAX Error: ", status, error);
                         $message.text('중복 확인 중 오류가 발생했습니다.').addClass('error-message');
+                        // 직접 스타일 설정
+                        $message.css('color', 'red');
+                        $message.css('font-weight', 'bold');
                         validationStatus[validationKey] = false;
                         updateSubmitButtonStatus();
                     }

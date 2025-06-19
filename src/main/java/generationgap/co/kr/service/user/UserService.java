@@ -1,7 +1,9 @@
 package generationgap.co.kr.service.user;
 
+import generationgap.co.kr.domain.payment.UserMemberships;
 import generationgap.co.kr.domain.user.UserDTO;
 import generationgap.co.kr.mapper.user.UserMapper;
+import generationgap.co.kr.repository.payment.UserMembershipsRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,9 @@ public class UserService {
 
     @Autowired // PasswordEncoder 주입
     private PasswordEncoder passwordEncoder;
+
+    @Autowired // 횟수를 위한
+    private UserMembershipsRepository userMembershipsRepository;
 
     @Value("${file.upload-dir.profile}") // application.properties에서 설정한 경로 주입
     private String uploadDir;
@@ -86,6 +91,12 @@ public class UserService {
 
         try {
             userMapper.insertUser(user);
+            // UserMemberships 정보 생성 및 저장
+            user = userMapper.findByUserId(user.getUserId());
+            UserMemberships userMembership = new UserMemberships();
+            userMembership.setUserIdx(user.getUserIdx()); // 저장된 유저의 user_idx를 가져와 설정
+            userMembership.setRemainingUses(1); // remainingUses를 1로 설정
+            userMembershipsRepository.save(userMembership); // UserMemberships 저장
             log.info("회원 등록 성공: userIdx={}, userId={}", user.getUserIdx(), user.getUserId());
         } catch (Exception e) {
             log.error("회원 등록 실패: userId={}, Error: {}", user.getUserId(), e.getMessage(), e);
@@ -151,6 +162,12 @@ public class UserService {
 
             try {
                 userMapper.insertOAuthUser(userDTO); // Mybatis insertOAuthUser 메서드 호출
+                // UserMemberships 정보 생성 및 저장
+                userDTO = userMapper.findByOAuth2UserId(userDTO.getUserId());
+                UserMemberships userMembership = new UserMemberships();
+                userMembership.setUserIdx(userDTO.getUserIdx()); // 저장된 유저의 user_idx를 가져와 설정
+                userMembership.setRemainingUses(1); // remainingUses를 1로 설정
+                userMembershipsRepository.save(userMembership); // UserMemberships 저장
                 log.info("새로운 {} 사용자 등록: userId={}, email={}", provider, userDTO.getUserId(), userDTO.getEmail());
                 return userDTO; // 삽입된 DTO 반환
             } catch (Exception e) {

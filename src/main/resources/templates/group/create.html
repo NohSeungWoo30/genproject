@@ -113,6 +113,35 @@
         <button id="createRoomButton" class="primary-button" type="submit">방 생성하기</button>
         <button id="cancelButton" class="secondary-button" type="button">취소하기</button>
       </div>
+      <script>
+        document.getElementById('createRoomButton').addEventListener('click', function(event) {
+          // 폼 제출(submit)을 기본적으로 막습니다.
+          // confirm 팝업에서 "취소"를 누르면 폼 제출이 진행되지 않습니다.
+          event.preventDefault();
+
+          // 사용자에게 확인 메시지를 띄웁니다.
+          const confirmation = confirm('정말 방을 생성하시겠습니까?\n방을 생성하면 이용권 1회 차감됩니다.');
+
+          // 사용자가 '확인'을 눌렀을 경우에만 폼을 제출합니다.
+          if (confirmation) {
+            // 버튼의 부모인 form 요소를 찾아서 제출합니다.
+            this.closest('form').submit();
+          }
+        });
+      </script>
+      <script th:inline="javascript">
+        /*<![CDATA[*/
+        // 컨트롤러에서 RedirectAttributes.addFlashAttribute("errorMessage", ...) 로 전달된 메시지를 가져옵니다.
+        var errorMessage = [[${errorMessage}]];
+
+        // errorMessage가 존재하고 비어있지 않다면 alert 팝업을 띄웁니다.
+        if (errorMessage != null && errorMessage !== '') {
+            alert(errorMessage);
+            // 만약 줄 바꿈을 원한다면:
+            // alert(errorMessage + '\n확인을 눌러주세요.');
+        }
+        /*]]>*/
+      </script>
     </section>
     </form>
     <section class="preview-section" id="previewSection">

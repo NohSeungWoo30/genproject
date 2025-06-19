@@ -193,7 +193,11 @@
 </section>
 
 <div class="login-wrapper"> <div class="login-container">
-    <h2>로그인</h2>
+
+    <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}">
+        <b>회원가입이 성공적으로 완료되었습니다.<br>
+        이용권 1회 충전되었습니다.</b>
+    </div>
 
     <div th:if="${param.error}" class="message error">
         아이디 또는 비밀번호가 올바르지 않습니다.

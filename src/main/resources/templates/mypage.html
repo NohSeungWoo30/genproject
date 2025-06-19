@@ -83,15 +83,16 @@
     <!-- 좌측: 프로필+메뉴 -->
     <aside class="mypage-sidebar">
         <div class="profile-card">
-            <img th:src="@{'/uploads/images/profile_upload/' + ${user.profileName}}" alt="프로필">
+            <img th:src="${user.profileName}" alt="프로필">
             <div class="user-id" th:text="${user.userId}">test12345</div>
             <div class="nickname" th:text="${user.nickname}">asd</div>
+            <div class="remainingUses" th:text="'남은 이용권 : ' + ${userMembership.remainingUses}">남은 이용권 : 0</div>
 
         </div>
         <nav class="menu-card">
             <ul class="menu-list">
                 <li><a th:href="@{/main}">메인페이지로 이동</a></li>
-                <li><a href="#" data-section="profileEdit">내 정보 수정</a></li>
+                <li><a th:href="@{/user/profile}">내 정보</a></li>
                 <li><a href="#" data-section="payments">결제 내역</a></li>
                 <li><a href="#" data-section="posts">내가 쓴 글</a></li>
                 <li><a th:href="@{/logout}">로그아웃</a></li>
@@ -101,19 +102,6 @@
 
     <!-- 오른쪽: 메뉴별 본문 -->
     <div class="mypage-content">
-        <!-- 내 정보 수정 -->
-        <div id="profileEdit" class="page-section">
-            <h2 style="font-size:1.3rem; margin-bottom:24px;">내 정보 수정</h2>
-            <form th:object="${user}" th:action="@{/user/profile-edit}" method="post" enctype="multipart/form-data">
-                <label for="profileImage" style="font-size:1.09em; margin-bottom:7px;">프로필 사진</label>
-                <input type="file" id="profileImage" th:field="*{profileName}" style="font-size:1.07em;">
-                <label for="nickname" style="font-size:1.09em; margin-bottom:7px;">닉네임</label>
-                <input type="text" id="nickname" th:field="*{nickname}" style="font-size:1.07em;">
-                <div style="margin-top:22px; text-align:right;">
-                    <button type="submit" style="padding:12px 28px; font-size:1.12em;">정보 저장</button>
-                </div>
-            </form>
-        </div>
         <!-- 결제 내역 -->
         <div id="payments" class="page-section">
             <h2 style="font-size:1.3rem; margin-bottom:24px;">결제 내역</h2>

@@ -1,10 +1,12 @@
 package generationgap.co.kr.controller.user;
 
+import generationgap.co.kr.domain.payment.UserMemberships;
 import generationgap.co.kr.domain.user.UserDTO;
 import generationgap.co.kr.dto.mypage.PaymentDto;
 import generationgap.co.kr.dto.mypage.PostDto;
 import generationgap.co.kr.mapper.payment.PaymentMapper;
 import generationgap.co.kr.mapper.post.BoardPostMapper;
+import generationgap.co.kr.repository.payment.UserMembershipsRepository;
 import generationgap.co.kr.security.CustomUserDetails;
 import generationgap.co.kr.service.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,8 +36,8 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    // ─── 추가된 Mapper 주입 ───
-
+    @Autowired // 횟수를 위한
+    private UserMembershipsRepository userMembershipsRepository;
 
     @Autowired
     private PaymentMapper paymentMapper;
@@ -171,8 +173,14 @@ public class UserController {
             return "redirect:/logout";
         }
 
-        model.addAttribute("user", user);
+        UserDTO currentUserDTO = userDetails.getUserDTO();
+        long userIdx = currentUserDTO.getUserIdx();
 
+        Optional<UserMemberships> userMembershipOptional = userMembershipsRepository.findByUserIdx(userIdx);
+        UserMemberships userMembership = userMembershipOptional.get();
+        model.addAttribute("userMembership", userMembership);
+        model.addAttribute("user", user);
+        log.info("마페 프로필 확인용");
         // ─── 추가된 부분: 참여 이력, 결제 내역, 내가 쓴 글 조회 ───
 
         List<PaymentDto> payments = paymentMapper.findPaymentsByUserIdx(user.getUserIdx());
