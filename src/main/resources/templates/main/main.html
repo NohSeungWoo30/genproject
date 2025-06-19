@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<!--<html lang="ko" xmlns:th="http://www.w3.org/1999/xhtml">-->
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!--토스트(우측하단 실시간 알림) 추가 모든 페이지에 꼭 추가하기-->
+    <link rel="stylesheet" href="/css/toast.css" />
+    <!--알림(종모양)기능 css추가 알림기능이 포함되는 모든 곳에 추가하기-->
+    <link rel="stylesheet" href="/css/notify.css" />
+    <link rel="stylesheet" href="/css/mainstyle.css" />
+    <link rel="stylesheet" href="/css/meetingdetail.css" />
+    <link rel="stylesheet" href="/css/filter.css" />
+
+    <!--로그인 세션관련 계속 추가하기-->
+    <th:block th:replace="fragments/user-session :: sessionScript"></th:block>
+
+    <!-- 1. 필수 라이브러리: SockJS, STOMP -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+
+    <title>메인 페이지</title>
+
+    <!-- ===== 외부 라이브러리 ===== -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- ionicons: main, simple 둘 다 필요 -->
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <!-- noUiSlider: simple.html용 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.js"></script>
+
+</head>
+
+<body>
+<div class="_1920-w-light">
+
+    <!-- ─── 상단 네비게이션 ─── -->
+    <header class="container-nav">
+        <div class="nav-left">
+            <a th:href="@{/main}"><img class="logo" src="/img/icons/Group 17.png" alt="M 로고"></a>
+        </div>
+
+        <div class="nav-center">
+            <img src="/img/봄.png" class="nav-img" alt="그림10">
+            <img src="/img/여름.png" class="nav-img" alt="그림10">
+            <img src="/img/가을.png" class="nav-img" alt="그림10">
+            <img src="/img/겨울.png" class="nav-img" alt="그림10">
+        </div>
+
+        <!-- ** navRight: 로그인/알림/프로필 영역(동적) ** -->
+        <div class="nav-right" id="navRight">
+            <a href="/user/login" class="login-link">로그인ㆍ회원가입</a>
+        </div>
+    </header>
+
+    <!-- ─── 하단 고정 네비 (모바일 bottom‑nav 스타일) ─── -->
+    <section class="bottom-nav-wrapper">
+        <nav class="bottom-nav">
+            <a th:href="@{/group/create}" class="bottom-link">모임 생성</a>
+            <a th:href="@{/group/meetinglist}" class="bottom-link">모임 목록</a>
+            <a th:href="@{/product-list}" class="bottom-link">상품 목록</a>
+            <a th:href="@{/posts}" class="bottom-link">자유 게시판</a>
+        </nav>
+    </section>
+
+    <!-- ─── 메인 배너 ─── -->
+    <section class="main-banner">
+        <div class="banner-slide-wrapper">
+            <img src="/img/고기.png" class="banner-image" />
+            <img src="/img/콘서트.png" class="banner-image" />
+            <img src="/img/러닝.png" class="banner-image" />
+        </div>
+        <button class="banner-prev">←</button>
+        <button class="banner-next">→</button>
+    </section>
+
+    <!-- ─── 카테고리 아이콘 링크 ─── -->
+    <nav class="category-links">
+        <a href="group/meetinglist?mainCategoryId=1" class="cat-link">
+            <img src="/img/icons/ball1.png" alt="운동/액티비티 아이콘" class="cat-icon" />
+            <span class="cat-text">운동/액티비티</span>
+        </a>
+
+        <a href="group/meetinglist?mainCategoryId=2" class="cat-link">
+            <img src="/img/icons/art1.png" alt="문화/예술 아이콘" class="cat-icon" />
+            <span class="cat-text">문화/예술</span>
+        </a>
+
+        <a href="group/meetinglist?mainCategoryId=3" class="cat-link">
+            <img src="/img/icons/book1.png" alt="지식/스터디 아이콘" class="cat-icon" />
+            <span class="cat-text">지식/스터디</span>
+        </a>
+
+        <a href="group/meetinglist?mainCategoryId=4" class="cat-link">
+            <img src="/img/icons/food1.png" alt="음식/카페 아이콘" class="cat-icon" />
+            <span class="cat-text">음식/카페</span>
+        </a>
+
+        <a href="group/meetinglist?mainCategoryId=5" class="cat-link">
+            <img src="/img/icons/travel1.png" alt="여행/탐험 아이콘" class="cat-icon" />
+            <span class="cat-text">여행/탐험</span>
+        </a>
+
+        <a href="group/meetinglist?mainCategoryId=6" class="cat-link">
+            <img src="/img/icons/game1.png" alt="게임/오락 아이콘" class="cat-icon" />
+            <span class="cat-text">게임/오락</span>
+        </a>
+
+        <a href="group/meetinglist?mainCategoryId=7" class="cat-link">
+            <img src="/img/icons/game1.png" alt="게임/오락 아이콘" class="cat-icon" />
+            <span class="cat-text">반려동물/자연</span>
+        </a>
+
+        <a href="group/meetinglist?mainCategoryId=8" class="cat-link">
+            <img src="/img/icons/build1.png" alt="만들기/공예 아이콘" class="cat-icon" />
+            <span class="cat-text">만들기/공예</span>
+        </a>
+
+        <a href="group/meetinglist?mainCategoryId=9" class="cat-link">
+            <img src="/img/icons/social3.png" alt="소셜/친목 아이콘" class="cat-icon" />
+            <span class="cat-text">소셜/친목</span>
+        </a>
+
+        <a href="group/meetinglist?mainCategoryId=10" class="cat-link">
+            <img src="/img/icons/guitar1.png" alt="기타 아이콘" class="cat-icon" />
+            <span class="cat-text">기타</span>
+        </a>
+    </nav>
+
+    <!-- ─── 최신 모임 (가로 스크롤 카드) ─── -->
+    <section class="container2">
+        <span>최근 생성 모임</span>
+        <div class="flex-row">
+            <!-- 1 최근 생성 모임 -->
+            <div th:each="gd_group : ${groupByCreateDate}" th:data-group-idx="${gd_group.groupIdx}" class="card">
+                <div class="card-thumb">
+                    <img th:if="${gd_group.groupImgUrl != null and !#strings.isEmpty(gd_group.groupImgUrl)}"
+                         th:src="@{${gd_group.groupImgUrl}}" />
+                    <img th:unless="${gd_group.groupImgUrl != null and !#strings.isEmpty(gd_group.groupImgUrl)}"
+                         th:src="@{/img/noImage.jpg}" />
+                </div>
+                <div class="card-info">
+                    <div class="card-category">
+                        <span th:text="${gd_group.district}"></span> · <span th:text="${gd_group.categoryMain.categoryMainName}"></span>
+                    </div>
+                    <div class="card-title" th:text="${gd_group.title}">
+                    </div>
+                    <div class="card-date" th:text="${#temporals.format(gd_group.groupDate, 'yyyy.MM.dd(E) HH:mm')}"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="container2">
+        <span>활발한 모임(지역)</span>
+        <div class="flex-row">
+            <!-- 2 카테고리가 많은 인기 모임순 -->
+            <div th:each="groupCategory : ${groupByCategory}" th:data-group-idx="${groupCategory.groupIdx}" class="card">
+                <div class="card-tzhumb">
+                    <img th:if="${groupCategory.groupImgUrl != null and !#strings.isEmpty(groupCategory.groupImgUrl)}"
+                         th:src="@{${groupCategory.groupImgUrl}}" />
+                    <img th:unless="${groupCategory.groupImgUrl != null and !#strings.isEmpty(groupCategory.groupImgUrl)}"
+                         th:src="@{/img/noImage.jpg}" />
+                </div>
+                <div class="card-info">
+                    <div class="card-category">
+                        <span th:text="${groupCategory.district}"></span> · <span th:text="${groupCategory.categoryMain.categoryMainName}"></span>
+                    </div>
+                    <div class="card-title" th:text="${groupCategory.title}">
+                    </div>
+                    <div class="card-date" th:text="${#temporals.format(groupCategory.groupDate, 'yyyy.MM.dd(E) HH:mm')}"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="container2">
+        <span>모임 날짜 임박</span>
+        <div class="flex-row">
+            <!-- 3 모임 날짜 임박순 -->
+            <div th:each="groupDate : ${groupByGroupDate}" th:data-group-idx="${groupDate.groupIdx}" class="card">
+                <div class="card-thumb">
+                    <img th:if="${groupDate.groupImgUrl != null and !#strings.isEmpty(groupDate.groupImgUrl)}"
+                         th:src="@{${groupDate.groupImgUrl}}" />
+                    <img th:unless="${groupDate.groupImgUrl != null and !#strings.isEmpty(groupDate.groupImgUrl)}"
+                         th:src="@{/img/noImage.jpg}" />
+                </div>
+                <div class="card-info">
+                    <div class="card-category">
+                        <span th:text="${groupDate.district}"></span> · <span th:text="${groupDate.categoryMain.categoryMainName}"></span>
+                    </div>
+                    <div class="card-title" th:text="${groupDate.title}">
+                    </div>
+                    <div class="card-date" th:text="${#temporals.format(groupDate.groupDate, 'yyyy.MM.dd(E) HH:mm')}"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ─── Footer ─── -->
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="about.html" class="footer-link">회사소개</a><span class="footer-divider"></span>
+            <a href="partnership.html" class="footer-link">제휴안내</a><span class="footer-divider"></span>
+            <a href="advertising.html" class="footer-link">광고안내</a><span class="footer-divider"></span>
+            <a href="terms.html" class="footer-link">이용약관</a><span class="footer-divider"></span>
+            <a href="privacy.html" class="footer-link">개인정보처리방침</a><span class="footer-divider"></span>
+            <a href="youth-policy.html" class="footer-link">청소년보호정책</a>
+        </div>
+        <div class="footer-copyright">© 1999 – 2025 dcinside. All rights reserved.</div>
+    </footer>
+</div>
+
+
+
+<!-- 1. 플로팅 간편매칭 버튼 -->
+<button id="open-filter-btn" class="fixed bottom-10 right-10 bg-white text-blue-700 border-2 border-blue-700 px-6 py-4 rounded-full font-bold shadow-xl hover:bg-blue-50 transition-all duration-300 hover:scale-105 flex items-center gap-2 z-40">
+    <ion-icon name="options-outline" class="text-xl"></ion-icon>
+    <span>간편 매칭</span>
+</button>
+<!-- 2. 필터 모달 -->
+<div id="filter-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+    <div class="filter-modal-card">
+        <!-- Screen 1: Filter Settings -->
+        <div id="filter-content" class="h-full flex flex-col">
+            <div class="px-8 pb-4 pt-6 flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-900">나에게 맞는 모임 찾기</h2>
+                <button id="close-filter-btn" class="w-12 h-12 rounded-full text-gray-500 hover:bg-gray-100 flex items-center justify-center">
+                    <ion-icon name="close-outline" class="text-2xl"></ion-icon>
+                </button>
+            </div>
+            <div class="filter-modal-content p-8 pt-4">
+                <div class="tags-container">
+                    <div class="tag-item" data-id="1"><span class="label">운동/액티비티</span></div>
+                    <div class="tag-item" data-id="2"><span class="label">문화/예술</span></div>
+                    <div class="tag-item" data-id="3"><span class="label">지식/스터디</span></div>
+                    <div class="tag-item" data-id="4"><span class="label">음식/카페</span></div>
+                    <div class="tag-item" data-id="5"><span class="label">여행/탐험</span></div>
+                    <div class="tag-item" data-id="6"><span class="label">게임/오락</span></div>
+                    <div class="tag-item" data-id="7"><span class="label">반려동물</span></div>
+                    <div class="tag-item" data-id="8"><span class="label">만들기/공예</span></div>
+                    <div class="tag-item" data-id="9"><span class="label">소셜/친목</span></div>
+                </div>
+                <hr class="filter-divider">
+                <div class="text-center">
+                    <div class="age-value"><span id="minAgeDisplay">20</span> – <span id="maxAgeDisplay">50</span>세</div>
+                    <div id="age-slider"></div>
+                </div>
+                <hr class="filter-divider">
+                <div class="segmented-control">
+                    <label class="seg-label"><input type="radio" name="gender" value="누구나" checked><span class="seg-btn">누구나</span></label>
+                    <label class="seg-label"><input type="radio" name="gender" value="남자만"><span class="seg-btn">남자만</span></label>
+                    <label class="seg-label"><input type="radio" name="gender" value="여자만"><span class="seg-btn">여자만</span></label>
+                </div>
+            </div>
+            <div class="p-6 bg-gray-50 border-t">
+                <button id="matchButton" class="btn-match" disabled>필터 적용하기</button>
+            </div>
+        </div>
+
+        <!-- Screen 2: Filter Results (hidden by default) -->
+        <div id="results-content" class="h-full flex flex-col hidden">
+            <div class="px-8 pb-4 pt-6 flex justify-between items-center">
+                <button id="back-to-filters-btn" class="w-12 h-12 rounded-full text-gray-500 hover:bg-gray-100 flex items-center justify-center">
+                    <ion-icon name="arrow-back-outline" class="text-2xl"></ion-icon>
+                </button>
+                <h2 class="text-2xl font-bold text-gray-900">매칭된 모임</h2>
+                <div class="w-12 h-12"></div>
+            </div>
+            <div class="px-8 pb-2">
+                <div id="applied-filters-display" class="flex flex-wrap items-center gap-2"></div>
+            </div>
+            <div class="filter-modal-content p-8 pt-4">
+                <div id="results-list"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 3. 상세 모달 -->
+<!-- ✅ 그룹 상세 모달 (meetingdetail.js가 조작하는 대상) -->
+<div id="group-detail-modal" class="fixed hidden inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-3xl relative overflow-y-auto max-h-[90vh]">
+        <button onclick="closeGroupDetailModal()" class="absolute top-2 right-2 text-2xl text-gray-500 hover:text-black">✕</button>
+
+        <section class="room-detail-section">
+            <!-- 모임 정보 카드 -->
+            <div id="roomDetailCard"></div>
+
+            <!-- ✅ 인라인 채팅 영역 교체 -->
+            <div id="inline-chat-wrapper" style="display: none;">
+                <div class="chat-container">
+                    <header class="chat-header">
+                        <div class="title">
+                            <div class="chat-title" id="chatRoomTitleText"></div>
+                        </div>
+                    </header>
+                    <main class="chat-messages" id="chatMessages"></main>
+                    <footer class="chat-input-wrapper">
+                        <div class="chat-input">
+                            <button>➕</button>
+                            <input type="text" id="chatInput" placeholder="메시지 보내기" />
+                            <button id="sendBtn">➤</button>
+                        </div>
+                    </footer>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- 신고 모달 (기존 방식 유지) -->
+        <div id="report-modal" style="display:none; position:fixed; top:20%; left:40%; background:white; padding:20px; border:1px solid #ccc; z-index:9999;">
+            <h3>🚨 메시지 신고</h3>
+            <label>신고 사유
+                <select id="report-reason">
+                    <option value="1">욕설/비방/혐오 표현</option>
+                    <option value="2">음란/선정적인 콘텐츠</option>
+                    <option value="3">도배/스팸/광고</option>
+                    <option value="4">개인 정보 노출</option>
+                    <option value="5">사칭/허위 정보</option>
+                    <option value="6">부적절한 내용</option>
+                    <option value="7">모임 운영 방해</option>
+                    <option value="8">기타</option>
+                </select>
+            </label><br><br>
+            <textarea id="report-comment" placeholder="신고 내용을 입력하세요" rows="4" cols="40"></textarea><br><br>
+            <button onclick="submitReport()">🚨 신고 제출</button>
+            <button onclick="closeReportModal()">❌ 닫기</button>
+        </div>
+    </div>
+</div>
+
+<!-- 참가 확인 모달 -->
+<div id="join-confirm-modal" class="modal hidden">
+    <div class="modal-dialog">
+        <p class="message">
+            해당 모임에 참여하게 되면 모임 이용 횟수가 1회 차감됩니다.<br>
+            참여하시겠습니까?
+        </p>
+        <div class="actions">
+            <button id="joinConfirmBtn" class="modal-btn confirm">확인</button>
+            <button id="joinCancelBtn"  class="modal-btn cancel">취소</button>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    // 로그인한 사용자 정보가 필요할 때 대비
+    window.currentLoggedInUser = {
+      userIdx: [[${currentUser != null ? currentUser.userIdx : -1}]],
+      nickname: [[${currentUser != null ? currentUser.nickname : "'비회원'"}]]
+    };
+</script>
+
+<!--꼭 notify.js나 notification.js 보다 위에-->
+<th:block th:replace="fragments/notification-templates :: notiTemplates"></th:block>
+
+
+<script src="/js/notify.js" defer></script>
+<script src="/js/notification.js" defer></script>
+<script src="/js/meetingdetail.js" defer></script>
+<script src="/js/filter.js" defer></script>
+<script src="/js/mainHomePage.js"></script>
+<script>
+    $(document).ready(function () {
+    const $wrapper = $('.banner-slide-wrapper');
+    const slideCount = $wrapper.children().length;
+    let current = 0;
+
+    function goToSlide(index) {
+      const percent = (100 / slideCount) * index;
+      $wrapper.css('transform', `translateX(-${percent}%)`);
+    }
+
+    $('.banner-next').click(function () {
+      current = (current + 1) % slideCount;
+      goToSlide(current);
+    });
+
+    $('.banner-prev').click(function () {
+      current = (current - 1 + slideCount) % slideCount;
+      goToSlide(current);
+    });
+
+    goToSlide(0); // 초기 위치
+  });
+
+</script>
+
+</body>
+</html>

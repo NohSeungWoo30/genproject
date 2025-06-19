@@ -1,15 +1,19 @@
 package generationgap.co.kr.domain.user;
 
 import lombok.*;
-
-import java.time.LocalDate; // 추가
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserDTO {
+public class UserDTO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private Long userIdx;
     private String userId;
     private String provider;
@@ -18,16 +22,30 @@ public class UserDTO {
     private LocalDate birthDate;
     private Character gender;
     private String userCi;
-    // --- 이 부분 추가 ---
-    private String password; // 사용자가 폼에 입력하는 원본 비밀번호를 받을 필드
-    private String passwordHash; // 데이터베이스에 저장될 해싱된 비밀번호
+    private String password;
+    private String passwordHash;
     private String email;
     private String phone;
-    private String profileName;
+    private String profileName;       // DB에 저장된 파일명 또는 URL 경로
     private String introduction;
     private LocalDate signupDate;
     private String userStatus;
     private LocalDate lastLoginAt;
     private LocalDate updateAt;
     private LocalDate ghost;
+    private int isSuspended;
+    private LocalDateTime suspendUntil;
+
+    /** 추천 수 */
+    private int trust;
+    /** 불참(노쇼) 횟수 */
+    private int noShowCount;
+
+    /**
+     * Thymeleaf에서 ${user.profileImageUrl} 로 프로필 이미지를 읽어올 수 있도록,
+     * 기존 profileName 필드를 반환하는 alias getter
+     */
+    public String getProfileImageUrl() {
+        return this.profileName;
+    }
 }

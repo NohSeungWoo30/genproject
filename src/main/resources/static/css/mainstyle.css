@@ -1,0 +1,894 @@
+/* ─── 0. 공통 리셋 ─── */
+
+* {
+
+margin: 0;
+
+padding: 0;
+
+box-sizing: border-box;
+
+}
+
+
+
+/* ─── 1. 최상위(_1920-w-light) ─── */
+
+._1920-w-light {
+
+background: #ffffff; /* 흰색 배경 */
+
+position: relative;
+
+min-height: 3100px;
+
+width: 100%;
+
+overflow-x: hidden;
+
+}
+
+
+
+/* ─── 2. 상단 내비게이션 바 ─── */
+
+.container-nav {
+
+width: 100%;
+
+height: 106px; /* 원래 디자인 높이 */
+
+background: #ffffff;
+
+display: flex;
+
+align-items: center;
+
+justify-content: space-between;
+
+padding: 0 40px;
+
+border-bottom: 1px solid #dbdbdb;
+
+}
+
+
+
+/* 좌측 로고 */
+
+.nav-left .logo {
+
+width: 300px;
+
+height: 60px;
+
+object-fit: contain;
+
+}
+
+
+
+/* 우측 로그인·회원가입 */
+
+.nav-right {
+
+display: flex;
+
+align-items: center;
+
+}
+
+
+
+/* 로그인·회원가입 링크 스타일 */
+
+.login-link {
+
+display: inline-block;
+
+width: 112px;
+
+height: 21px;
+
+color: #383535;
+
+font-size: 15px;
+
+font-family: Pretendard, sans-serif;
+
+font-weight: 400;
+
+line-height: 24px;
+
+text-decoration: none;
+
+word-wrap: break-word;
+
+}
+
+
+
+/* 로그인·회원가입 호버 효과 (원한다면 추가) */
+
+.login-link:hover {
+
+color: #000000;
+
+}
+
+
+
+/* ─── 3. 메인 배너 ─── */
+
+.main-banner {
+  width: 100%;
+  max-width: 1200px;
+  height: 300px;
+  margin: 20px auto 0 auto;
+  overflow: hidden;
+  position: relative;
+}
+
+.banner-image {
+  width: calc(100% / 3); /* 슬라이드 개수에 맞게 조정 */
+  height: 100%;
+  object-fit: cover;
+  flex-shrink: 0;
+  display: block;
+}
+
+
+
+
+
+/* ─── 4. 모임 카드 래퍼 (세로 간격) ─── */
+
+.container2 {
+
+width: 100%;
+
+max-width: 1200px;
+
+margin: 30px auto 0 auto;
+
+padding: 0 10px;
+
+}
+
+
+
+/* ─── 5. Flexbox: 한 줄(가로 스크롤) ─── */
+
+.flex-row {
+
+display: flex;
+
+gap: 17px; /* 카드 사이 간격 */
+
+overflow-x: auto; /* 가로 스크롤바 생성 */
+
+padding-bottom: 10px;/* 스크롤바가 카드와 겹치지 않도록 여유 공간 */
+
+scroll-behavior: smooth;
+
+}
+
+.flex-row::-webkit-scrollbar {
+
+height: 6px;
+
+}
+
+.flex-row::-webkit-scrollbar-thumb {
+
+background: #999696;
+
+border-radius: 3px;
+
+}
+
+.flex-row::-webkit-scrollbar-track {
+
+background: transparent;
+
+}
+
+
+
+/* ─── 6. 카드 공통 스타일 ─── */
+
+.card {
+
+flex: 0 0 auto; /* 폭 고정, 다음 줄로 넘어가지 않음 */
+
+width: 282px; /* 디자인 가이드와 동일 */
+
+background: #f4f4f4;
+
+border-radius: 10px;
+
+overflow: hidden;
+
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+cursor: pointer;
+
+}
+
+
+
+/* 6-1. 카드 내부 썸네일(이미지) */
+
+.card-thumb img {
+
+display: block;
+
+width: 100%;
+
+height: 211px; /* 디자인 비율과 동일 */
+
+object-fit: cover;
+
+}
+
+
+
+/* 6-2. 카드 정보 영역 */
+
+.card-info {
+
+padding: 10px;
+
+}
+
+
+
+/* 6-2-1. 카테고리(작은 글씨) */
+
+.card-category {
+
+font-family: Pretendard, sans-serif;
+
+font-size: 14.875px;
+
+color: #383535;
+
+margin-bottom: 6px;
+
+}
+
+
+
+/* 6-2-2. 카드 제목(중간 크기) */
+
+.card-title {
+
+font-family: Pretendard, sans-serif;
+
+font-size: 16.875px;
+
+color: #383535;
+
+line-height: 1.4;
+
+margin-bottom: 8px;
+
+word-break: keep-all;
+
+}
+
+
+
+/* 6-2-3. 카드 날짜(연한 회색) */
+
+.card-date {
+
+font-family: Pretendard, sans-serif;
+
+font-size: 15px;
+
+color: #999696;
+
+}
+
+
+
+/* ─── 7. 중간 카테고리 링크 (아이콘 버전) ─── */
+
+.category-links {
+
+width: 100%;
+
+max-width: 1200px;
+
+margin: 40px auto 0 auto;
+
+padding: 0 10px;
+
+display: flex;
+
+gap: 40px; /* 아이템 간 간격 */
+
+flex-wrap: wrap; /* 화면이 좁아지면 줄바꿈 */
+
+justify-content: center; /* 가로 가운데 정렬 */
+
+}
+
+
+
+.category-links .cat-link {
+
+display: flex;
+
+flex-direction: column; /* 아이콘 위, 텍스트 아래 정렬 */
+
+align-items: center; /* 가로 가운데 정렬 */
+
+text-decoration: none; /* 밑줄 제거 */
+
+color: #383535; /* 텍스트 색상 */
+
+font-family: Pretendard, sans-serif;
+
+font-size: 13px;
+
+}
+
+
+
+/* ─── 카테고리 아이콘 기본/호버 스타일 (방안 1) ─── */
+
+.category-links .cat-icon {
+
+width: 65px; /* 기존 80px → 70px로 축소 */
+
+height: 65px; /* 기존 80px → 70px로 축소 */
+
+object-fit: contain;
+
+margin-bottom: 12px;
+
+transition: transform 0.2s ease-out; /* 0.15s → 0.2s로 부드럽게 */
+
+}
+
+
+
+/* 마우스가 아이콘 위에 있을 때만 확대 */
+
+.category-links .cat-icon:hover {
+
+transform: scale(1.2); /* 기존 1.1 → 1.2로 강조 비율 증가 */
+
+}
+
+
+
+.category-links .cat-text {
+
+text-align: center;
+
+line-height: 1.2;
+
+}
+
+
+
+/* ─── 8. 중간 배너 ─── */
+
+.mid-banner {
+
+width: 100%;
+
+max-width: 1200px;
+
+margin: 40px auto 0 auto;
+
+padding: 0 10px;
+
+}
+
+.mid-banner-img {
+
+display: block;
+
+width: 100%;
+
+height: 180px;
+
+object-fit: cover;
+
+border-radius: 10px;
+
+}
+
+
+
+/* ─── 9. 하단 네비게이션 바 ─── */
+
+.bottom-nav-wrapper {
+
+width: 100%;
+
+background: #7BC8FF;
+
+border-top: 1px solid #7BC8FF;
+
+
+}
+
+.bottom-nav {
+
+width: 100%;
+
+max-width: 1920px;
+
+margin: 0 auto;
+
+display: flex;
+
+gap: 40px;
+
+align-items: center;
+
+justify-content: center;
+
+padding: 16px 0;
+
+}
+
+.bottom-nav .bottom-link {
+
+font-family: Pretendard;
+
+font-size: 24px;
+
+font-weight: 700;
+
+color: #ffffff;
+
+text-decoration: none;
+
+text-shadow:
+
+0 0 2px rgba(0, 0, 0, 0.3),
+
+0 1px 2px rgba(0, 0, 0, 0.4);
+
+}
+
+
+
+.bottom-nav .bottom-link:hover {
+
+color: #003465; /* 짙은 파랑 or 선택 강조 색상 */
+
+transform: translateY(-2px); /* 살짝 띄우기 */
+
+text-shadow: none; /* hover 시 그림자 제거로 선명하게 */
+
+}
+
+
+
+/* 선택된 메뉴 예시 (active 상태라면) */
+
+.bottom-nav .bottom-link.active {
+
+color: #003465; /* 선택 강조 색 */
+
+border-bottom: 3px solid #003465; /* 강조선으로 구분 */
+
+text-shadow: none;
+
+}
+
+
+
+
+
+/* ─── 10. Footer ─── */
+
+.footer {
+
+width: 100%;
+
+background: #ffffff;
+
+padding: 40px 20px;
+
+text-align: center;
+
+font-family: Pretendard, sans-serif;
+
+font-size: 12px;
+
+color: #000000;
+
+border-top: 1px solid #dbdbdb;
+
+margin-top: 60px;
+
+}
+
+.footer-links {
+
+display: inline-flex;
+
+align-items: center;
+
+gap: 8px;
+
+flex-wrap: wrap;
+
+justify-content: center;
+
+}
+
+.footer-link {
+
+color: #000000;
+
+text-decoration: none;
+
+}
+
+.footer-divider {
+
+display: inline-block;
+
+width: 1px;
+
+height: 11px;
+
+background: #dbdbdb;
+
+vertical-align: middle;
+
+}
+
+.footer a:hover {
+
+text-decoration: underline;
+
+}
+
+.footer a:visited {
+
+color: #000000;
+
+}
+
+.footer a:active {
+
+color: #999696;
+
+}
+
+.footer .footer-copyright {
+
+margin-top: 12px;
+
+font-size: 12px;
+
+color: #000000;
+
+}
+
+
+
+/* ─── 11. 반응형 대응 (모바일 화면 예시) ─── */
+
+@media (max-width: 600px) {
+
+/* 상단 내비게이션 패딩·높이 조정 */
+
+.container-nav {
+
+padding: 0 10px;
+
+height: 80px;
+
+}
+
+.nav-left .logo {
+
+width: 80px;
+
+height: auto;
+
+}
+
+/* 로그인 링크 폰트 축소 */
+
+.login-link {
+
+font-size: 13px;
+
+width: auto;
+
+height: auto;
+
+}
+
+
+
+/* 카드 래퍼 패딩 축소 */
+
+.container2 {
+
+padding: 0 5px;
+
+}
+
+
+
+/* 카테고리 아이콘 축소 */
+
+.category-links .cat-link {
+
+font-size: 12px;
+
+}
+
+.category-links .cat-icon {
+
+width: 60px;
+
+height: 60px;
+
+margin-bottom: 8px;
+
+}
+
+
+
+/* 하단 네비게이션 폰트 축소 */
+
+.bottom-nav .bottom-link {
+
+font-size: 18px;
+
+padding: 4px 8px;
+
+}
+
+}
+
+
+
+/* ─── 알림/프사 유튜브 스타일 ─── */
+
+.profile-thumb {
+
+width: 38px; height: 38px;
+
+border-radius: 50%;
+
+overflow: hidden;
+
+margin-left: 20px;
+
+border: 1.5px solid #eee;
+
+background: #f3f3f3;
+
+display: inline-block;
+
+vertical-align: middle;
+
+cursor: pointer;
+
+}
+
+.profile-thumb img {
+
+width: 100%; height: 100%; object-fit: cover;
+
+display: block;
+
+}
+
+.profile-thumb:active, .profile-thumb:hover { box-shadow:0 0 0 2px #4062ec; }
+
+.noti-bell-btn { position:relative; margin-right:2px; cursor:pointer; }
+
+.noti-badge {
+
+display:none; position:absolute; top:0; right:-2px;
+
+width:13px; height:13px; background:#f43630; border-radius:50%;
+
+border:2px solid #fff;
+
+}
+
+.noti-popover {
+
+display:none; position:absolute; top:38px; right:-28px; z-index:200;
+
+width:320px; background:#fff; border-radius:10px; box-shadow:0 4px 18px rgba(0,0,0,.12);
+
+border:1px solid #ededed; padding:0;
+
+}
+
+.noti-popover .header {
+
+font-weight:700;font-size:17px;padding:15px 20px 9px 20px; border-bottom:1px solid #eee;
+
+}
+
+.noti-popover .footer {
+
+padding:8px 14px;font-size:13px;text-align:right;
+
+}
+
+/* ─── [추가] 알림 리스트 아이템 ───────────────────────────── */
+
+
+
+/* 종 아이콘 크기 & 색 */
+
+.noti-bell-btn ion-icon{
+
+font-size:28px; /* 필요하면 24~30px 사이에서 조정 */
+
+color:#383535;
+
+}
+
+
+
+/* 개별 알림 박스 */
+
+.notification-item{
+
+display:flex;
+
+gap:10px;
+
+padding:12px 16px;
+
+cursor:pointer;
+
+transition:background .15s ease-in-out;
+
+}
+
+.notification-item.unread{background:#f8faff;} /* 읽지 않은 항목 */
+
+.notification-item:hover {background:#eef3ff;}
+
+
+
+/* 아이콘 영역 */
+
+.notification-item .noti-icon ion-icon{
+
+font-size:22px;
+
+color:#4062ec;
+
+}
+
+
+
+/* 메시지 + 시간 */
+
+.notification-item .noti-content{
+
+flex:1;
+
+font-size:14px;
+
+line-height:1.35;
+
+}
+
+.notification-item .noti-time{
+
+display:block;
+
+margin-top:2px;
+
+font-size:12px;
+
+color:#888;
+
+}
+
+/* 간편 매칭 버튼 */
+#open-filter-btn {
+  position: fixed;
+  bottom: 2.5rem;
+  right: 2.5rem;
+  background: #ffffff;
+  color: #2563eb;
+  border: 2px solid #2563eb;
+  padding: 1rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 9999;
+}
+#open-filter-btn:hover {
+  background: #f0f9ff;
+  transform: scale(1.05);
+}
+
+/* 모달 배경 */
+#filter-modal, #room-detail-modal {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* 필터 카드 공통 */
+.filter-modal-card {
+  background: #fff;
+  border-radius: 28px;
+  width: 95vw;
+  max-width: 520px;
+  max-height: 700px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+}
+
+/* 기타 스타일은 기존 simple.html에서 옮겨와 붙여넣기 가능 */
+.hidden { display: none !important; }
+
+.nav-wrapper {
+  position: relative;
+}
+
+.nav-center {
+  display: flex;         /* 가로 배치 */
+  gap: 45px;             /* 이미지 사이 간격 */
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.nav-center .nav-img {
+  width: 65px;
+  height: 45px;
+  object-fit: cover;
+}
+
+.banner-slide-wrapper {
+  display: flex;
+  width: 300%; /* 이미지가 3장이라면 */
+  height: 100%;
+  transition: transform 0.5s ease-in-out;
+}
+.banner-prev,
+.banner-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.6);
+  padding: 0.5rem 1rem;
+  border-radius: 50%;
+  font-size: 24px;
+  z-index: 10;
+  cursor: pointer;
+  border: none;
+}
+
+.banner-prev {
+  left: 16px;
+}
+
+.banner-next {
+  right: 16px;
+}
+

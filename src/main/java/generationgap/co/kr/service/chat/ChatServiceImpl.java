@@ -29,7 +29,7 @@ public class ChatServiceImpl implements ChatService{
 
     // 채팅 수정
     @Override
-    public void editMessageWithHistory(int messageId, String newContent, int requestUserIdx, String editedBy){
+    public void editMessageWithHistory(int messageId, String newContent, long requestUserIdx, String editedBy){
         //1. 작성자 확인
         int senderIdx = chatMapper.getSenderIdxByMessageId(messageId);
         if(senderIdx != requestUserIdx){
@@ -45,7 +45,7 @@ public class ChatServiceImpl implements ChatService{
 
     // 메세지 삭제
     @Override
-    public void deleteMessage(int messageId, int requesterIdx, String requesterId){
+    public void deleteMessage(int messageId, long requesterIdx, String requesterId){
         int senderIdx = chatMapper.getSenderIdxByMessageId(messageId);
 
         if(senderIdx != requesterIdx){

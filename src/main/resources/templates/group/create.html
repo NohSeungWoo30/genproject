@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>방 생성하기</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.js"></script>
+</head>
+<body>
+  <div class="container-grid" id="mainContainer">
+    <form id="groupCreateForm" method="post" enctype="multipart/form-data" action="/group/group_success">
+    <section class="form-section" id="formSection">
+      <h1>방 생성하기</h1>
+      <div class="form-group">
+        <label for="roomImageInput">방 사진 업로드</label>
+        <input type="file" id="roomImageInput" name="roomImageFile" accept="image/*" />
+      </div>
+      <input type="hidden" id="ownerIdx" name="ownerIdx" required th:value="${group.ownerIdx}" readonly>
+      <input type="hidden" name="ownerNickname" th:value="${nickname}" readonly/>
+      <div class="form-group tag-picker">
+        <label>모임의 유형을 선택해주세요</label>
+        <div class="tag-icon-grid">
+          <!-- 메인 카테고리 선택버튼 DB에서 가져옴 -->
+          <div class="tag-icon" name="cmCategoryMainIdx" th:each="maincategory : ${categoryMainList}"
+               th:data-value="${maincategory.categoryMainName}"
+               th:data-id="${maincategory.cmCategoryMainIdx}"
+               th:text="${maincategory.categoryMainName}">
+          </div>
+          <!-- 카테고리 전달용 히든값 -->
+          <input type="hidden" id="selectedCategoryId" name="groupCategoryMainIdx" readonly>
+          <!--서브카테고리 생략-->
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="titleInput">방 제목</label>
+        <input type="text" id="titleInput" name="title" placeholder="예) 다 같이 맛있는 감자탕 먹어요!" />
+      </div>
+      <div class="form-group">
+        <label for="descriptionInput">설명</label>
+        <textarea id="descriptionInput" name="content" rows="4" placeholder="예) 성수동에서 유명한 감자탕 맛집에 가실 분 구합니다!"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="locationInput">모임 위치 (주소 입력 후 엔터)</label>
+        <input type="text" id="locationInput" placeholder="예) 서울시청, 종각역 메가커피" />
+        <div id="map" class="map-area"></div>
+        <div>
+          <!--지도에 검색 된 장소 리스트 출력(선택가능) -->
+          <ul id="placeResultList"></ul>
+        </div>
+        <div>
+          <label for="meetingPlaceName">선택된 장소명:</label>
+          <input type="text" id="meetingPlaceName" name="placeName" readonly>
+        </div>
+        <input type="hidden" id="meetingPlaceCategory" name="placeCategory" readonly>
+        <div>
+          <label for="meetingPlaceAddress">선택된 주소:</label>
+          <input type="text" id="meetingPlaceAddress" name="placeAddress" readonly>
+        </div>
+        <input type="hidden" id="meetingPlaceLink" name="naverPlaceUrl" readonly>
+        <input type="hidden" id="meetingPlaceLatInput" name="latitude" readonly>
+        <input type="hidden" id="meetingPlaceLngInput" name="longitude" readonly>
+      </div>
+      <div class="form-group">
+        <label for="meetingDatetimeInput">모임 날짜·시간</label>
+        <input type="datetime-local" id="meetingDatetimeInput" name="groupDate"/>
+      </div>
+      <div class="form-group">
+        <label for="remainingTimeDisplay">남은 시간</label>
+        <input type="text" id="remainingTimeDisplay" readonly placeholder="모임 날짜를 선택하면 자동 계산됩니다" />
+      </div>
+      <!-- 성별 제한 라디오 버튼 -->
+      <div class="form-group">
+        <label>성별 제한</label>
+        <div>
+          <input type="radio" id="genderMale" name="genderLimit" value="M">
+          <label for="genderMale">남성</label>
+          <input type="radio" id="genderFemale" name="genderLimit" value="F">
+          <label for="genderFemale">여성</label>
+          <input type="radio" id="genderNone" name="genderLimit" value="A" checked>
+          <label for="genderNone">제한 없음</label>
+        </div>
+      </div>
+      <!-- 나이 슬라이더 -->
+      <div class="form-group">
+        <label>나이 제한</label>
+        <div class="age-slider-section">
+          <div class="age-value">
+            <span id="minAgeDisplay">20</span> ~ <span id="maxAgeDisplay">50</span>
+          </div>
+          <div id="age-slider"></div>
+          <div class="age-ticks"></div>
+          <input type="hidden" id="ageMin" name="minAge" value="20">
+          <input type="hidden" id="ageMax" name="maxAge" value="50">
+        </div>
+      </div>
+      <!-- 인원 슬라이더 -->
+      <div class="form-group">
+        <label>최소/최대 인원</label>
+        <div class="person-slider-section">
+          <div class="person-value">
+            <span id="minPersonDisplay">2</span> ~ <span id="maxPersonDisplay">12</span>
+          </div>
+          <div id="person-slider"></div>
+          <div class="person-ticks"></div>
+          <input type="hidden" id="minPerson" name="minMembers" value="2">
+          <input type="hidden" id="maxPerson" name="maxMembers" value="12">
+        </div>
+      </div>
+      <div class="button-group">
+        <button id="createRoomButton" class="primary-button" type="submit">방 생성하기</button>
+        <button id="cancelButton" class="secondary-button" type="button">취소하기</button>
+      </div>
+    </section>
+    </form>
+    <section class="preview-section" id="previewSection">
+      <h2>실시간 미리보기</h2>
+      <div class="live-card" id="liveCard">
+        <div class="preview-header-background" id="liveHeaderBackground">
+          <div class="room-image-container">
+            <div class="image-preview-placeholder" id="liveRoomPlaceholder"></div>
+            <img id="liveRoomImage" class="room-image hidden" alt="방 이미지" />
+          </div>
+          <div class="profile-block">
+            <div class="profile-placeholder" id="liveProfilePlaceholder"></div>
+            <img src="" alt="프로필" class="profile-image hidden" id="liveProfileImage" />
+            <div class="profile-name" id="liveProfileName" th:text="${nickname}"></div>
+          </div>
+        </div>
+        <section class="card-body">
+          <div class="tags" id="liveTagsContainer"></div>
+          <div class="tags" id="liveAgeContainer"></div>
+          <div class="tags" id="livePersonContainer"></div>
+          <h2 class="title" id="liveTitle">방 제목</h2>
+          <div class="content">
+            <div class="description" id="liveDescription">설명 내용이 여기에 표시됩니다.</div>
+            <div class="right-info">
+              <div class="map-preview" id="liveMapPreview">
+                <div id="liveSmallMap" class="small-map-area"></div>
+              </div>
+              <div class="info-list">
+                <div class="info-item">
+                  <span class="label">모임 시간</span>
+                  <span class="value" id="liveMeetingTime"></span>
+                </div>
+                <div class="info-item">
+                  <span class="label">남은 시간</span>
+                  <span class="value" id="liveRemainingTime"></span>
+                </div>
+                <div class="info-item">
+                  <span class="label">인원</span>
+                  <span class="value" id="livePerson"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="join-button">방 참여</button>
+        </section>
+      </div>
+    </section>
+  </div>
+  <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=s2hofoc0b5&submodules=geocoder"></script>
+  <script src="/js/script.js"></script>
+</body>
+</html>

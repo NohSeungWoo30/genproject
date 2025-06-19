@@ -1,25 +1,259 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><title>게시글 작성</title></head>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>게시글 작성</title>
+  <link rel="stylesheet" th:href="@{/css/vars.css}" />
+  <link rel="stylesheet" th:href="@{/css/boardstyle.css}" />
+  <link rel="stylesheet" th:href="@{/css/mainstyle.css}" />
+  <link rel="stylesheet" href="/css/toast.css" />
+  <!--알림(종모양)기능 css추가 알림기능이 포함되는 모든 곳에 추가하기-->
+  <link rel="stylesheet" href="/css/notify.css" />
+
+  <!--로그인 세션관련 계속 추가하기-->
+  <th:block th:replace="fragments/user-session :: sessionScript"></th:block>
+
+  <!--알림 아이콘관련 계속 추가하기-->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+  <!-- 1. 필수 라이브러리: SockJS, STOMP -->
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+
+
+  <style>
+    .write-container {
+      max-width: 600px;
+      margin: 60px auto;
+      background: var(--color-white-solid);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      padding: 24px 20px 40px;
+    }
+    .write-container h2 {
+      font-family: var(--font-pretendard-medium);
+      font-size: 22px;
+      margin-bottom: 20px;
+      color: var(--color-mine-shaft);
+      text-align: center;
+    }
+    .write-container .form-group {
+      margin-bottom: 16px;
+    }
+    .write-container label {
+      display: block;
+      font-family: var(--font-pretendard-medium);
+      font-size: 14px;
+      margin-bottom: 6px;
+      color: var(--color-mine-shaft);
+    }
+    .write-container input[type="text"],
+    .write-container select,
+    .write-container textarea {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 14px;
+      border: 1px solid var(--color-grey-80);
+      border-radius: 4px;
+      background: var(--color-white-solid);
+      font-family: var(--font-pretendard-regular);
+      color: var(--color-mine-shaft);
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .write-container input:focus,
+    .write-container textarea:focus,
+    .write-container select:focus {
+      outline: none;
+      border-color: var(--color-pigment-indigo);
+      background: var(--color-white-solid);
+    }
+    .write-container textarea {
+      resize: vertical;
+      min-height: 150px;
+    }
+    .write-container .btn-submit,
+    .write-container .btn-cancel {
+      padding: 10px 16px;
+      font-size: 14px;
+      font-family: var(--font-pretendard-medium);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .write-container .btn-submit {
+      background: var(--color-pigment-indigo);
+      color: var(--color-white-solid);
+      margin-right: 8px;
+    }
+    .write-container .btn-submit:hover {
+      background: #9a4ed6;
+    }
+    .write-container .btn-cancel {
+      background: var(--color-grey-89);
+      color: var(--color-white-solid);
+    }
+    .write-container .btn-cancel:hover {
+      background: var(--color-grey-80);
+    }
+    .image-preview-list {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .image-preview-list img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      background: #fafafa;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s;
+    }
+
+    .image-preview-list img:hover {
+      transform: scale(1.05);
+    }
+
+
+
+
+
+  </style>
+</head>
 <body>
-<h2>➕ 게시글 작성</h2>
 
-<form th:action="@{/posts/write}" method="post" th:object="${post}">
-  <label>카테고리:
-    <select th:field="*{category}">
-      <option value="공지">공지</option>
-      <option value="자유">자유</option>
-      <option value="질문">질문</option>
-      <option value="정보">정보</option>
-    </select>
-  </label><br/><br/>
+<!-- ─── 상단 네비게이션 ─── -->
+<header class="container-nav">
+  <div class="nav-left">
+    <a th:href="@{/main}"><img class="logo" src="/img/icons/Group 17.png" alt="M 로고"></a>
+  </div>
 
-  <label>제목: <input type="text" th:field="*{title}" /></label><br/><br/>
-  <label>내용:<br/>
-    <textarea th:field="*{content}" rows="10" cols="60"></textarea>
-  </label><br/><br/>
+  <div class="nav-center">
+    <img src="/img/봄.png" class="nav-img" alt="그림10">
+    <img src="/img/여름.png" class="nav-img" alt="그림10">
+    <img src="/img/가을.png" class="nav-img" alt="그림10">
+    <img src="/img/겨울.png" class="nav-img" alt="그림10">
+  </div>
 
-  <button type="submit">등록</button>
-</form>
+  <!-- ** navRight: 로그인/알림/프로필 영역(동적) ** -->
+  <div class="nav-right" id="navRight">
+    <a href="/user/login" class="login-link">로그인ㆍ회원가입</a>
+  </div>
+</header>
+
+<!-- ─── 하단 고정 네비 (모바일 bottom‑nav 스타일) ─── -->
+<section class="bottom-nav-wrapper">
+  <nav class="bottom-nav">
+    <a th:href="@{/group/create}" class="bottom-link">모임 생성</a>
+    <a th:href="@{/group/meetinglist}" class="bottom-link">모임 목록</a>
+    <a th:href="@{/product-list}" class="bottom-link">상품 목록</a>
+    <a th:href="@{/posts}" class="bottom-link">자유 게시판</a>
+  </nav>
+</section>
+
+<!-- 글 작성 폼 -->
+<section class="write-container">
+  <h2>글 작성하기</h2>
+  <form th:action="@{/posts/write}" method="post" th:object="${post}" enctype="multipart/form-data">
+
+    <!-- 카테고리 -->
+    <div class="form-group">
+      <label for="category">카테고리<span>*</span></label>
+      <select th:field="*{category}" id="category" required>
+        <option value="">– 선택 –</option>
+        <option value="공지">공지</option>
+        <option value="자유">자유</option>
+        <option value="질문">질문</option>
+        <option value="정보">정보</option>
+      </select>
+    </div>
+
+    <!-- 제목 -->
+    <div class="form-group">
+      <label for="title">제목<span>*</span></label>
+      <input type="text" th:field="*{title}" id="title" placeholder="제목을 입력하세요" required />
+    </div>
+
+    <!-- 내용 -->
+    <div class="form-group">
+      <label for="content">본문<span>*</span></label>
+      <textarea th:field="*{content}" id="content" placeholder="내용을 입력하세요" required rows="8"></textarea>
+    </div>
+
+    <!-- 이미지 업로드 -->
+    <div class="form-group">
+      <label for="files">이미지 첨부 (여러장 가능)</label>
+      <input type="file" id="files" name="files" multiple accept="image/*" />
+      <div class="image-preview-list" id="imagePreviewList"></div>
+    </div>
+
+    <!-- 버튼 -->
+    <div class="btn-group" style="text-align: right; margin-top: 24px;">
+      <button type="button" class="btn-cancel" onclick="window.location.href='/posts'">취소</button>
+      <button type="submit" class="btn-submit">등록</button>
+    </div>
+  </form>
+</section>
+
+<script>
+  // 이미지 미리보기
+  const fileInput = document.getElementById('files');
+  const previewContainer = document.getElementById('imagePreviewList');
+
+  fileInput.addEventListener('change', function () {
+    previewContainer.innerHTML = '';
+    const files = Array.from(fileInput.files);
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        previewContainer.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  //비로그인 시 알러트
+  document.querySelector("form").addEventListener("submit", async function (e) {
+    e.preventDefault(); // 기본 제출 막기
+
+    const formData = new FormData(this);
+
+    const response = await fetch(this.action, {
+      method: "POST",
+      body: formData
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      alert(data.message || "로그인이 필요합니다.");
+      location.href = "/login"; // 로그인 페이지로 이동
+      return;
+    }
+
+    // 성공 시 리디렉션
+    location.href = "/posts";
+  });
+
+</script>
+
+
+<!--꼭 notify.js나 notification.js 보다 위에-->
+<th:block th:replace="fragments/notification-templates :: notiTemplates"></th:block>
+
+
+<script src="/js/notify.js" defer></script>
+<script src="/js/notification.js" defer></script>
 </body>
 </html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>아이디 찾기</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body { padding: 20px; background-color: #f8f9fa; }
+    .container { max-width: 500px; margin-top: 50px; padding: 30px; background-color: #fff; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h2 { text-align: center; margin-bottom: 30px; color: #007bff; }
+    .form-group label { font-weight: bold; }
+    .btn-primary { width: 100%; margin-top: 20px; }
+    .alert { margin-top: 20px; text-align: center; }
+    .found-id { font-size: 1.2rem; font-weight: bold; color: #28a745; margin-top: 20px; text-align: center; }
+    .hidden { display: none; } /* 요소를 숨기기 위한 스타일 */
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>아이디 찾기</h2>
+
+  <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}">
+    사용자 정보가 일치하지 않습니다.
+  </div>
+
+  <div th:if="${foundUserId}" class="found-id alert alert-success">
+    찾으시는 아이디는 '<span th:text="${foundUserId}"></span>' 입니다.
+  </div>
+
+  <form id="findIdForm" th:action="@{/user/find-id}" method="post">
+    <div class="form-group">
+      <label for="userName">이름</label>
+      <input type="text" class="form-control" id="userName" name="userName" required autofocus>
+    </div>
+    <div class="form-group">
+      <label for="phone">전화번호</label>
+      <input type="tel" class="form-control" id="phone" name="phone" placeholder="예: 01012345678" required>
+    </div>
+    <button type="submit" class="btn btn-primary" id="findIdButton">아이디 찾기</button>
+  </form>
+
+  <button type="button" class="btn btn-primary hidden" id="findPasswordButton" onclick="location.href='/user/forgot-password'">비밀번호 찾기</button>
+
+  <div class="text-center mt-3">
+    <a th:href="@{/user/login}">로그인 페이지로 돌아가기</a>
+  </div>
+</div>
+
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  const foundUserId = /*[[${foundUserId}]]*/ null;
+  const findIdForm = document.getElementById('findIdForm');
+  const findIdButton = document.getElementById('findIdButton');
+  const findPasswordButton = document.getElementById('findPasswordButton');
+
+  // foundUserId 값이 존재하면 아이디 찾기 폼과 버튼을 숨기고 비밀번호 찾기 버튼을 보여줍니다.
+  if (foundUserId) {
+    findIdForm.classList.add('hidden'); // 폼 전체를 숨김
+    findIdButton.classList.add('hidden'); // 아이디 찾기 버튼 숨김 (폼을 숨기므로 사실상 불필요할 수 있지만 명시적으로)
+    findPasswordButton.classList.remove('hidden'); // 비밀번호 찾기 버튼 보여줌
+  }
+  /*]]>*/
+</script>
+</body>
+</html>

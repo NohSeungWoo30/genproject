@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="generationgap.co.kr.mapper.payment.PaymentMapper">
+
+    <select id="findPaymentsByUserIdx" resultType="generationgap.co.kr.dto.mypage.PaymentDto">
+        SELECT
+        product_name AS productName,
+        approved_at AS approvedAt,
+        paid_amount AS paidAmount,
+        payments_status AS status
+        FROM payments
+        WHERE user_idx = #{userIdx}
+        ORDER BY approved_at DESC
+    </select>
+</mapper>

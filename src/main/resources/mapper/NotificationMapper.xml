@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="generationgap.co.kr.mapper.notification.NotificationMapper">
+
+    <resultMap id="NotificationResultMap" type="generationgap.co.kr.domain.notification.Notification">
+        <id property="notiIdx" column="noti_idx"/>
+        <result property="userIdx" column="user_idx"/>
+        <result property="notiMessage" column="noti_message"/>
+        <result property="notiTypeIdx" column="noti_type_idx"/>
+        <result property="notiUrl" column="noti_url"/>
+        <result property="isRead" column="is_read"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="sentAt" column="sent_at"/>
+    </resultMap>
+
+
+
+    <select id="getTemplateByType" resultType="string">
+        SELECT noti_template
+        FROM notification_types
+        WHERE noti_type_idx = #{notiTypeIdx}
+    </select>
+
+    <!--<insert id="insertNotification">
+        INSERT INTO notifications (user_idx, noti_message, noti_type_idx, noti_url, is_read, sent_at)
+        VALUES (#{recipientId}, #{message}, #{notiTypeIdx}, #{notiUrl}, 'N', SYSDATE)
+    </insert>-->
+
+    <insert id="insertNotification" parameterType="generationgap.co.kr.domain.notification.Notification">
+        <!-- 시퀀스로 먼저 noti_idx 가져옴 -->
+        <selectKey keyProperty="notiIdx" resultType="long" order="BEFORE">
+            SELECT notifications_seq.NEXTVAL FROM dual
+        </selectKey>
+
+        INSERT INTO notifications (
+        noti_idx, user_idx, noti_message, noti_type_idx, noti_url,
+        is_read, is_deleted, sent_at
+        ) VALUES (
+        #{notiIdx}, #{userIdx}, #{notiMessage}, #{notiTypeIdx}, #{notiUrl},
+        'N', 'N', SYSDATE
+        )
+    </insert>
+
+
+    <select id="getNotificationsByUser" resultMap="NotificationResultMap">
+        SELECT *
+        FROM notifications
+        WHERE user_idx = #{userId}
+        AND is_read = 'N'
+        AND is_deleted = 'N'
+        ORDER BY sent_at DESC
+    </select>
+
+    <update id="deleteNotification">
+        UPDATE notifications
+        SET is_deleted = 'Y'
+        WHERE noti_idx = #{notiIdx}
+        AND user_idx = #{userId}
+    </update>
+
+    <update id="markNotificationAsRead">
+        UPDATE notifications
+        SET is_read = 'Y'
+        WHERE noti_idx = #{notiIdx}
+        AND user_idx = #{userId}
+    </update>
+
+</mapper>

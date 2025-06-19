@@ -1,0 +1,188 @@
+/* ───── 프로필 썸네일 ───── */
+.profile-thumb {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-left: 20px;
+  border: 1.5px solid #eee;
+  background: #f3f3f3;
+  display: inline-block;
+  vertical-align: middle;
+  cursor: pointer;
+}
+.profile-thumb img {
+  width: 100%; height: 100%; object-fit: cover;
+  display: block;
+}
+.profile-thumb:active, .profile-thumb:hover {
+  box-shadow: 0 0 0 2px #4062ec;
+}
+
+/* ───── 알림 버튼 & 뱃지 ───── */
+.noti-bell-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  margin-right: 12px;
+}
+.noti-bell-btn ion-icon {
+  font-size: 28px;
+  color: #383535;
+  transition: 0.2s;
+}
+.noti-bell-btn:hover ion-icon {
+  color: #000;
+}
+.noti-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9999px;
+  background: #ef4444;
+  display: none;
+  box-shadow: 0 0 0 2px #fff;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+}
+
+/* ───── 팝오버 ───── */
+.noti-popover {
+  display: none;
+  position: absolute;
+  top: 38px;
+  right: -28px;
+  z-index: 200;
+  width: 320px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+  border: 1px solid #ededed;
+  padding: 0;
+  animation: fadeScale 0.15s ease-out;
+}
+@keyframes fadeScale {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.noti-popover .header {
+  font-weight: 700;
+  font-size: 17px;
+  padding: 15px 20px 9px 20px;
+  border-bottom: 1px solid #eee;
+}
+.noti-popover .footer {
+  padding: 8px 14px;
+  font-size: 13px;
+  text-align: right;
+}
+
+/* ───── 알림 리스트 항목 ───── */
+.notification-item {
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.15s ease-in-out;
+}
+.notification-item.unread {
+  background: #f8faff;
+}
+.notification-item:hover {
+  background: #eef3ff;
+}
+.notification-item .noti-icon ion-icon {
+  font-size: 22px;
+  color: #4062ec;
+}
+.notification-item .noti-content {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.35;
+}
+.notification-item .noti-time {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: #888;
+}
+
+/* ───── 알림 카드 ───── */
+.noti-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #fff;
+  border: 1px solid #f3f4f6;
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  transition: 0.25s;
+}
+.noti-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+.noti-card.read {
+  opacity: 0.55;
+}
+.noti-card:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* ───── 알림 아이콘 색상 ───── */
+.noti-icon {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e0f2fe;
+}
+.noti-icon.msg {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+.noti-icon.like {
+  background: #fef9c3;
+  color: #ca8a04;
+}
+.noti-icon.alert {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.noti-icon ion-icon {
+  font-size: 22px;
+}
+
+/* ───── 카드 본문 ───── */
+.noti-body p {
+  font-size: 14px;
+  color: #111;
+}
+.noti-body time {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* ───── 닫기 버튼 ───── */
+.dismiss-btn ion-icon {
+  pointer-events: none;
+}
+

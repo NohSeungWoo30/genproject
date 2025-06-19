@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>게시글 상세보기</title>
+    <link rel="stylesheet" href="/css/vars.css" />
+    <link rel="stylesheet" href="/css/boardstyle.css" />
+    <style>
+        /* (기존 스타일 그대로 유지) */
+        .detail-container {
+          max-width: 700px;
+          margin: 60px auto;
+          background: var(--color-white-solid, #fff);
+          border-radius: 10px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+          padding: 36px 32px 40px;
+          font-family: var(--font-pretendard-regular, sans-serif);
+        }
+        .detail-container h2 {
+          font-family: var(--font-pretendard-medium);
+          font-size: 26px;
+          margin-bottom: 20px;
+          color: var(--color-mine-shaft);
+          word-break: keep-all;
+        }
+        .detail-meta {
+          margin-bottom: 14px;
+          color: var(--color-grey-80);
+          font-size: 15px;
+          display: flex;
+          gap: 16px;
+          flex-wrap: wrap;
+        }
+        .detail-meta span {
+          margin-right: 18px;
+          white-space: nowrap;
+        }
+        .detail-content {
+          margin: 30px 0 38px;
+          font-size: 17px;
+          color: var(--color-mine-shaft);
+          line-height: 1.7;
+          word-break: break-all;
+          min-height: 100px;
+        }
+        .detail-images-list {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          margin: 20px 0;
+        }
+        .detail-images-list img {
+          max-width: 150px;
+          max-height: 150px;
+          border-radius: 8px;
+          object-fit: cover;
+          display: block;
+        }
+        .btn-back {
+          display: inline-block;
+          margin-top: 12px;
+          padding: 9px 19px;
+          background: var(--color-grey-89);
+          color: var(--color-mine-shaft);
+          border: none;
+          border-radius: 4px;
+          font-family: var(--font-pretendard-medium);
+          text-decoration: none;
+          font-size: 15px;
+          transition: background 0.2s;
+        }
+        .btn-back:hover {
+          background: var(--color-grey-80);
+          color: var(--color-white-solid);
+        }
+        .btn-like {
+          display: inline-block;
+          margin-bottom: 20px;
+          padding: 8px 16px;
+          background: var(--color-cornflower-blue);
+          color: #fff;
+          border: none;
+          border-radius: 4px;
+          font-family: var(--font-pretendard-medium);
+          font-size: 15px;
+          cursor: pointer;
+          transition: background 0.2s;
+        }
+        .btn-like:hover {
+          background: var(--color-blue-40, #3b4890);
+        }
+        .comments-section {
+          margin-top: 40px;
+          border-top: 1px solid var(--color-grey-80);
+          padding-top: 20px;
+        }
+        .comments-section h3 {
+          font-family: var(--font-pretendard-medium);
+          font-size: 20px;
+          margin-bottom: 12px;
+          color: var(--color-mine-shaft);
+        }
+        .comment-item-container {
+          margin-bottom: 16px;
+        }
+        .comment-item {
+          padding: 12px;
+          border-radius: 8px;
+          background: var(--color-grey-97);
+          position: relative;
+        }
+        .comment-author {
+          font-family: var(--font-pretendard-medium);
+          font-size: 15px;
+          color: var(--color-mine-shaft);
+          margin-bottom: 4px;
+        }
+        .comment-date {
+          font-size: 13px;
+          color: var(--color-grey-80);
+          margin-bottom: 8px;
+        }
+        .comment-text {
+          font-size: 15px;
+          color: var(--color-mine-shaft);
+          line-height: 1.5;
+          word-break: break-all;
+        }
+        .btn-reply {
+          margin-top: 8px;
+          font-size: 13px;
+          color: var(--color-grey-80);
+          cursor: pointer;
+          background: none;
+          border: none;
+          padding: 0;
+        }
+        .btn-reply:disabled {
+          color: var(--color-grey-60);
+          cursor: default;
+        }
+        .btn-reply:hover:not(:disabled) {
+          color: var(--color-pigment-indigo);
+        }
+        .btn-show-replies {
+          margin-top: 8px;
+          font-size: 13px;
+          color: var(--color-pigment-indigo);
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0;
+        }
+        .btn-show-replies:hover {
+          text-decoration: underline;
+        }
+        .replies-container {
+          margin-top: 12px;
+          margin-left: 20px;
+          display: none;
+        }
+        .reply-item {
+          margin-bottom: 12px;
+          padding: 10px;
+          border-radius: 6px;
+          background: var(--color-grey-94);
+        }
+        .reply-author {
+          font-family: var(--font-pretendard-medium);
+          font-size: 14px;
+          color: var(--color-mine-shaft);
+          margin-bottom: 2px;
+        }
+        .reply-date {
+          font-size: 12px;
+          color: var(--color-grey-80);
+          margin-bottom: 6px;
+        }
+        .reply-text {
+          font-size: 14px;
+          color: var(--color-mine-shaft);
+          line-height: 1.4;
+          word-break: break-all;
+        }
+        .reply-form {
+          margin-top: 12px;
+          padding: 12px;
+          background: var(--color-white-solid);
+          border: 1px solid var(--color-grey-80);
+          border-radius: 8px;
+        }
+        .reply-form input,
+        .reply-form textarea {
+          width: 100%;
+          margin-bottom: 8px;
+          padding: 8px;
+          border: 1px solid var(--color-grey-80);
+          border-radius: 4px;
+          font-family: var(--font-pretendard-regular);
+          font-size: 14px;
+        }
+        .reply-form button {
+          padding: 6px 12px;
+          background: var(--color-pigment-indigo);
+          color: #fff;
+          border: none;
+          border-radius: 4px;
+          font-family: var(--font-pretendard-medium);
+          font-size: 14px;
+          cursor: pointer;
+        }
+        .reply-form button:hover {
+          background: #9a4ed6;
+        }
+        .comment-form {
+          margin-top: 20px;
+          padding: 12px;
+          background: var(--color-white-solid);
+          border: 1px solid var(--color-grey-80);
+          border-radius: 8px;
+        }
+        .comment-form input,
+        .comment-form textarea {
+          width: 100%;
+          margin-bottom: 8px;
+          padding: 8px;
+          border: 1px solid var(--color-grey-80);
+          border-radius: 4px;
+          font-family: var(--font-pretendard-regular);
+          font-size: 14px;
+        }
+        .comment-form button {
+          padding: 6px 12px;
+          background: var(--color-pigment-indigo);
+          color: #fff;
+          border: none;
+          border-radius: 4px;
+          font-family: var(--font-pretendard-medium);
+          font-size: 14px;
+          cursor: pointer;
+        }
+        .comment-form button:hover {
+          background: #9a4ed6;
+        }
+    </style>
+</head>
+<body>
+<div class="detail-container" id="post-detail"></div>
+<script>
+    // --------------------------------------------------------
+    // 1) URL 파라미터에서 seq 가져오기
+    // --------------------------------------------------------
+    function getSeqFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("seq");
+    }
+    //const seq = getSeqFromUrl();
+    //if (!seq) {
+    //  document.getElementById("post-detail").innerHTML = "<p style='font-size:17px'>잘못된 접근입니다.</p><a href='board.html' class='btn-back'>목록으로</a>";
+    //  throw new Error("No seq provided");
+    //}
+    const seq = 1; // 테스트용
+
+    // --------------------------------------------------------
+    // 2) 로그인 여부 확인 (추천·댓글 작성 시 필요)
+    // --------------------------------------------------------
+    const userIdx = sessionStorage.getItem('user_idx');
+    const authToken = sessionStorage.getItem('auth_token');
+
+    // --------------------------------------------------------
+    // 3) 게시글 상세 정보 가져오기 및 조회수 증가
+    //    GET /api/board-posts/:seq
+    // --------------------------------------------------------
+    async function fetchPostDetail() {
+  return {
+    seq: 1,
+    category: "일반",
+    title: "테스트 게시글입니다",
+    author: "관리자",
+    views: 123,
+    likes: 5,
+    date: "2025-06-10 10:00",
+    content: "이것은 테스트용 본문입니다.",
+    images: [
+      "/img/sample1.jpg",
+      "/img/sample2.jpg"
+    ]
+  };
+}
+
+    // --------------------------------------------------------
+    // 4) 댓글 목록 가져오기
+    //    GET /api/board-posts/:seq/comments
+    // --------------------------------------------------------
+    async function fetchComments() {
+  return [
+    {
+      id: 1,
+      parentId: null,
+      author: "홍길동",
+      text: "첫 번째 댓글입니다.",
+      date: "2025-06-10 10:30"
+    },
+    {
+      id: 2,
+      parentId: 1,
+      author: "이순신",
+      text: "답글입니다.",
+      date: "2025-06-10 10:45"
+    }
+  ];
+}
+
+    // --------------------------------------------------------
+    // 5) 현재 시간 문자열 생성 ("YYYY-MM-DD HH:mm")
+    // --------------------------------------------------------
+    function getCurrentDateTime() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      return `${year}-${month}-${day} ${hours}:${minutes}`;
+    }
+
+    // --------------------------------------------------------
+    // 6) 댓글 렌더링 함수 (최상위·1단계 자식만)
+    // --------------------------------------------------------
+    function renderComments(commentsList, container) {
+      const parentComments = commentsList.filter(c => c.parentId === null);
+      parentComments.forEach(parent => {
+        const parentContainer = document.createElement("div");
+        parentContainer.className = "comment-item-container";
+        container.appendChild(parentContainer);
+
+        const item = document.createElement("div");
+        item.className = "comment-item";
+        item.dataset.commentId = parent.id;
+        item.innerHTML = `
+          <div class="comment-author">${parent.author}</div>
+          <div class="comment-date">${parent.date}</div>
+          <div class="comment-text">${parent.text}</div>
+          ${ userIdx ? `<button class="btn-reply">답글</button>` : '' }
+        `;
+        parentContainer.appendChild(item);
+
+        // 자식 댓글 필터
+        const childComments = commentsList.filter(c => c.parentId === parent.id);
+        if (childComments.length > 0) {
+          const showBtn = document.createElement("button");
+          showBtn.className = "btn-show-replies";
+          showBtn.textContent = `답글 ${childComments.length}개 보기`;
+          parentContainer.appendChild(showBtn);
+
+          const repliesContainer = document.createElement("div");
+          repliesContainer.className = "replies-container";
+          parentContainer.appendChild(repliesContainer);
+
+          let opened = false;
+          showBtn.addEventListener("click", () => {
+            if (!opened) {
+              childComments.forEach(child => {
+                const replyItem = document.createElement("div");
+                replyItem.className = "reply-item";
+                replyItem.innerHTML = `
+                  <div class="reply-author">${child.author}</div>
+                  <div class="reply-date">${child.date}</div>
+                  <div class="reply-text">${child.text}</div>
+                `;
+                repliesContainer.appendChild(replyItem);
+              });
+              repliesContainer.style.display = "block";
+              showBtn.textContent = "답글 숨기기";
+              opened = true;
+            } else {
+              repliesContainer.innerHTML = "";
+              repliesContainer.style.display = "none";
+              showBtn.textContent = `답글 ${childComments.length}개 보기`;
+              opened = false;
+            }
+          });
+        }
+
+        if (userIdx) {
+          const replyBtn = item.querySelector(".btn-reply");
+          replyBtn.addEventListener("click", () => {
+            // 1) 기존 폼 제거
+            document.querySelectorAll(".reply-form").forEach(f => f.remove());
+            // 2) 다른 답글 버튼 비활성화
+            document.querySelectorAll(".btn-reply").forEach(btn => btn.disabled = true);
+            replyBtn.disabled = false;
+
+            let repliesContainer = parentContainer.querySelector(".replies-container");
+            if (!repliesContainer) {
+              repliesContainer = document.createElement("div");
+              repliesContainer.className = "replies-container";
+              parentContainer.appendChild(repliesContainer);
+            }
+            repliesContainer.style.display = "block";
+
+            // 3) 답글 폼 생성
+            const form = document.createElement("form");
+            form.className = "reply-form";
+            form.innerHTML = `
+              <input type="text" class="reply-author" placeholder="이름" required />
+              <textarea class="reply-content" placeholder="답글을 입력하세요" rows="2" required></textarea>
+              <button type="submit">작성</button>
+            `;
+            repliesContainer.insertBefore(form, repliesContainer.firstChild);
+
+            form.addEventListener("submit", async (e) => {
+              e.preventDefault();
+              const authorInput = form.querySelector(".reply-author");
+              const contentInput = form.querySelector(".reply-content");
+              const author = authorInput.value.trim();
+              const text = contentInput.value.trim();
+              if (!author || !text) return;
+
+              // -----------------------------------------
+              // 7) 서버에 답글 등록 API 호출
+              //    POST /api/board-posts/:seq/comments
+              // -----------------------------------------
+              try {
+                const res = await fetch(`/api/board-posts/${seq}/comments`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + authToken
+                  },
+                  body: JSON.stringify({
+                    parentId: parent.id,
+                    author_name: author,
+                    content: text
+                  })
+                });
+                if (!res.ok) {
+                  const err = await res.json();
+                  alert('답글 등록 실패: ' + (err.message || '잠시 후 다시 시도해주세요.'));
+                  return;
+                }
+                form.remove();
+                document.querySelectorAll(".btn-reply").forEach(btn => btn.disabled = false);
+                await loadComments();  // 댓글 재로딩
+              } catch (err) {
+                console.error(err);
+                alert('서버 요청 중 오류가 발생했습니다.');
+              }
+            });
+          });
+        }
+      });
+    }
+
+    // --------------------------------------------------------
+    // 8) 댓글 전체 삭제 후 다시 렌더링
+    // --------------------------------------------------------
+    let commentListContainer = null;
+    async function loadComments() {
+      const comments = await fetchComments();
+      if (!commentListContainer) {
+        commentListContainer = document.createElement("div");
+        commentListContainer.id = "comments-list";
+        document.querySelector(".comments-section").insertBefore(commentListContainer, document.getElementById("comment-form"));
+      }
+      commentListContainer.innerHTML = "";
+      renderComments(comments, commentListContainer);
+    }
+
+    // --------------------------------------------------------
+    // 9) 게시글 렌더링 함수
+    // --------------------------------------------------------
+    async function renderPostDetail() {
+      const post = await fetchPostDetail();
+      if (!post) {
+        document.getElementById("post-detail").innerHTML = "<p style='font-size:17px'>글을 찾을 수 없습니다.</p><a href='board.html' class='btn-back'>목록으로</a>";
+        return;
+      }
+
+      document.getElementById("post-detail").innerHTML = `
+        <h2>${post.title}</h2>
+        <div class="detail-meta">
+          <span>카테고리: ${post.category}</span>
+          <span>작성자: ${post.author}</span>
+          <span>조회수: <span id="view-count">${post.views}</span></span>
+          <span>추천수: <span id="like-count">${post.likes}</span></span>
+          <span>작성일: ${post.date}</span>
+        </div>
+        ${ userIdx
+           ? `<button id="like-button" class="btn-like">추천</button>`
+           : ''
+        }
+        ${
+          (post.images && post.images.length)
+          ? `<div class="detail-images-list">
+                ${post.images.map(img => `<img src="${img}" alt="이미지">`).join('')}
+             </div>`
+          : ""
+        }
+        <div class="detail-content">${post.content || ""}</div>
+
+        <!-- 댓글 섹션 시작 -->
+        <div class="comments-section">
+          <h3>댓글</h3>
+          <!-- 댓글 리스트가 이곳에 생성됨 -->
+          <div id="comments-list"></div>
+          <!-- 최상위 댓글 입력 폼 -->
+          ${ userIdx
+            ? `<form id="comment-form" class="comment-form">
+                <input type="text" id="comment-author" placeholder="이름" required />
+                <textarea id="comment-content" placeholder="댓글을 입력하세요" rows="3" required></textarea>
+                <button type="submit">작성</button>
+              </form>`
+            : `<p style="margin-bottom: 20px; color: var(--color-grey-80);">로그인해야 댓글을 작성할 수 있습니다.</p>`
+          }
+        </div>
+        <!-- 댓글 섹션 끝 -->
+
+        <a href="board.html" class="btn-back">목록으로</a>
+      `;
+
+      // --------------------------------------------------------
+      // 10) 추천 버튼 이벤트 등록
+      //     PATCH /api/board-posts/:seq/like
+      // --------------------------------------------------------
+      if (userIdx) {
+        const likeButton = document.getElementById("like-button");
+        likeButton.addEventListener("click", async () => {
+          try {
+            const res = await fetch(`/api/board-posts/${seq}/like`, {
+              method: "PATCH",
+              headers: {
+                "Authorization": "Bearer " + authToken
+              }
+            });
+            if (!res.ok) {
+              const err = await res.json();
+              alert('추천 실패: ' + (err.message || '잠시 후 다시 시도해주세요.'));
+              return;
+            }
+            // 추천 수 업데이트
+            const newData = await res.json();
+            // 예: newData = { like_count: 5 }
+            document.getElementById("like-count").textContent = newData.like_count;
+          } catch (err) {
+            console.error(err);
+            alert('서버 요청 중 오류가 발생했습니다.');
+          }
+        });
+      }
+
+      // --------------------------------------------------------
+      // 11) 댓글 로딩 및 폼 제출 핸들러 등록
+      // --------------------------------------------------------
+      await loadComments();
+
+      if (userIdx) {
+        const commentForm = document.getElementById("comment-form");
+        commentForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const authorInput = document.getElementById("comment-author");
+          const contentInput = document.getElementById("comment-content");
+          const author = authorInput.value.trim();
+          const text = contentInput.value.trim();
+          if (!author || !text) return;
+
+          try {
+            const res = await fetch(`/api/board-posts/${seq}/comments`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + authToken
+              },
+              body: JSON.stringify({
+                parentId: null,
+                author_name: author,
+                content: text
+              })
+            });
+            if (!res.ok) {
+              const err = await res.json();
+              alert('댓글 등록 실패: ' + (err.message || '잠시 후 다시 시도해주세요.'));
+              return;
+            }
+            authorInput.value = "";
+            contentInput.value = "";
+            await loadComments();
+          } catch (err) {
+            console.error(err);
+            alert('서버 요청 중 오류가 발생했습니다.');
+          }
+        });
+      }
+    }
+
+    // --------------------------------------------------------
+    // 12) 페이지 로드 시 게시글 상세렌더링 호출
+    // --------------------------------------------------------
+    renderPostDetail();
+</script>
+
+</body>
+</html>

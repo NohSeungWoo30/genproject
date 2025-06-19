@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>그룹 상세 모달</title>
+  <link rel="stylesheet" href="/css/meetingdetail.css" />
+
+
+
+  <!-- 1. 필수 라이브러리: SockJS, STOMP -->
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+
+  <script th:inline="javascript">
+    window.room = [[${roomJson}]];
+    window.userId = [[${currentUser.userIdx}]];
+    window.groupId = [[${room.groupIdx}]];
+    window.isChatJoined = [[${isJoined}]];
+  </script>
+
+</head>
+<body>
+
+<!--로그인 세션관련 계속 추가하기-->
+<th:block th:replace="fragments/user-session :: sessionScript"></th:block>
+
+<!-- ✅ 디버그용 사용자 확인 출력 -->
+<p th:if="${user == null}" style="color:red;">[디버그] user는 null입니다.</p>
+<p th:if="${user != null}" style="color:green;">[디버그] user는 존재합니다. ID: <span th:text="${user.userIdx}">?</span></p>
+
+<!-- ✅ 그룹 상세 모달 -->
+<div id="group-detail-modal" class="fixed hidden inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center">
+  <div class="bg-white rounded-xl shadow-lg w-full max-w-3xl relative overflow-y-auto max-h-[90vh]">
+    <button onclick="closeGroupDetailModal()" class="absolute top-2 right-2 text-2xl text-gray-500 hover:text-black">✕</button>
+
+    <section class="room-detail-section">
+      <div id="roomDetailCard"></div>
+      <div id="inline-chat-wrapper" style="display:none;"></div>
+    </section>
+
+    <!-- 신고 모달 -->
+    <div id="report-modal" style="display:none; position:fixed; top:20%; left:40%; background:white; padding:20px; border:1px solid #ccc; z-index:9999;">
+      <h3>🚨 메시지 신고</h3>
+      <label>신고 사유
+        <select id="report-reason">
+          <option value="1">욕설/비방/혐오 표현</option>
+          <option value="2">음란/선정적인 콘텐츠</option>
+          <option value="3">도배/스팸/광고</option>
+          <option value="4">개인 정보 노출</option>
+          <option value="5">사칭/허위 정보</option>
+          <option value="6">부적절한 내용</option>
+          <option value="7">모임 운영 방해</option>
+          <option value="8">기타</option>
+        </select>
+      </label><br><br>
+      <textarea id="report-comment" placeholder="신고 내용을 입력하세요" rows="4" cols="40"></textarea><br><br>
+      <button onclick="submitReport()">🚨 신고 제출</button>
+      <button onclick="closeReportModal()">❌ 닫기</button>
+    </div>
+
+    <!-- 삭제된 메시지 템플릿 -->
+    <template id="deleted-message-template">
+      <div class="message-group deleted">
+        <div class="message self">
+          <div class="content-container">
+            <div class="bubble-container">
+              <div class="bubble">삭제된 메시지입니다.</div>
+              <span class="timestamp"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+  </div>
+</div>
+
+<!-- ✅ 연결된 스크립트 (meetingdetail.js의 수정본이 로드되어야 함) -->
+<script src="/js/meetingdetail.js" defer></script>
+<script>
+  function openGroupDetailModal(roomData) {
+    window.room = roomData;
+    window.isChatJoined = roomData.participants?.some(p => p.name === window.currentLoggedInUser?.name);
+    document.getElementById('group-detail-modal').classList.remove('hidden');
+    displayRoomDetails();
+    if (window.isChatJoined) showInlineChat(false);
+  }
+  function closeGroupDetailModal() {
+    document.getElementById('group-detail-modal').classList.add('hidden');
+  }
+</script>
+
+</body>
+
+
+
+</html>

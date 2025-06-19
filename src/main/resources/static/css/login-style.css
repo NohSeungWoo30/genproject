@@ -1,0 +1,307 @@
+/* ────────────────────────────────────────────────────────────────────
+   1) 전체 리셋
+   ──────────────────────────────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--color-grey-97); /* 옅은 회색 */
+  font-family: var(--font-pretendard-regular);
+  color: var(--color-mine-shaft);
+  line-height: 1.4;
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   2) 중앙 컨테이너 스타일
+   ──────────────────────────────────────────────────────────────────── */
+.container {
+  max-width: 400px;
+  margin: 80px auto; /* 화면 중앙, 위쪽 80px 여유 */
+  background: var(--color-white-solid); /* 흰색 */
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 24px 20px 32px;
+}
+
+/* 페이지 제목 (h2) */
+.container h2 {
+  text-align: center;
+  font-family: var(--font-pretendard-medium);
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 24px;
+  color: var(--color-mine-shaft);
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   3) form-group: 레이블 + 입력창
+   ──────────────────────────────────────────────────────────────────── */
+.form-group {
+  margin-bottom: 16px;
+  width: 100%;
+}
+.form-group label {
+  display: block;
+  font-family: var(--font-pretendard-medium);
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: var(--color-mine-shaft);
+}
+
+/* 입력창 기본 스타일 */
+.form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid var(--color-grey-80); /* #cccccc */
+  border-radius: 4px;
+  background: #fafafa;
+  font-family: var(--font-pretendard-regular);
+  color: var(--color-mine-shaft);
+  transition: border-color 0.2s, background 0.2s;
+}
+.form-group input:focus {
+  outline: none;
+  border-color: var(--color-pigment-indigo); /* 보라색 */
+  background: var(--color-white-solid);
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   4) 비밀번호 입력 + 보기/숨기기 버튼
+   ──────────────────────────────────────────────────────────────────── */
+.password-wrapper {
+  position: relative;
+}
+.password-wrapper input {
+  padding-right: 60px; /* 버튼 공간 확보 */
+}
+.btn-toggle {
+  position: absolute;
+  top: 68%;
+  right: 10px;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  color: var(--color-cornflower-blue); /* #65b1ef */
+  cursor: pointer;
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   5) 로그인 버튼
+   ──────────────────────────────────────────────────────────────────── */
+.btn-submit {
+  width: 100%;
+  padding: 12px 0;
+  font-size: 16px;
+  font-weight: 500;
+  background: var(--color-pigment-indigo); /* 보라색 */
+  color: var(--color-white-solid);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: var(--font-pretendard-medium);
+  margin-top: 8px;
+}
+.btn-submit:hover {
+  background: #9a4ed6; /* 조금 더 진한 보라색 */
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   6) 보조 텍스트 (회원가입 · 아이디/비번 찾기)
+   ──────────────────────────────────────────────────────────────────── */
+.text-helper {
+  text-align: center;
+  margin: 12px 0;
+  font-size: 13px;
+  color: var(--color-grey-46); /* #757575 */
+}
+.text-helper a {
+  color: var(--color-pigment-indigo);
+  text-decoration: none;
+  font-weight: 500;
+}
+.text-helper a:hover {
+  text-decoration: underline;
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   7) 구분 텍스트 “또는”
+   ──────────────────────────────────────────────────────────────────── */
+.divider {
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-grey-46);
+  margin: 16px 0;
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   8) 소셜 로그인 버튼
+   ──────────────────────────────────────────────────────────────────── */
+.btn-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 0;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  font-family: var(--font-pretendard-medium);
+  transition: background 0.2s;
+}
+
+/* Google 로그인 버튼 */
+.btn-social.google {
+  background: #ffffff;
+  color: var(--color-mine-shaft);
+  border: 1px solid var(--color-grey-80);
+}
+.btn-social.google:hover {
+  background: var(--color-grey-97);
+}
+
+/* Kakao 로그인 버튼 */
+.btn-social.kakao {
+  background: #fee500;
+  color: var(--color-black);
+  border: 1px solid #e0c200;
+}
+.btn-social.kakao:hover {
+  background: #fddc00;
+}
+
+/* 아이콘(예시로 G/K 문자를 사용) */
+.btn-social .icon {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  text-align: center;
+  line-height: 18px;
+  font-size: 12px;
+  background: transparent;
+}
+.btn-social .social-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+body {
+  background-color: #f5f5f5;
+  font-family: 'Pretendard-Regular', sans-serif;
+}
+.container {
+  max-width: 400px;
+  margin: 80px auto;
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+h2 {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 24px;
+  color: var(--color-mine-shaft);
+}
+.form-group {
+  margin-bottom: 16px;
+}
+.form-group label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: var(--color-mine-shaft);
+}
+.form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid var(--color-grey-80);
+  border-radius: 4px;
+  background: var(--color-white-solid);
+  transition: border-color 0.2s;
+}
+.form-group input:focus {
+  border-color: var(--color-pigment-indigo);
+  outline: none;
+}
+.password-wrapper {
+  position: relative;
+}
+.btn-toggle {
+  position: absolute;
+  right: 12px;
+  top: 38px;
+  background: none;
+  border: none;
+  color: var(--color-grey-80);
+  cursor: pointer;
+  font-size: 12px;
+}
+.btn-submit {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  background: var(--color-pigment-indigo);
+  color: var(--color-white-solid);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 16px;
+}
+.btn-submit:hover {
+  background: #5548b6;
+}
+.text-helper {
+  margin-top: 12px;
+  font-size: 13px;
+  text-align: center;
+}
+.text-helper a {
+  color: var(--color-pigment-indigo);
+  text-decoration: none;
+}
+.text-helper a:hover {
+  text-decoration: underline;
+}
+.divider {
+  margin: 16px 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--color-grey-80);
+}
+.btn-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border: 1px solid var(--color-grey-80);
+  background: var(--color-white-solid);
+}
+.btn-social img.social-icon {
+  width: 20px;
+  margin-right: 8px;
+}
+.btn-social.google:hover {
+  background: #f9e9e7;
+}
+.btn-social.kakao:hover {
+  background: #fff7e0;
+}

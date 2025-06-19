@@ -1,0 +1,97 @@
+        .detail-container {
+          max-width: 900px;
+          margin: 60px auto;
+          background: var(--color-white-solid, #fff);
+          border-radius: 10px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+          padding: 36px 32px 40px;
+          font-family: var(--font-pretendard-regular, sans-serif);
+        }
+        form label {
+          font-weight: bold;
+          display: block;
+          margin-top: 16px;
+          font-size: 15px;
+        }
+        form input[type="text"],
+        form textarea,
+        form input[type="file"] {
+          width: 100%;
+          padding: 10px;
+          margin-top: 6px;
+          border: 1px solid var(--color-grey-80);
+          border-radius: 4px;
+          font-family: var(--font-pretendard-regular);
+          font-size: 14px;
+          box-sizing: border-box;
+        }
+        form textarea {
+          height: 220px;
+          resize: vertical;
+        }
+        .submit-button {
+          margin-top: 24px;
+          padding: 10px 20px;
+          width: 100%;
+          background-color: var(--color-cornflower-blue);
+          color: #fff;
+          font-size: 16px;
+          font-family: var(--font-pretendard-medium);
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+        .submit-button:hover {
+          background-color: #3f8edc;
+        }
+        h2 {
+          text-align: center;
+          font-size: 24px;
+          margin-bottom: 24px;
+        }
+
+        .image-preview-list {
+           display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .image-preview-list img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #eee;
+            background: #fafafa;
+        }
+
+        form select {
+          width: 100%;
+          padding: 10px 12px;
+          font-size: 14px;
+          font-family: var(--font-pretendard-regular); /* input과 통일 */
+          border: 1px solid var(--color-grey-80);
+          border-radius: 4px;
+          background-color: var(--color-white-solid);
+          color: var(--color-mine-shaft);
+          appearance: none; /* 기본 브라우저 화살표 제거 (선택 사항) */
+          background-image: url('data:image/svg+xml;utf8,<svg fill="gray" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+          background-repeat: no-repeat;
+          background-position: right 12px center;
+          background-size: 16px;
+        }
+
+        .image-preview-list img {
+          width: 120px;
+          height: 120px;
+          object-fit: cover;
+          border-radius: 6px;
+          border: 1px solid #ddd;
+          background: #fafafa;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+          transition: transform 0.2s;
+        }
+
+        .image-preview-list img:hover {
+          transform: scale(1.05);
+        }

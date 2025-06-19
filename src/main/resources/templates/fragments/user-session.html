@@ -1,0 +1,20 @@
+
+<th:block th:fragment="sessionScript">
+  <th:block th:if="${user != null}">
+    <script th:inline="javascript">
+      /*<![CDATA[*/
+      window.userId = /*[[${user.userIdx}]]*/ 0;
+      window.isLoggedIn = true;
+      console.log("[로그인] userId:", window.userId);
+      /*]]>*/
+    </script>
+  </th:block>
+
+  <th:block th:if="${user == null}">
+    <script>
+      window.userId = 0;
+      window.isLoggedIn = false;
+      console.log("[비로그인] userId:", window.userId);
+    </script>
+  </th:block>
+</th:block>

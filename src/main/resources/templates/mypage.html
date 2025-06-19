@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마이페이지</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: #f8f9fa;
+            margin: 0; padding: 0;
+        }
+        .mypage-wrap {
+            display: flex;
+            max-width: 1300px;
+            margin: 60px auto 0 auto;
+            gap: 0 44px;
+            align-items: flex-start;
+        }
+        .mypage-sidebar {
+            width: 440px;
+            flex-shrink: 0;
+        }
+        .profile-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.09);
+            padding: 48px 0 30px 0;
+            margin-bottom: 28px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .profile-card img {
+            width: 120px; height: 120px;
+            object-fit: cover;
+            border-radius: 50%; border: 2px solid #e5e5e5; margin-bottom: 18px;
+        }
+        .profile-card .user-id { font-size: 1.35rem; font-weight: bold; color: #212529; margin-bottom: 5px; }
+        .profile-card .nickname { font-size: 1.15rem; color: #6c757d; margin-bottom: 16px; }
+        .profile-card .stats { display: flex; justify-content: center; gap: 64px; width: 100%; border-top: 1.5px solid #eee; padding-top: 18px;}
+        .profile-card .stat { text-align: center; flex: 1 0 0;}
+        .profile-card .stat-value { font-size: 1.21rem; font-weight: 700; }
+        .profile-card .stat-label { font-size: 1.01rem; color: #6c757d; }
+        .menu-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 18px rgba(0,0,0,0.09); padding: 0; overflow: hidden;}
+        .menu-list { list-style: none; padding: 0; margin: 0;}
+        .menu-list li { border-bottom: 1.5px solid #f0f0f0;}
+        .menu-list li:last-child { border-bottom: none;}
+        .menu-list a { display: block; width: 100%; padding: 22px 32px; color: #212529; background: none; text-decoration: none; font-size: 1.18rem; transition: background 0.14s, color 0.13s;}
+        .menu-list a.selected, .menu-list a:active { background: #4a90e2; color: #fff;}
+        .menu-list a:hover:not(.selected) { background: #f2f5fa;}
+        /* 오른쪽 본문 */
+        .mypage-content {
+            flex: 1 1 0;
+            min-width: 460px;
+        }
+        .page-section {
+            display: none;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.09);
+            padding: 40px 38px;
+        }
+        .page-section.active { display: block; }
+        .empty-message { color: #888; text-align: center; padding: 48px 0; font-size: 1.15rem; }
+        .pay-list, .post-list { padding:0; margin:0; }
+        .pay-item, .post-item { padding: 18px 0; border-bottom: 1.5px solid #f0f0f0; font-size: 1.07rem;}
+        .pay-item:last-child, .post-item:last-child { border-bottom:none; }
+        .pay-title { font-weight:700; font-size: 1.07em; }
+        .pay-meta { font-size:1em; color:#aaa; margin-top:2px;}
+        .post-title-link {
+            color: #376bc4;
+            font-size: 1.07rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+        .post-title-link:hover { text-decoration: underline; color: #235092; }
+        .post-meta { font-size:0.97em; color:#7d8793; margin-top:2px;}
+    </style>
+</head>
+<body>
+<div class="mypage-wrap">
+    <!-- 좌측: 프로필+메뉴 -->
+    <aside class="mypage-sidebar">
+        <div class="profile-card">
+            <img th:src="@{'/uploads/images/profile_upload/' + ${user.profileName}}" alt="프로필">
+            <div class="user-id" th:text="${user.userId}">test12345</div>
+            <div class="nickname" th:text="${user.nickname}">asd</div>
+
+        </div>
+        <nav class="menu-card">
+            <ul class="menu-list">
+                <li><a th:href="@{/main}">메인페이지로 이동</a></li>
+                <li><a href="#" data-section="profileEdit">내 정보 수정</a></li>
+                <li><a href="#" data-section="payments">결제 내역</a></li>
+                <li><a href="#" data-section="posts">내가 쓴 글</a></li>
+                <li><a th:href="@{/logout}">로그아웃</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- 오른쪽: 메뉴별 본문 -->
+    <div class="mypage-content">
+        <!-- 내 정보 수정 -->
+        <div id="profileEdit" class="page-section">
+            <h2 style="font-size:1.3rem; margin-bottom:24px;">내 정보 수정</h2>
+            <form th:object="${user}" th:action="@{/user/profile-edit}" method="post" enctype="multipart/form-data">
+                <label for="profileImage" style="font-size:1.09em; margin-bottom:7px;">프로필 사진</label>
+                <input type="file" id="profileImage" th:field="*{profileName}" style="font-size:1.07em;">
+                <label for="nickname" style="font-size:1.09em; margin-bottom:7px;">닉네임</label>
+                <input type="text" id="nickname" th:field="*{nickname}" style="font-size:1.07em;">
+                <div style="margin-top:22px; text-align:right;">
+                    <button type="submit" style="padding:12px 28px; font-size:1.12em;">정보 저장</button>
+                </div>
+            </form>
+        </div>
+        <!-- 결제 내역 -->
+        <div id="payments" class="page-section">
+            <h2 style="font-size:1.3rem; margin-bottom:24px;">결제 내역</h2>
+            <div th:if="${#lists.isEmpty(pageData.payments)}" class="empty-message">
+                결제 내역이 없습니다.
+            </div>
+            <ul class="pay-list" th:if="${!#lists.isEmpty(pageData.payments)}">
+                <li th:each="p : ${pageData.payments}" class="pay-item">
+                    <div class="pay-title" th:text="${p.productName}">상품명</div>
+                    <div class="pay-meta">
+                        <span th:text="${#dates.format(p.approvedAt,'yyyy-MM-dd')}">2025-06-19</span> |
+                        <span th:text="${p.paidAmount}">10000</span>원
+                        <span th:if="${p.status != null}">| <span th:text="${p.status}"></span></span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <!-- 내가 쓴 글 -->
+        <div id="posts" class="page-section">
+            <h2 style="font-size:1.3rem; margin-bottom:24px;">내가 쓴 글</h2>
+            <div th:if="${#lists.isEmpty(pageData.posts)}" class="empty-message">
+                작성한 글이 없습니다.
+            </div>
+            <ul class="post-list" th:if="${!#lists.isEmpty(pageData.posts)}">
+                <li th:each="post : ${pageData.posts}" class="post-item">
+                    <a th:href="@{/posts/{postIdx}(postIdx=${post.postIdx})}" th:text="${post.title}" class="post-title-link">글 제목</a>
+                    <div class="post-meta">
+                        <span th:text="${post.category}">카테고리</span> |
+                        <span th:text="${#dates.format(post.createdAt,'yyyy-MM-dd')}">2025-06-19</span> |
+                        조회 <span th:text="${post.views}">0</span>
+                        <span> | 댓글 <span th:text="${post.commentCount}">0</span></span>
+                        <span> | 좋아요 <span th:text="${post.likeCount}">0</span></span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<script>
+    document.querySelectorAll('.menu-list a[data-section]').forEach(function(menu){
+        menu.addEventListener('click', function(e){
+            e.preventDefault();
+            document.querySelectorAll('.page-section').forEach(function(sec){
+                sec.classList.remove('active');
+            });
+            document.querySelectorAll('.menu-list a[data-section]').forEach(function(a){
+                a.classList.remove('selected');
+            });
+            var sectionId = this.getAttribute('data-section');
+            this.classList.add('selected');
+            document.getElementById(sectionId).classList.add('active');
+        });
+    });
+    // 처음엔 아무 section도 선택X (원하면 기본으로 열 section을 여기에 추가)
+</script>
+</body>
+</html>

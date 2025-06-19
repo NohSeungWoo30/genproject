@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- 기존 CSS 변수 파일/메인 스타일 -->
+  <!--<link rel="stylesheet" href="/css/vars.css" />-->
+  <!--<link rel="stylesheet" href="/css/mainstyle.css" />-->
+  <link rel="stylesheet" href="/css/meetinglist.css" />
+  <!--토스트(우측하단 실시간 알림) 추가 모든 페이지에 꼭 추가하기-->
+  <link rel="stylesheet" href="/css/toast.css" />
+  <!--알림(종모양)기능 css추가 알림기능이 포함되는 모든 곳에 추가하기-->
+  <link rel="stylesheet" href="/css/notify.css" />
+  <!--알림 아이콘관련 계속 추가하기-->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+  <!--로그인 세션관련 계속 추가하기-->
+  <th:block th:replace="fragments/user-session :: sessionScript"></th:block>
+  <!-- 1. 필수 라이브러리: SockJS, STOMP -->
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+    <title>모임목록 페이지</title>
+
+</head>
+<body>
+<div class="_1920-w-light">
+
+    <!-- ─── 상단 네비게이션 ─── -->
+    <header class="container-nav">
+        <div class="nav-left">
+            <a th:href="@{/main}"><img class="logo" src="/img/icons/Group 17.png" alt="M 로고"></a>
+        </div>
+
+        <div class="nav-center">
+            <img src="/img/봄.png" class="nav-img" alt="그림10">
+            <img src="/img/여름.png" class="nav-img" alt="그림10">
+            <img src="/img/가을.png" class="nav-img" alt="그림10">
+            <img src="/img/겨울.png" class="nav-img" alt="그림10">
+        </div>
+
+        <!-- ** navRight: 로그인/알림/프로필 영역(동적) ** -->
+        <div class="nav-right" id="navRight">
+            <a href="/user/login" class="login-link">로그인ㆍ회원가입</a>
+        </div>
+    </header>
+
+    <!-- ─── 하단 고정 네비 (모바일 bottom‑nav 스타일) ─── -->
+    <section class="bottom-nav-wrapper">
+        <nav class="bottom-nav">
+            <a th:href="@{/group/create}" class="bottom-link">모임 생성</a>
+            <a th:href="@{/group/meetinglist}" class="bottom-link">모임 목록</a>
+            <a th:href="@{/product-list}" class="bottom-link">상품 목록</a>
+            <a th:href="@{/posts}" class="bottom-link">자유 게시판</a>
+        </nav>
+    </section>
+
+    <!-- ─── 필터 섹션 (이전 디자인 형태) ─── -->
+    <div class="filter-and-sort-area">
+        <button id="open-filter-modal" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">검색 필터 열기</button>
+    </div>
+    <div id="filter-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="close-button">&times;</span> <h2>모임 검색 필터</h2>
+            <div style="max-width: 1200px; margin: 20px auto 0 auto; padding: 0 10px;">
+
+                <!-- 날짜 선택 -->
+                <div style="display: inline-block; margin-right: 12px;">
+                    <label for="date-input" style="font-size: 14px; color: #333;">모임날짜</label><br />
+                    <input type="date" id="date-input" name="groupDate" style="padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;" />
+                </div>
+
+                <!-- 지역 선택 (버튼 클릭 시 region selector가 아래에 펼쳐집니다) -->
+                <div style="display: inline-block; margin-right: 12px;">
+                    <label style="font-size: 14px; color: #333; cursor: pointer;" id="open-region">지역</label><br />
+                    <button id="btn-region" style="padding: 6px 12px; border: 1px solid #ccc; border-radius: 4px; background: #fafafa; cursor: pointer; font-size: 14px;">선택</button>
+                </div>
+
+                <!-- 나이 범위 -->
+                <div style="display: inline-block; vertical-align: top; margin-right: 12px;">
+                    <label style="font-size: 14px; color: #333;">나이</label>
+                    <div class="age-container">
+                        <div class="age-value" id="age-value">20세 - 50세</div>
+                        <div class="dual-range">
+                            <input type="range" id="age-max" min="20" max="50" step="5" value="50" />
+                            <input type="range" id="age-min" min="20" max="50" step="5" value="20" />
+                        </div>
+                        <div class="age-ticks">
+                            <span>20</span><span>25</span><span>30</span><span>35</span><span>40</span><span>45</span><span>50</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 인원수 선택 -->
+                <div style="display: inline-block; margin-right: 12px;">
+                    <label for="count-select" style="font-size: 14px; color: #333;">최대참가인원수</label><br />
+                    <select id="count-select" style="padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;">
+                        <option value="" selected>선택</option>
+                        <option value="0-9999">전체</option>
+                        <option value="2-10">2~10명</option>
+                        <option value="11-20">11~20명</option>
+                        <option value="21-30">21~30명</option>
+                        <option value="21-30">21~30명</option>
+                    </select>
+                </div>
+
+                <!-- 카테고리 입력 -->
+                <div style="display: inline-block;">
+                    <label for="category-input" style="font-size: 14px; color: #333;">카테고리</label><br />
+                    <select
+                            id="category-input"
+                            style="padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; width: 140px;"
+                    >
+                        <option value="" selected disabled>선택</option>
+                        <option th:each="item : ${categoryMainList}"
+                                th:value="${item.cmCategoryMainIdx}"
+                                th:text="${item.categoryMainName}">
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- ─── 4. region 필터가 펼쳐지는 영역 (초기 숨김) ─── -->
+            <div id="filter-region-panel" style="display: none; margin-top: 8px; max-width: 1200px; margin-left: auto; margin-right: auto; padding: 0 10px;">
+                <div class="region-selector-container">
+                    <div class="region-selector">
+                        <!--<div class="region-header">
+                          <div class="btn" data-tab="area">시·도</div>
+                          <div class="btn" data-tab="sigungu">시·구·군</div>
+                          <div class="btn" data-tab="dong">동·읍·면</div>
+
+                        </div>-->
+                        <div class="region-content">
+                            <div class="region-pane" id="sido-pane">
+                                <h4>시·도</h4>
+                                <ul id="sido-list"></ul>
+                            </div>
+                            <div class="region-pane" id="sigungu-pane">
+                                <h4>시·구·군</h4>
+                                <ul id="sigungu-list"></ul>
+                            </div>
+                            <div class="region-pane" id="dong-pane">
+                                <h4>동·읍·면</h4>
+                                <ul id="dong-list"></ul>
+                            </div>
+                        </div>
+                        <div class="selected-tags" id="selected-tags"></div>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: right; margin-top: 20px;">
+                <button id="apply-filter-button" style="padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">필터 적용</button>
+            </div>
+        </div>
+    </div>  <!-- 모달창 검색 끝 -->
+
+    <!-- ─── “모임 카드” ─── -->
+    <div class="meeting-list-container">
+        <div id="meeting-grid" class="meeting-grid">
+            <div th:each="item : ${groupsList}" th:data-group-idx="${item.groupIdx}" class="card">
+                <div class="card-thumb">
+                    <img th:if="${item.groupImgUrl != null and !#strings.isEmpty(item.groupImgUrl)}"
+                         th:src="@{${item.groupImgUrl}}" />
+                    <img th:unless="${item.groupImgUrl != null and !#strings.isEmpty(item.groupImgUrl)}"
+                         th:src="@{/img/noImage.jpg}" />
+                </div>
+                <div class="card-info">
+                    <div class="card-category">
+                        <span th:text="${item.district}"></span> · <span th:text="${item.categoryMain.categoryMainName}"></span>
+                    </div>
+                    <div class="card-title" th:text="${item.title}">
+                    </div>
+                    <div class="card-date" th:text="${#temporals.format(item.groupDate, 'yyyy.MM.dd(E) HH:mm')}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── 10. 중간 배너 (가로 배너, 메인과 동일) ─── -->
+    <div class="mid-banner">
+        <img src="/img/_200.png" alt="중간 배너" class="mid-banner-img" />
+    </div>
+
+    <!-- ─── 11. 하단 Footer ─── -->
+    <footer class="footer" style="margin-top: 20px;">
+        <div class="footer-links">
+            <a href="about.html" class="footer-link">회사소개</a>
+            <span class="footer-divider"></span>
+            <a href="partnership.html" class="footer-link">제휴안내</a>
+            <span class="footer-divider"></span>
+            <a href="advertising.html" class="footer-link">광고안내</a>
+            <span class="footer-divider"></span>
+            <a href="terms.html" class="footer-link">이용약관</a>
+            <span class="footer-divider"></span>
+            <a href="privacy.html" class="footer-link">개인정보처리방침</a>
+            <span class="footer-divider"></span>
+            <a href="youth-policy.html" class="footer-link">청소년보호정책</a>
+        </div>
+        <div class="footer-copy">
+            © 1999 - 2025 dcinside. All rights reserved.
+        </div>
+    </footer>
+</div>
+
+<script th:inline="javascript">
+    // 로그인한 사용자 정보가 필요할 때 대비
+    window.currentLoggedInUser = {
+      userIdx: [[${currentUser != null ? currentUser.userIdx : -1}]],
+      nickname: [[${currentUser != null ? currentUser.nickname : "'비회원'"}]]
+    };
+</script>
+<!--꼭 notify.js나 notification.js 보다 위에-->
+<th:block th:replace="fragments/notification-templates :: notiTemplates"></th:block>
+<script src="/js/notify.js" defer></script>
+<script src="/js/notification.js" defer></script>
+
+
+<!-- ───regionData.js 파일을 동일 경로에 두고 호출하세요 ─── -->
+<!--<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="/js/regionData.js"></script>
+<script src="/js/meetinglist.js"></script>
+<!--<script src="/js/meetingcreate.js"></script>-->
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+      console.log("✅ DOMContentLoaded - 알림/프로필 초기화 시작");
+
+      if (typeof initNotification === "function") {
+        initNotification(); // 알림 렌더링용 함수
+      }
+
+      if (typeof initUserSession === "function") {
+        initUserSession(); // 사용자 프로필 렌더링용 함수
+      }
+    });
+</script>
+
+
+</body>
+</html>
