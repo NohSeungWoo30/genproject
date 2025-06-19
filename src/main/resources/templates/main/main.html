@@ -220,9 +220,20 @@
 
 
 <!-- 1. 플로팅 간편매칭 버튼 -->
-<button id="open-filter-btn" class="fixed bottom-10 right-10 bg-white text-blue-700 border-2 border-blue-700 px-6 py-4 rounded-full font-bold shadow-xl hover:bg-blue-50 transition-all duration-300 hover:scale-105 flex items-center gap-2 z-40">
+<!-- 필터 전용 버튼 -->
+<button id="open-filter-btn"
+        class="fixed bottom-10 right-10 bg-white text-blue-700 border-2 border-blue-700 px-6 py-4 rounded-full font-bold shadow-xl hover:bg-blue-50 transition-all duration-300 hover:scale-105 flex items-center gap-2 z-40"
+        style="display: none;">
     <ion-icon name="options-outline" class="text-xl"></ion-icon>
     <span>간편 매칭</span>
+</button>
+
+<!-- 모임 상세 보기 버튼 -->
+<button id="open-room-btn"
+        class="fixed bottom-10 right-10 bg-white text-green-700 border-2 border-green-700 px-6 py-4 rounded-full font-bold shadow-xl hover:bg-green-50 transition-all duration-300 hover:scale-105 flex items-center gap-2 z-40"
+        style="display: none;">
+    <ion-icon name="chatbubbles-outline" class="text-xl"></ion-icon>
+    <span>그룹방</span>
 </button>
 <!-- 2. 필터 모달 -->
 <div id="filter-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
@@ -355,6 +366,9 @@
       userIdx: [[${currentUser != null ? currentUser.userIdx : -1}]],
       nickname: [[${currentUser != null ? currentUser.nickname : "'비회원'"}]]
     };
+
+    // ✅ 여기에 상태값 추가
+    window.isChatJoined = [[${isJoined}]];
 </script>
 
 <!--꼭 notify.js나 notification.js 보다 위에-->

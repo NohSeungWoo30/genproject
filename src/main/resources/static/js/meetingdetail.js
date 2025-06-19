@@ -73,7 +73,7 @@ function displayRoomDetails() {
     groupDate
   } = room;
 
-  detailCardContainer.innerHTML = /* html */
+  detailCardContainer.innerHTML = /* html */`
     <div class="live-card">
       <div class="card-top-banner">
         <img src="${groupImgUrl}" alt="대표 이미지" class="food-image">
@@ -103,7 +103,7 @@ function displayRoomDetails() {
         </div>
         <div class="card-actions" id="cardActions"></div>
       </div>
-    </div>;
+    </div>`;
 
     updateMainButtons();
 
@@ -182,7 +182,7 @@ async function joinChat() {
     }
 
     try {
-      const response = await fetch(/group/api/groups/${window.groupId}/join, {
+      const response = await fetch( `/group/api/groups/${window.groupId}/join`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -204,7 +204,7 @@ async function joinChat() {
                   alert(msg || "이용권 잔여 횟수가 없습니다.");
                   break;
                 default:
-                  alert(오류(${response.status}) : ${msg});
+                  alert(`오류(${response.status}) : ${msg}`);
               }
               return;           // 실패 시 이후 로직 중단
             }
@@ -253,7 +253,7 @@ async function updateFloatingButton () {
     /* 1) 로컬스토리지 우선 */
     const stored = localStorage.getItem('joinedGroupId');
     if (stored) {
-      const r = await fetch(/group/api/groups/${stored});
+      const r = await fetch(`/group/api/groups/${stored}`);
       if (r.ok) {
         window.room  = await r.json();
         window.groupId = room.groupIdx;
@@ -266,7 +266,7 @@ async function updateFloatingButton () {
     }
 
     /* 2) 서버에 현재 참가 방 질의 */
-    const res = await fetch(/group/api/current-group?userId=${window.userId});
+    const res = await fetch(`/group/api/current-group?userId=${window.userId}`);
     console.log('📡 status', res.status);
 
     if (res.status === 200) {
@@ -295,7 +295,7 @@ async function leaveChat() {
   try {
     // 1. 서버에 “나가기” 요청
     const res = await fetch(
-      /group/api/groups/${window.groupId}/leave?userId=${window.userId},
+      `/group/api/groups/${window.groupId}/leave?userId=${window.userId}`,
       { method: 'POST' }
     );
     const result = await res.json();
@@ -314,7 +314,7 @@ async function leaveChat() {
     }
 
     // 4. ★ DB에서 최신 값 다시 받아오기 ★
-    const fresh = await fetch(/group/api/groups/detail/${window.groupId})
+    const fresh = await fetch(`/group/api/groups/detail/${window.groupId}`)
                           .then(r => r.json());
     window.room = fresh;
 
@@ -340,7 +340,7 @@ function connectWebSocket() {
 
   const groupId = window.groupId; // 이걸 함수 안에서 다시 선언
 
-  const url = ws://${location.hostname}:8080/ws/chat?groupId=${encodeURIComponent(groupId)};
+  const url = `ws://${location.hostname}:8080/ws/chat?groupId=${encodeURIComponent(groupId)}`;
   ws = new WebSocket(url);
 
   ws.onopen = () => console.log('✅ WebSocket 연결됨');
@@ -372,12 +372,15 @@ function connectWebSocket() {
 
 
       if (data.type === 'EDIT') {
-        const target = document.getElementById(message-${data.messageId});
+        const target = document.getElementById(`message-${data.messageId}`);
         const edited = String(data.isEdited).toUpperCase() === 'Y';
         if (target) {
           const bubble = target.querySelector('.bubble');
           if (bubble) {
-            bubble.innerHTML = ${escapeHTML(data.newContent)}${edited ? ' <span class="edited-label">(수정됨)</span>' : ''};
+            bubble.innerHTML = `
+              ${escapeHTML(data.newContent)}
+              ${edited ? '<span class="edited-label">(수정됨)</span>' : ''}
+            `;
           }
         }
         return;
@@ -464,21 +467,21 @@ function addMessage(msgData) {
 
   // 삭제된 메시지 처리
   if (isDeleted === 'Y') {
-    let target = document.getElementById(message-${messageId});
+    let target = document.getElementById(`message-${messageId}`);
     const editedText = edited ? ' <span class="edited-label">(수정됨)</span>' : '';
     if (!target) {
       const group = document.createElement('div');
       group.className = 'message-group';
-      group.id = message-${messageId};
+      group.id = `message-${messageId}`
       const messageDiv = document.createElement('div');
-      messageDiv.className = message ${type} deleted;
-      messageDiv.innerHTML =
+      messageDiv.className = `message ${type} deleted`;
+      messageDiv.innerHTML =`
         <div class="content-container">
           <div class="bubble-container">
             <div class="bubble">삭제된 메시지입니다.${editedText}</div>
             <span class="timestamp"></span>
           </div>
-        </div>;
+        </div>`;
       group.appendChild(messageDiv);
       chatMessages.appendChild(group);
       chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -486,7 +489,7 @@ function addMessage(msgData) {
     }
     const bubble = target.querySelector('.bubble');
     if (bubble) {
-      bubble.innerHTML = 삭제된 메시지입니다.${editedText};
+      bubble.innerHTML = `삭제된 메시지입니다.${editedText}`;
       bubble.classList.add('deleted');
     }
     return;
@@ -495,11 +498,12 @@ function addMessage(msgData) {
   // 일반 메시지
   const group = document.createElement('div');
   group.className = 'message-group';
-  group.id = message-${messageId};
+  group.id = `message-${messageId}`;
+
 
 
   const messageDiv = document.createElement('div');
-  messageDiv.className = message ${type};
+  messageDiv.className = `message ${type}`;
   /*messageDiv.innerHTML =
     <img class="avatar" src="${avatar}" alt="avatar">
     <div class="content-container">
@@ -513,8 +517,11 @@ function addMessage(msgData) {
     </div>
   ;*/
 
-  messageDiv.innerHTML =
-      ${type === 'self' ? '' : <img class="avatar" src="${avatar}" alt="avatar">}
+  messageDiv.innerHTML =`
+      ${type === 'self'
+           ? ''
+           : `<img class="avatar" src="${avatar}" alt="avatar">`
+        }
       <div class="content-container">
         <span class="nickname">${nickname}</span>
         <div class="bubble-container">
@@ -523,8 +530,7 @@ function addMessage(msgData) {
           </div>
           <span class="timestamp">${formatTime(date)}</span>
         </div>
-      </div>
-    ;
+      </div>`;
   group.appendChild(messageDiv);
   chatMessages.appendChild(group);
   chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -538,10 +544,12 @@ function showInlineChat(isFirstTime) {
   if (isFirstTime) {
     chatMessages.innerHTML = '';
     lastMessageInfo = null;
-    addSystemMessage(${currentLoggedInUser.nickname}님이 채팅방에 입장하셨습니다.);
+/*
+    addSystemMessage(`${currentLoggedInUser.nickname}님이 채팅방에 입장하셨습니다.`);
+*/
 
   // ✅ 초기 채팅 메시지 불러오기
-  fetch(/api/chat/messages?groupId=${groupId})
+  fetch(`/api/chat/messages?groupId=${groupId}`)
 
     .then(res => res.json())
     .then(messages => {
@@ -577,7 +585,7 @@ function getTimeRemaining(endtime) {
   const hours = Math.floor((total / (1000 * 60 * 60)) % 24);
   const minutes = Math.floor((total / 1000 / 60) % 60);
   if (total <= 0) return '모임 시간 종료';
-  return ${hours > 0 ? hours + '시간 ' : ''}${minutes}분;
+  return `${hours > 0 ? hours + '시간 ' : ''}${minutes}분`;
 }
 
 function formatTime(date) {
@@ -588,7 +596,7 @@ function formatTime(date) {
   const minutes = String(d.getMinutes()).padStart(2, '0');
   const ampm = hours >= 12 ? '오후' : '오전';
   const displayHour = hours % 12 || 12;
-  return ${month}월 ${day}일 ${ampm} ${displayHour}시 ${minutes}분;
+  return `${month}월 ${day}일 ${ampm} ${displayHour}시 ${minutes}분`;
 }
 // ✅ 이벤트 연결 ──────────────────────────
 if (sendBtn)   sendBtn.addEventListener('click', sendMessage);
@@ -603,12 +611,14 @@ if (roomBtn) {
     participantsList.innerHTML = room.participants.map(p => {
       let tag = p.nickname;
       if (p.nickname === room.hostNickname) tag += ' (방장)';
-      return
-        <div class="participant" data-nickname="${p.nickname}" data-avatar="${p.avatar}">
-          <img src="${p.avatar}" alt="${p.nickname}">
-          <span class="name">${tag}</span>
-        </div>;
-    }).join('');
+      return `
+            <div class="participant" data-nickname="${p.nickname}" data-avatar="${p.avatar}">
+              <img src="${p.avatar}" alt="${p.nickname}">
+              <span class="name">${tag}</span>
+            </div>
+          `;
+        })
+        .join('');
 
     updateSidePanelFooter();
     roomPanel.classList.add('active');
@@ -649,7 +659,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   if (storedGroupId) {
     try {
-      const res = await fetch(/group/api/groups/${storedGroupId});
+      const res = await fetch(
+        `/group/api/groups/${storedGroupId}`
+      );
       if (!res.ok) throw new Error("방 정보 로딩 실패");
 
       const joinedRoom = await res.json();
@@ -664,6 +676,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     } catch (e) {
       console.warn("⚠ 저장된 방 로딩 실패, 초기화함");
       localStorage.removeItem('joinedGroupId');
+
       displayRoomDetails();
     }
   } else {
@@ -690,10 +703,16 @@ window.addEventListener('DOMContentLoaded', async () => {
       participantsList.innerHTML = room.participants.map(p => {
         let nameTag = p.nickname;
         if (p.nickname === room.hostNickname) nameTag += ' (방장)';
-        return <div class="participant" data-nickname="${p.nickname}" data-avatar="${p.avatar}">
-                  <img src="${p.avatar}" alt="${p.nickname}">
-                  <span class="name">${nameTag}</span>
-                </div>;
+        return `
+          <div
+            class="participant"
+            data-nickname="${p.nickname}"
+            data-avatar="${p.avatar}"
+          >
+            <img src="${p.avatar}" alt="${p.nickname}">
+            <span class="name">${p.nickname}</span>
+          </div>
+        `;
       }).join('');
       updateSidePanelFooter();
       roomPanel.classList.add('active');
@@ -765,15 +784,19 @@ function addContextMenuHandler(messageDiv, msgData) {
     if (top + maxH > vh) top = vh - maxH - 8;
 
     contextMenu.style.position = 'fixed'; // ✅ body 기준 위치 고정
-    contextMenu.style.left = ${left}px;
-    contextMenu.style.top = ${top}px;
+    contextMenu.style.left = `${left}px`;
+    contextMenu.style.top = `${top}px`;
 
     // 🔸 메뉴 구성
     const isSelf = msgData.type === 'self';
     contextMenu.innerHTML = isSelf
-      ? <div class="menu-item" onclick="handleEdit(${msgData.messageId})">✏ 수정</div>
-         <div class="menu-item" onclick="handleDelete(${msgData.messageId})">🗑 삭제</div>
-      : <div class="menu-item" onclick="handleReport(${msgData.messageId}, ${msgData.userIdx})">🚨 신고</div>;
+      ? `
+          <div class="menu-item" onclick="handleEdit(${msgData.messageId})">수정</div>
+          <div class="menu-item" onclick="handleDelete(${msgData.messageId})">삭제</div>
+        `
+      : `
+          <div class="menu-item" onclick="handleReport(${msgData.messageId}, ${msgData.userIdx})">신고</div>
+        `;
 
     document.body.appendChild(contextMenu);
 
@@ -792,7 +815,7 @@ function handleEdit(messageId) {
   console.log("✏ 수정 요청:", messageId);
   document.querySelectorAll('.custom-context-menu').forEach(menu => menu.remove());
 
-const messageEl = document.getElementById(message-${messageId});
+const messageEl = document.getElementById(`message-${messageId}`);
   if (!messageEl) return;
 
   const bubble = messageEl.querySelector('.bubble');
@@ -847,8 +870,10 @@ function restoreBubble(bubble, newContent, isEdited = true) {
   const container = bubble.parentNode;
   container.querySelectorAll('.edit-input, .edit-actions').forEach(el => el.remove());
 
-  bubble.innerHTML = ${escapeHTML(newContent)}${isEdited ? ' <span class="edited-label">(수정됨)</span>' : ''};
-
+  bubble.innerHTML = `
+    ${escapeHTML(newContent)}
+    ${isEdited ? '<span class="edited-label">(수정됨)</span>' : ''}
+  `;
   bubble.style.display = '';
 }
 
@@ -945,8 +970,11 @@ function submitReport() {
   }
 
 function closeGroupDetailModal() {
-  const modal = document.getElementById('group-detail-modal');
-  if (modal) modal.classList.add('hidden');
+  // 그룹 상세 모달 닫기
+  document.getElementById('group-detail-modal')?.classList.add('hidden');
+
+  // 💡 혹시라도 열려 있을 수 있는 필터 모달도 닫는다
+  document.getElementById('filter-modal')?.classList.add('hidden');
 }
 
 function setupChatEvents() {
@@ -985,7 +1013,7 @@ document.addEventListener('open-group-detail', async ({ detail }) => {
   const { groupIdx } = detail;
   try {
     /* 최신 그룹 정보 가져오기 */
-    const data = await fetch(/group/api/groups/detail/${groupIdx})
+    const data = await fetch(`/group/api/groups/detail/${groupIdx}`)
                          .then(r => r.json());
 
     /* 전역 상태 갱신 – meetingdetail.js 가 이미 쓰는 변수들 */
@@ -1003,4 +1031,34 @@ document.addEventListener('open-group-detail', async ({ detail }) => {
     console.error('그룹 데이터 로드 실패', err);
     alert('모임 정보를 불러오지 못했습니다.');
   }
+});
+
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const filterBtn   = document.getElementById('open-filter-btn');
+  const openRoomBtn = document.getElementById('open-room-btn');
+
+  if (!filterBtn || !openRoomBtn) {
+    console.warn("버튼 요소를 찾지 못했습니다.");
+    return;   // 이제 함수 내부라 안전합니다
+  }
+
+  // (1) 참여 여부 동기화
+  await updateFloatingButton();
+
+  // (2) 토글
+  if (window.isChatJoined) {
+    openRoomBtn .style.display = 'flex';
+    filterBtn  .style.display = 'none';
+  } else {
+    filterBtn  .style.display = 'flex';
+    openRoomBtn .style.display = 'none';
+  }
+
+  // (3) 클릭 핸들러 바인딩
+  filterBtn .addEventListener('click', openModal);
+  openRoomBtn .addEventListener('click', () => {
+    document.getElementById('group-detail-modal')?.classList.remove('hidden');
+    displayRoomDetails();
+  });
 });
