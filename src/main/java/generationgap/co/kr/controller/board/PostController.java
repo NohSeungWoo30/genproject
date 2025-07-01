@@ -100,7 +100,7 @@ public class PostController {
         List<Post> posts = postService.getPostListPagedFiltered(offset, pageSize, category, sort, keyword);
 
 
-        // ✅ 댓글 수 계산 추가
+        // 댓글 수 계산 추가
         for (Post post : posts) {
             List<Comment> all = commentService.getFilteredCommentsByPost(post.getPostIdx().intValue());
             int visibleCount = (int) all.stream()
@@ -227,7 +227,7 @@ public class PostController {
         for (Comment parent : parentComments) {
             List<Comment> replies = repliesGroupedByParentId.get(parent.getCommentIdx());
 
-            // 🔐 null 방지
+            // null 방지
             if (replies == null) {
                 replyCounts.put(parent.getCommentIdx(), 0);
             } else {

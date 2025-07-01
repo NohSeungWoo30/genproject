@@ -84,7 +84,7 @@
     <aside class="mypage-sidebar">
         <div class="profile-card">
             <img th:src="${user.profileName}" alt="프로필">
-            <div class="user-id" th:text="${user.userId}">test12345</div>
+            <div class="useremail" th:text="${user.email}">test12345</div>
             <div class="nickname" th:text="${user.nickname}">asd</div>
             <div class="remainingUses" th:text="'남은 이용권 : ' + ${userMembership.remainingUses}">남은 이용권 : 0</div>
 

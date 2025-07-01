@@ -112,7 +112,7 @@
         </a>
 
         <a href="group/meetinglist?mainCategoryId=7" class="cat-link">
-            <img src="/img/icons/game1.png" alt="게임/오락 아이콘" class="cat-icon" />
+            <img src="/img/icons/pet1.png" alt="게임/오락 아이콘" class="cat-icon" />
             <span class="cat-text">반려동물/자연</span>
         </a>
 
@@ -294,7 +294,7 @@
     </div>
 </div>
 <!-- 3. 상세 모달 -->
-<!-- ✅ 그룹 상세 모달 (meetingdetail.js가 조작하는 대상) -->
+<!-- 그룹 상세 모달 (meetingdetail.js가 조작하는 대상) -->
 <div id="group-detail-modal" class="fixed hidden inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center">
     <div class="bg-white rounded-xl shadow-lg w-full max-w-3xl relative overflow-y-auto max-h-[90vh]">
         <button onclick="closeGroupDetailModal()" class="absolute top-2 right-2 text-2xl text-gray-500 hover:text-black">✕</button>
@@ -303,7 +303,7 @@
             <!-- 모임 정보 카드 -->
             <div id="roomDetailCard"></div>
 
-            <!-- ✅ 인라인 채팅 영역 교체 -->
+            <!-- 인라인 채팅 영역 교체 -->
             <div id="inline-chat-wrapper" style="display: none;">
                 <div class="chat-container">
                     <header class="chat-header">
@@ -326,7 +326,7 @@
 
         <!-- 신고 모달 (기존 방식 유지) -->
         <div id="report-modal" style="display:none; position:fixed; top:20%; left:40%; background:white; padding:20px; border:1px solid #ccc; z-index:9999;">
-            <h3>🚨 메시지 신고</h3>
+            <h3>메시지 신고</h3>
             <label>신고 사유
                 <select id="report-reason">
                     <option value="1">욕설/비방/혐오 표현</option>
@@ -340,8 +340,8 @@
                 </select>
             </label><br><br>
             <textarea id="report-comment" placeholder="신고 내용을 입력하세요" rows="4" cols="40"></textarea><br><br>
-            <button onclick="submitReport()">🚨 신고 제출</button>
-            <button onclick="closeReportModal()">❌ 닫기</button>
+            <button onclick="submitReport()">신고 제출</button>
+            <button onclick="closeReportModal()">닫기</button>
         </div>
     </div>
 </div>
@@ -367,7 +367,7 @@
       nickname: [[${currentUser != null ? currentUser.nickname : "'비회원'"}]]
     };
 
-    // ✅ 여기에 상태값 추가
+    // 여기에 상태값 추가
     window.isChatJoined = [[${isJoined}]];
 </script>
 

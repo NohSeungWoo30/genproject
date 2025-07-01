@@ -17,7 +17,7 @@ public interface NotificationMapper {
                             @Param("message") String message,
                             @Param("notiTypeIdx") Long notiTypeIdx,
                             @Param("notiUrl") String notiUrl);*/
-    void insertNotification(Notification notification); // ✅ 도메인 객체 기반으로
+    void insertNotification(Notification notification); // 도메인 객체 기반으로
 
 
     List<Notification> getNotificationsByUser(@Param("userId") Long userId);

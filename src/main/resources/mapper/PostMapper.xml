@@ -176,35 +176,6 @@
 
 
 
-    <!--
-    getPostsPagedFiltered 원코드
-    <select id="getPostsPagedFiltered" resultMap="postMap">
-        SELECT
-        bp.*, u.nickname AS nickname, COUNT(c.comment_idx) AS comment_count
-        FROM board_posts bp
-        JOIN users u ON bp.author_idx = u.user_idx
-        LEFT JOIN post_comments c ON bp.post_idx = c.post_idx AND c.is_deleted = 'N'
-        WHERE bp.is_deleted = 'N'
-        <if test="category != null and category != ''">
-            AND bp.category = #{category}
-        </if>
-        GROUP BY bp.post_idx, bp.author_idx, bp.category, bp.title, bp.content,
-        bp.view_count, bp.like_count, bp.deleted_by, bp.is_deleted,
-        bp.created_at, bp.deleted_at, bp.update_at, u.nickname
-        <choose>
-            <when test="sort == 'views'">
-                ORDER BY bp.view_count DESC, bp.created_at DESC, bp.post_idx DESC
-            </when>
-            <when test="sort == 'likes'">
-                ORDER BY bp.like_count DESC, bp.created_at DESC, bp.post_idx DESC
-            </when>
-            <otherwise>
-                ORDER BY bp.created_at DESC, bp.post_idx DESC
-            </otherwise>
-        </choose>
-        OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
-    </select>-->
-
     <select id="getPostsPagedFiltered" resultMap="postMap">
         SELECT
         bp.post_idx,
@@ -259,16 +230,6 @@
         </choose>
         OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
     </select>
-
-
-    <!-- getPostCountFiltered 원코드
-    <select id="getPostCountFiltered" resultType="int">
-        SELECT COUNT(*) FROM board_posts
-        WHERE is_deleted = 'N'
-        <if test="category != null and category != ''">
-            AND category = #{category}
-        </if>
-    </select>-->
 
     <select id="getPostCountFiltered" resultType="int">
         SELECT COUNT(*) FROM board_posts

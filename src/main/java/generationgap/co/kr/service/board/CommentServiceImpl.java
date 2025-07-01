@@ -38,7 +38,7 @@ public class CommentServiceImpl implements CommentService {
                     LocalDateTime baseTime = null;
                     if (c.getUpdateAt() != null) {
                         baseTime = c.getUpdateAt();//수정 시간 우선
-                        c.setEdited(true);       // ✅ 수정됨 표시
+                        c.setEdited(true);       // 수정됨 표시
 
                     }else if(c.getCreatedAt()!=null){
                         baseTime = c.getCreatedAt();//작성 시간
@@ -80,7 +80,7 @@ public class CommentServiceImpl implements CommentService {
             int postWriterId = commentMapper.getPostWriterByPostIdx(comment.getPostIdx());
             if (postWriterId != currentUserId) {
                 sendNotificationTo(postWriterId, postId, "/posts/" + comment.getPostIdx());
-                System.out.println("🎯 대상은 게시글 작성자");
+                System.out.println("대상은 게시글 작성자");
 
             }
         } else {
@@ -88,7 +88,7 @@ public class CommentServiceImpl implements CommentService {
             Comment parent = commentMapper.getCommentById(comment.getParentCommentId().intValue());
             if (parent != null && parent.getCommenterIdx() != currentUserId) {
                 sendNotificationTo(parent.getCommenterIdx(), postId, "/posts/" + comment.getPostIdx());
-                System.out.println("🎯 대상은 부모 댓글 작성자");
+                System.out.println("대상은 부모 댓글 작성자");
 
             }
         }

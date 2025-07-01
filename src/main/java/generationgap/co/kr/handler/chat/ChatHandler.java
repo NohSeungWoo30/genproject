@@ -74,7 +74,7 @@ public class ChatHandler extends TextWebSocketHandler {
 
         // 1. 세션 등록
         groupSessions.computeIfAbsent(groupId, k-> new HashSet<>()).add(session);
-        System.out.println("✅ WebSocket 연결됨: groupId = " + groupId);
+        System.out.println("WebSocket 연결됨: groupId = " + groupId);
 
         //먼저 현재 사용자 식별 메세지 전송하기
         JSONObject identityMsg = new JSONObject();
@@ -92,7 +92,7 @@ public class ChatHandler extends TextWebSocketHandler {
             json.put("msg", msg.getContent());
             String msgUserId = userMapper.getUserIdByUserIdx(msg.getSenderIdx());
             json.put("userId", msgUserId);
-            json.put("userIdx", msg.getSenderIdx()); // ✅ 숫자형 고유 ID 추가
+            json.put("userIdx", msg.getSenderIdx()); // 숫자형 고유 ID 추가
             json.put("messageId", msg.getMessagesIdx());
             json.put("sentAt", msg.getSentAt().toString());
             json.put("isDeleted", msg.getIsDeleted());
@@ -101,7 +101,9 @@ public class ChatHandler extends TextWebSocketHandler {
             session.sendMessage(new TextMessage(json.toString()));
         }
 
+/*
         sendSystemMessage(groupId, nickname + " 님이 입장하셨습니다.");
+*/
 
     }//afterConnectionEstablished
 
@@ -115,7 +117,7 @@ public class ChatHandler extends TextWebSocketHandler {
         // 1. 데이터 파싱
         String groupId = getParam(session, "groupId");
 
-        // ✅ 인증 정보 수동 추출 (Spring Security 6.x 기준)
+        // 인증 정보 수동 추출 (Spring Security 6.x 기준)
         SecurityContext context = (SecurityContext) session.getAttributes().get("SPRING_SECURITY_CONTEXT");
         if (context == null || context.getAuthentication() == null) {
             session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"세션에 인증 정보 없음\"}"));
@@ -217,7 +219,7 @@ public class ChatHandler extends TextWebSocketHandler {
 
         chatService.saveMessage(chatMessage); //서비스 단에서 DB 저장
         Long id = chatMessage.getMessagesIdx();
-        System.out.println("✅ 저장된 메시지 ID = " + id);
+        System.out.println("저장된 메시지 ID = " + id);
 
         // 4. 같은 그룹(groupId) 세션에 브로드캐스트
         JSONObject response = new JSONObject();
@@ -236,8 +238,8 @@ public class ChatHandler extends TextWebSocketHandler {
             }
         }
 
-        System.out.println("💬 userIdx = " + userIdx);
-        System.out.println("💬 chatMessage.getSenderIdx() = " + chatMessage.getSenderIdx());
+        System.out.println("userIdx = " + userIdx);
+        System.out.println("chatMessage.getSenderIdx() = " + chatMessage.getSenderIdx());
     }//handleTextMessage
 
     @Override
@@ -256,15 +258,17 @@ public class ChatHandler extends TextWebSocketHandler {
                     nickname = customUser.getNickname();
                 }
             }
+/*
 
             sendSystemMessage(groupId, nickname + " 님이 퇴장하셨습니다.");
+*/
 
             if(sessions.isEmpty()){
                 groupSessions.remove(groupId);
             }
         }
 
-        System.out.println("❌ 연결 종료: groupId = " + groupId);
+        System.out.println("연결 종료: groupId = " + groupId);
     }
 
     private void sendSystemMessage(String groupId, String content){

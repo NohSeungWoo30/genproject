@@ -97,7 +97,7 @@ $(function () {
         const ageRange = ageSlider.noUiSlider.get();
         const rawGender = $('input[name="gender"]:checked').val();
 
-        // ✅ gender 문자열 → 코드값 변환
+        // gender 문자열 → 코드값 변환
         const genderMap = {
             '누구나': 'A',
             '남자만': 'M',
@@ -174,7 +174,7 @@ $(function () {
     $('#results-list').on('click', '.result-item-card', function () {
         const groupId = $(this).data('group-id');
 
-        // 👉 필터 모달 먼저 닫기
+        // 필터 모달 먼저 닫기
         $('#filter-modal').addClass('hidden');
 
         // 1. 상세 모달 열기
@@ -186,20 +186,20 @@ $(function () {
         // 3. 그룹 정보 요청
         fetch(`/group/api/groups/detail/${groupId}`)
             .then(res => {
-                if (!res.ok) throw new Error("❌ 그룹 데이터 응답 실패");
+                if (!res.ok) throw new Error("그룹 데이터 응답 실패");
                 return res.json(); // 여기서 실제 groupData를 받음
             })
             .then(groupData => {
-                console.log("✅ groupData 수신", groupData);
+                console.log("groupData 수신", groupData);
 
                 // 방 정보 저장
                 window.room = groupData;
 
-                // ✅ 참가 여부 판단해서 저장
+                // 참가 여부 판단해서 저장
                 window.isChatJoined = groupData.participants?.some(p => p.name === window.currentLoggedInUser?.name);
 
                 // 상세 내용 렌더링
-               // ✅ 함수 존재 여부 확인 후 안전하게 실행
+               // 함수 존재 여부 확인 후 안전하게 실행
                  if (typeof displayRoomDetails === 'function') {
                    displayRoomDetails();
                  } else {

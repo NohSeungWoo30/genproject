@@ -4,12 +4,14 @@ import generationgap.co.kr.domain.group.CategoryMain;
 import generationgap.co.kr.domain.group.CategorySub;
 import generationgap.co.kr.domain.group.GroupMembers;
 import generationgap.co.kr.domain.group.Groups;
+import generationgap.co.kr.domain.payment.UserMemberships;
 import generationgap.co.kr.domain.user.UserDTO;
 import generationgap.co.kr.dto.group.GroupDto;
 import generationgap.co.kr.mapper.group.GroupsMapper;
 import generationgap.co.kr.repository.payment.UserMembershipsRepository;
 import generationgap.co.kr.security.CustomUserDetails;
 import generationgap.co.kr.service.group.GroupService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import generationgap.co.kr.service.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +47,10 @@ public class GroupsController {
     @Autowired // 회원가입, 첫 구글로그인 횟수를 위한
     private UserMembershipsRepository userMembershipsRepository;
     // 이미지 저장 경로를 상수로 정의하여 관리 용이성 높임
-    private static final String UPLOAD_DIR = "src/main/resources/static/upload/groupImg/";
+    //private static final String UPLOAD_DIR = "src/main/resources/static/upload/groupImg/";
+    @Value("${file.upload-dir.group-img}")
+    private String uploadDir;
+
 
     @GetMapping("/favicon.ico")
     @ResponseBody
@@ -178,7 +183,7 @@ public class GroupsController {
 
                 // 성공적으로 생성이 되면 스크립트를 통해 디테일 페이지로 방생성번호와 함께 이동
                 //return "redirect:/group/detail/" + createdGroupId;
-                return "redirect:/group/detail?groupId=" + createdGroupId;
+                return "redirect:/main";
             } catch (Exception e) {
                 System.err.println("그룹 저장 실패: " + e.getMessage());
                 e.printStackTrace();
@@ -231,58 +236,40 @@ public class GroupsController {
         System.out.println("DEBUG: saveGroupImage 메서드 진입");
 
         if (groupImageFile == null || groupImageFile.isEmpty()) {
-            return null; // 파일이 없거나 비어있으면 null 반환
+            return null;
         }
 
         String originalFileName = groupImageFile.getOriginalFilename();
-        String contentType = groupImageFile.getContentType();
-        long size = groupImageFile.getSize();
+        String contentType      = groupImageFile.getContentType();
+        long size               = groupImageFile.getSize();
 
-        // 1. 파일 타입 유효성 검사
+        // 1. 파일 타입 검사
         if (contentType == null || !contentType.matches("image/(jpeg|png|gif|webp)")) {
-            System.err.println("ERROR: 허용되지 않는 이미지 파일 형식: " + contentType);
-            throw new IllegalArgumentException("이미지 파일 (JPEG, PNG, GIF, WebP)만 업로드할 수 있습니다.");
+            throw new IllegalArgumentException("이미지 파일(JPEG, PNG, GIF, WebP)만 업로드할 수 있습니다.");
         }
 
-        // 2. 파일 크기 유효성 검사 (10MB 제한)
-        final long MAX_ALLOWED_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
-        if (size > MAX_ALLOWED_SIZE_BYTES) {
-            System.err.println("ERROR: 파일 크기 초과: " + originalFileName + " (" + size + " bytes). 허용 최대 크기: " + MAX_ALLOWED_SIZE_BYTES + " bytes.");
-            throw new IllegalArgumentException("파일은 " + (MAX_ALLOWED_SIZE_BYTES / (1024 * 1024)) + "MB 이하만 업로드 가능합니다.");
+        // 2. 크기 검사 (10MB)
+        final long MAX_SIZE = 10 * 1024 * 1024;
+        if (size > MAX_SIZE) {
+            throw new IllegalArgumentException("파일은 " + (MAX_SIZE / (1024 * 1024)) + "MB 이하만 업로드 가능합니다.");
         }
 
-        // 3. 업로드 디렉토리 준비
-        Path uploadDirPath = Paths.get(UPLOAD_DIR); // UPLOAD_DIR은 이미 "src/main/resources/static/upload/groupImg/"
+        // 3. 업로드 폴더 준비
+        Path uploadDirPath = Paths.get(uploadDir);
         if (!Files.exists(uploadDirPath)) {
-            try {
-                Files.createDirectories(uploadDirPath); // createDirectories는 중간 디렉토리도 모두 생성
-                System.out.println("DEBUG: UPLOAD_DIR 생성: " + uploadDirPath.toAbsolutePath());
-            } catch (IOException e) {
-                System.err.println("ERROR: 업로드 디렉토리 생성 실패: " + e.getMessage());
-                throw new RuntimeException("파일 업로드 디렉토리 생성 중 오류가 발생했습니다.", e);
-            }
+            Files.createDirectories(uploadDirPath);
         }
 
-        // 4. 고유한 파일 이름 생성
-        String fileExtension = "";
-        if (originalFileName != null && originalFileName.contains(".")) {
-            fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
-        }
-        String uuidFileName = UUID.randomUUID().toString() + fileExtension;
-        Path filePath = uploadDirPath.resolve(uuidFileName);
+        // 4. 고유 파일명 생성
+        String ext          = originalFileName.substring(originalFileName.lastIndexOf('.'));
+        String uuidFileName = UUID.randomUUID().toString() + ext;
+        Path target         = uploadDirPath.resolve(uuidFileName);
 
         // 5. 파일 저장
-        try {
-            System.out.println("DEBUG: 파일 저장 시도: " + filePath.toAbsolutePath());
-            groupImageFile.transferTo(filePath);
-            System.out.println("DEBUG: 파일 저장 성공: " + uuidFileName);
-        } catch (IOException e) {
-            System.err.println("ERROR: 파일 시스템에 파일 저장 실패: " + e.getMessage());
-            throw new RuntimeException("파일 저장 중 오류가 발생했습니다.", e);
-        }
+        groupImageFile.transferTo(target.toFile());
 
-        // 6. 웹에서 접근할 수 있는 URL 반환
-        return "/upload/groupImg/" + uuidFileName;
+        // 6. 반환할 URL
+        return "/groupImg/" + uuidFileName;
     }
 
 
@@ -357,6 +344,9 @@ public class GroupsController {
             userMembershipsRepository.save(userMembership); // DB에 변경사항 반영
         }
 
+
+
+
         /* 2) 그대로 반환 */
         return ResponseEntity.ok(groupDto);
     }
@@ -385,4 +375,3 @@ public class GroupsController {
 
 }
 
-}

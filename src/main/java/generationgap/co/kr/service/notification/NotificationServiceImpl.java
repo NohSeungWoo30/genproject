@@ -22,9 +22,9 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void sendNotification(NotificationDto dto) {
 
-        System.out.println("🧪 DTO: " + dto); // 객체 자체 로그
+        System.out.println("DTO: " + dto); // 객체 자체 로그
         if (dto == null) {
-            System.out.println("🚨 dto가 null입니다!");
+            System.out.println("dto가 null입니다!");
             return;
         }
         try {
@@ -41,12 +41,12 @@ public class NotificationServiceImpl implements NotificationService {
             notificationMapper.insertNotification(notification);
 
             Map<String, String> payload = new HashMap<>();
-            payload.put("notiIdx", notification.getNotiIdx().toString()); // ✅ 자동 생성된 notiIdx
+            payload.put("notiIdx", notification.getNotiIdx().toString()); // 자동 생성된 notiIdx
             payload.put("notiMessage", message);
             payload.put("notiUrl", notification.getNotiUrl());
             messagingTemplate.convertAndSend("/topic/notifications/" + dto.getRecipientId(), payload);
         }catch (Exception e) {
-            System.out.println("🚨 예외 발생: " + e.getMessage());
+            System.out.println("예외 발생: " + e.getMessage());
             e.printStackTrace();
         }
     }

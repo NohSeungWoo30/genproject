@@ -36,20 +36,29 @@
 }
 .noti-badge {
   position: absolute;
-  top: -5px;
-  right: -5px;
-  min-width: 18px;
+  /* position adjustments as before… */
+  top: 8px;
+  right: 4px;
+
+  /* FIXED SIZE: width == height */
+  width: 18px;
   height: 18px;
-  padding: 0 4px;
-  border-radius: 9999px;
+  padding: 0;                /* no extra padding */
+
+  /* perfect circle */
+  border-radius: 50%;
+
+  /* center the “1” */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   background: #ef4444;
-  display: none;
-  box-shadow: 0 0 0 2px #fff;
   color: #fff;
   font-size: 11px;
   font-weight: 600;
-  line-height: 18px;
-  text-align: center;
+  line-height: 1;
+  box-shadow: 0 0 0 2px #fff;
 }
 
 /* ───── 팝오버 ───── */

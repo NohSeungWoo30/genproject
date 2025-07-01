@@ -31,23 +31,31 @@
 
 </head>
 <body>
-<!-- 상단 네비게이션 바 -->
+<!-- ─── 상단 네비게이션 ─── -->
 <header class="container-nav">
   <div class="nav-left">
     <a th:href="@{/main}"><img class="logo" src="/img/icons/Group 17.png" alt="M 로고"></a>
   </div>
 
+  <div class="nav-center">
+    <img src="/img/봄.png" class="nav-img" alt="그림10">
+    <img src="/img/여름.png" class="nav-img" alt="그림10">
+    <img src="/img/가을.png" class="nav-img" alt="그림10">
+    <img src="/img/겨울.png" class="nav-img" alt="그림10">
+  </div>
+
+  <!-- ** navRight: 로그인/알림/프로필 영역(동적) ** -->
   <div class="nav-right" id="navRight">
     <a href="/user/login" class="login-link">로그인ㆍ회원가입</a>
   </div>
 </header>
 
-<!--하단 네비게이션 바-->
+<!-- ─── 하단 고정 네비 (모바일 bottom‑nav 스타일) ─── -->
 <section class="bottom-nav-wrapper">
   <nav class="bottom-nav">
-    <a href="#" class="bottom-link">모임 생성</a>
-    <a href="meeting-list.html" class="bottom-link">모임 목록</a>
-    <a href="#" class="bottom-link">상품 목록</a>
+    <a th:href="@{/group/create}" class="bottom-link">모임 생성</a>
+    <a th:href="@{/group/meetinglist}" class="bottom-link">모임 목록</a>
+    <a th:href="@{/product-list}" class="bottom-link">상품 목록</a>
     <a th:href="@{/posts}" class="bottom-link">자유 게시판</a>
   </nav>
 </section>
@@ -116,8 +124,8 @@
 
 
   <div class="comments-section">
-    <h3>💬 댓글</h3>
-    <!-- ✅ 원댓글 루프 -->
+    <h3>댓글</h3>
+    <!--  원댓글 루프 -->
     <div th:each="parent : ${parentComments}" class="comment">
       <th:block th:if="${parent.isDeleted == 'Y'}">
         <span style="color: gray;">[삭제된 댓글입니다]</span>
@@ -188,7 +196,7 @@
 
       </th:block>
 
-      <!-- ✅ 대댓글 그룹핑 렌더링 -->
+      <!-- 대댓글 그룹핑 렌더링 -->
       <div th:id="'replies-' + ${parent.commentIdx}" style="display: none;">
       <div th:each="reply : ${repliesMap[parent.commentIdx]}" class="comment reply">
         <th:block th:if="${reply.isDeleted == 'Y'}">
@@ -267,7 +275,7 @@
  };
 
 
-   // 👍 좋아요 시작
+   // 좋아요 시작
    function likePost(postId) {
        if (!postId) {
          alert("postId가 없습니다!");
@@ -302,7 +310,7 @@
          console.error(err);
          alert("추천 처리 중 오류 발생:\n" + err.message);
        });
-     } // 👍 좋아요 끝
+     } // 좋아요 끝
 
      //삭제버튼
 
@@ -332,7 +340,7 @@
    });
  }//삭제버튼끝
 
-   // 💬 댓글 시작
+   // 댓글 시작
    function showReplyForm(commentId) {
   const replyForm = document.getElementById("reply-form-" + commentId);
   const editBox = document.getElementById("edit-box-" + commentId);
@@ -387,7 +395,7 @@
    console.error("에러:", err);
    alert("요청 중 오류 발생");
  });
-   } // 💬 댓글 끝
+   } // 댓글 끝
 
    //댓글 삭제
    function deleteComment(commentIdx) {
@@ -491,7 +499,7 @@
   const reasonId = document.getElementById('report-reason').value;
   const comment = document.getElementById('report-comment').value;
 
-console.log("🚨 신고 데이터 확인:", {
+console.log("신고 데이터 확인:", {
     entityType: currentTargetType,
     entityId: currentTargetId,
     reportCategoryId: Number(currentReportCategoryId),
@@ -562,9 +570,9 @@ function closeReportModal() {
 }
 </script>
 
-<!-- ✅ 여기에 신고 모달 UI 넣기 -->
+<!-- 여기에 신고 모달 UI 넣기 -->
 <div id="report-modal">
-  <h3>🚨 신고하기</h3>
+  <h3>신고하기</h3>
   <br>
 
   <label>
@@ -584,7 +592,7 @@ function closeReportModal() {
 
   <div class="modal-button-group">
     <button onclick="submitReport()">신고 제출</button>
-    <button onclick="closeReportModal()">❌ 닫기</button>
+    <button onclick="closeReportModal()">닫기</button>
   </div>
 
 </div>

@@ -60,7 +60,7 @@ public class UserController {
 
         try {
             userService.registerUser(user, profileImageFile); // ⭐ MultipartFile도 함께 전달
-            redirectAttributes.addFlashAttribute("successMessage", "회원가입이 성공적으로 완료되었습니다. 로그인해주세요.");
+            redirectAttributes.addFlashAttribute("successMessage", "회원가입이 성공적으로 완료되었습니다. 이용권 1회 충전되었습니다.");
             return "redirect:/user/login"; // 로그인 페이지로 리다이렉트
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());

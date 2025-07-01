@@ -17,20 +17,20 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
-    // ✅ 알림 목록 조회
+    // 알림 목록 조회
     @GetMapping
     public List<Notification> getNotifications(@AuthenticationPrincipal CustomUserDetails user) {
         return notificationService.getUserNotifications(user.getUserIdx());
     }
 
-    // ✅ 알림 읽음 처리
+    // 알림 읽음 처리
     @PostMapping("/{notiIdx}/read")
     public void markAsRead(@PathVariable Long notiIdx,
                            @AuthenticationPrincipal CustomUserDetails user) {
         notificationService.markAsRead(notiIdx, user.getUserIdx());
     }
 
-    // ✅ 알림 삭제 처리
+    // 알림 삭제 처리
     @DeleteMapping("/{notiIdx}")
     public void delete(@PathVariable Long notiIdx,
                        @AuthenticationPrincipal CustomUserDetails user) {

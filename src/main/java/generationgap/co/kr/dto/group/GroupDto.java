@@ -15,17 +15,17 @@ public class GroupDto {
     private String content;
     private String groupImgUrl;
 
-    // 🙋‍♂️ 모임장
+    // 모임장
     private String hostNickname;
     private String hostAvatar;
 
-    // 🕒 일정·인원
+    // 일정·인원
     private LocalDateTime groupDate;
     private int membersMin;      // ← 추가
     private int membersMax;
     private int partyMember;
 
-    // 📍 장소
+    // 장소
     private String placeAddress;     // ← 추가
     private String placeName;   // ← 추가
 

@@ -1,7 +1,7 @@
 
 .toast-notification {
   all: initial !important;
-  display: block !important;   /* ✅ 이거만 추가해도 해결될 수 있음 */
+  display: block !important;   /* 이거만 추가해도 해결될 수 있음 */
 
   position: fixed !important;
   bottom: 32px !important;

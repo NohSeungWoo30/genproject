@@ -1,9 +1,3 @@
-/**
- * 알림 및 프로필 모듈 v3 (Spring Security 세션 연동 버전)
- * - <template> 태그 기반 렌더링
- * - window.userId를 기반으로 로그인 판단
- */
-
 function formatTime(timestamp) {
   const date = new Date(timestamp);
   return date.toLocaleString(); // 예: 2025.06.13. 오후 2:30
@@ -12,7 +6,7 @@ function formatTime(timestamp) {
 
 // DOMContentLoaded 이후 실행
 document.addEventListener('DOMContentLoaded', () => {
-  // ✅ 수정된 로그인 여부 확인 방식
+  // 수정된 로그인 여부 확인 방식
     const isLoggedIn = window.isLoggedIn === true;
     console.log("isLoggedIn:", window.isLoggedIn);
 
@@ -41,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     navRight.innerHTML = '';
     navRight.appendChild(fragment);
 
-    // ✅ 팝오버 강제 닫힌 상태로 시작
+    // 팝오버 강제 닫힌 상태로 시작
     const popover = document.getElementById('noti-popover');
     if (popover) popover.style.display = 'none';
 
@@ -165,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 중복 여부 체크
     if (state.notifications.some(n => n.id === notiIdx)) {
-      console.warn("🚫 중복 알림 차단됨", notiIdx);
+      console.warn("중복 알림 차단됨", notiIdx);
       return;
     }
 
@@ -180,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     renderNotiList();
 
-    // ✅ 여기서 토스트도 함께 출력
+    // 여기서 토스트도 함께 출력
       if (typeof showToastNotification === 'function') {
         showToastNotification(msg);
       }
@@ -191,12 +185,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchNotifications() {
 
-      console.log("📥 fetchNotifications() 호출됨");
+      console.log("fetchNotifications() 호출됨");
 
       const res = await fetch('/api/notifications');
       const data = await res.json();
 
-      console.log("📬 응답 데이터:", data); // 서버에서 받은 알림 목록 확인
+      console.log("응답 데이터:", data); // 서버에서 받은 알림 목록 확인
 
       state.notifications = data.map(n => ({
         id: n.notiIdx,
@@ -210,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderNotiList();
     }
 
-    // ✅ 반드시 호출해야 함!
+    // 반드시 호출해야 함!
     fetchNotifications();
 
     setupEventListeners();

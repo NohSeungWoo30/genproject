@@ -1,7 +1,7 @@
-console.log("📦 meetingdetail.js 로딩됨");
+console.log("meetingdetail.js 로딩됨");
 
 
-// ✅ 전역 변수
+// 전역 변수
 let ws = null;
 const userId = window.userId;
 /*
@@ -19,7 +19,7 @@ let currentReportedUserId = null;
 let currentReportCategoryId = null;
 
 
-// ✅ DOM 요소
+// DOM 요소
 const detailCardContainer = document.querySelector('#group-detail-modal #roomDetailCard');
 const inlineChatWrapper = document.querySelector('#group-detail-modal #inline-chat-wrapper');
 const chatRoomTitleText = document.getElementById('chatRoomTitleText');
@@ -60,7 +60,7 @@ function applyGroupButtonUI() {
 }
 
 
-// ✅ 초기화
+// 초기화
 function displayRoomDetails() {
   if (!window.room) return;
 
@@ -110,14 +110,14 @@ function displayRoomDetails() {
 }
 
 window.displayRoomDetails = displayRoomDetails;
-console.log("✅ displayRoomDetails 함수 전역 등록 완료");
+console.log("displayRoomDetails 함수 전역 등록 완료");
 
 
 
 
 if (!window.groupId && room && room.groupIdx) {
   window.groupId = room.groupIdx;
-  console.log("✅ 동적으로 groupId 설정됨:", window.groupId);
+  console.log("동적으로 groupId 설정됨:", window.groupId);
 }
 
 // ① 모달 열기·닫기 함수
@@ -210,7 +210,7 @@ async function joinChat() {
             }
 
       const groupData  = await response.json();
-      console.log("🎯 join 후 groupData 다시 로드:", groupData);
+      console.log("join 후 groupData 다시 로드:", groupData);
 
       window.room = groupData;
       window.groupId = groupData.groupIdx;
@@ -223,13 +223,13 @@ async function joinChat() {
       showInlineChat(true);
       displayRoomDetails();
     } catch (err) {
-      console.error("❌ 참가 실패:", err);
+      console.error("참가 실패:", err);
     }
   }
 }
 
 async function updateFloatingButton () {
-  console.log('🔍 updateFloatingButton 실행됨');
+  console.log('updateFloatingButton 실행됨');
 
   const btn = document.getElementById('open-filter-btn');
   if (!btn) return;
@@ -283,7 +283,7 @@ async function updateFloatingButton () {
 
     /* 3) 204이거나 데이터 없으면 그대로 ‘간편 매칭’ 유지 */
   } catch (err) {
-    console.warn('❌ current-group 요청 실패', err);
+    console.warn('current-group 요청 실패', err);
     // 네트워크 장애 시에도 기존 UI(간편 매칭) 유지
   }
 }
@@ -299,7 +299,7 @@ async function leaveChat() {
       { method: 'POST' }
     );
     const result = await res.json();
-    console.log('🚪 나가기 성공:', result);
+    console.log('나가기 성공:', result);
 
     // 2. 클라이언트 상태 초기화
     localStorage.removeItem('joinedGroupId');
@@ -325,7 +325,7 @@ async function leaveChat() {
     if (ws) ws.close();
 
   } catch (e) {
-    console.error('❌ 나가기 실패:', e);
+    console.error('나가기 실패:', e);
   }
 }
 
@@ -333,7 +333,7 @@ async function leaveChat() {
 function connectWebSocket() {
 
   if (!window.groupId) {
-    alert("⚠ 그룹 ID가 없습니다. 채팅방을 열 수 없습니다.");
+    alert("그룹 ID가 없습니다. 채팅방을 열 수 없습니다.");
     return;
   }
 
@@ -343,7 +343,7 @@ function connectWebSocket() {
   const url = `ws://${location.hostname}:8080/ws/chat?groupId=${encodeURIComponent(groupId)}`;
   ws = new WebSocket(url);
 
-  ws.onopen = () => console.log('✅ WebSocket 연결됨');
+  ws.onopen = () => console.log('WebSocket 연결됨');
 
   ws.onmessage = (event) => {
     const data = JSON.parse(event.data);
@@ -412,7 +412,7 @@ function connectWebSocket() {
       }
     };
 
-  ws.onclose = () => console.log('❌ WebSocket 연결 종료');
+  ws.onclose = () => console.log('WebSocket 연결 종료');
 }
 
 function sendMessage() {
@@ -422,10 +422,10 @@ function sendMessage() {
   const payload = {
     type: "CHAT",
     msg: text,
-    userId: window.userId  // ✅ 클라이언트가 보낼 수 있으면 넣고, 없어도 서버에서 인증으로 커버 가능
+    userId: window.userId  // 클라이언트가 보낼 수 있으면 넣고, 없어도 서버에서 인증으로 커버 가능
   };
 
-  console.log("📤 보내는 메시지:", payload);
+  console.log("보내는 메시지:", payload);
   ws.send(JSON.stringify(payload));
   chatInput.value = '';
 }
@@ -504,18 +504,6 @@ function addMessage(msgData) {
 
   const messageDiv = document.createElement('div');
   messageDiv.className = `message ${type}`;
-  /*messageDiv.innerHTML =
-    <img class="avatar" src="${avatar}" alt="avatar">
-    <div class="content-container">
-      <span class="nickname">${nickname}</span>
-      <div class="bubble-container">
-        <div class="bubble">
-          ${escapeHTML(content)}${edited ? ' <span class="edited-label">(수정됨)</span>' : ''}
-        </div>
-        <span class="timestamp">${formatTime(date)}</span>
-      </div>
-    </div>
-  ;*/
 
   messageDiv.innerHTML =`
       ${type === 'self'
@@ -537,8 +525,6 @@ function addMessage(msgData) {
 
   addContextMenuHandler(messageDiv, msgData);
 }
-
-
 function showInlineChat(isFirstTime) {
   chatRoomTitleText.textContent = room.title;
   if (isFirstTime) {
@@ -547,7 +533,6 @@ function showInlineChat(isFirstTime) {
 /*
     addSystemMessage(`${currentLoggedInUser.nickname}님이 채팅방에 입장하셨습니다.`);
 */
-
   // ✅ 초기 채팅 메시지 불러오기
   fetch(`/api/chat/messages?groupId=${groupId}`)
 
@@ -788,10 +773,11 @@ function addContextMenuHandler(messageDiv, msgData) {
     contextMenu.style.top = `${top}px`;
 
     // 🔸 메뉴 구성
+    //<div class="menu-item" onclick="handleEdit(${msgData.messageId})">수정</div>
     const isSelf = msgData.type === 'self';
     contextMenu.innerHTML = isSelf
       ? `
-          <div class="menu-item" onclick="handleEdit(${msgData.messageId})">수정</div>
+
           <div class="menu-item" onclick="handleDelete(${msgData.messageId})">삭제</div>
         `
       : `

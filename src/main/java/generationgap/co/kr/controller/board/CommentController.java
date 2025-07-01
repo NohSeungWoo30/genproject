@@ -54,7 +54,7 @@ public class CommentController {
         comment.setContent(content);
         comment.setParentCommentId(parentCommentId);
 
-        System.out.println("🌐 Controller 요청 도착");
+        System.out.println("Controller 요청 도착");
         commentService.addComment(comment, userIdx);
 
         return "ok";
